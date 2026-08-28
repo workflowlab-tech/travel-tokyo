@@ -44,13 +44,9 @@ export default function DetailedItineraryPage() {
   const [selectedDayTab, setSelectedDayTab] = useState<number>(0);
   // Sun vs Rain Mode per Day
   const [weatherMode, setWeatherMode] = useState<Record<string, "sun" | "rain">>({});
-  // Expanded Place Guides
-  const [expandedGuides, setExpandedGuides] = useState<Record<string, boolean>>({
-    "asakusa-sensoji": true,
-    "tokyo-disneyland": true,
-    "warner-bros-studio": true,
-    "tokyo-disneysea": true,
-  });
+  // Expanded Place Guides — collapsed by default so the day view leads with
+  // the timeline, not a wall of pre-opened guide detail; tap "Open Guide" to expand.
+  const [expandedGuides, setExpandedGuides] = useState<Record<string, boolean>>({});
 
   // Transit Modal State
   const [activeTransitRoute, setActiveTransitRoute] = useState<TransportRoute | null>(null);

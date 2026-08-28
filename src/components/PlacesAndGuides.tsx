@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   placeGuides,
   disneyGuides,
@@ -18,23 +19,35 @@ import {
   ShoppingBag,
   Clock,
   CheckCircle2,
-  AlertTriangle,
-  ChevronDown,
-  ChevronUp,
   Info,
-  DollarSign,
   Utensils,
-  Footprints,
   ShieldAlert,
   ArrowRight,
 } from "lucide-react";
+
+// Every full destination/ride/dining guide already lives, in full, on the
+// dedicated /itinerary page under each day. These tabs used to repeat that
+// same content a second time here — this map just points each place at the
+// day it belongs to, so Home can link out to the one real copy instead.
+const placeIdToDay: Record<string, string> = {
+  "asakusa-sensoji": "01",
+  "tokyo-disneyland": "02",
+  "warner-bros-studio": "03",
+  "tokyo-disneysea": "04",
+  "shibuya-harajuku": "05",
+  "akihabara-electric-town": "06",
+};
+
+const parkDayNumber: Record<"disneyland" | "disneysea", string> = {
+  disneyland: "02",
+  disneysea: "04",
+};
 
 export const PlacesAndGuides: React.FC = () => {
   const [guideTab, setGuideTab] = useState<
     "destinations" | "rides" | "dining" | "transport" | "etiquette" | "shopping"
   >("destinations");
 
-  const [expandedPlaceId, setExpandedPlaceId] = useState<string | null>("asakusa-sensoji");
   const [selectedPark, setSelectedPark] = useState<"disneyland" | "disneysea">("disneyland");
   const [diningPark, setDiningPark] = useState<"all" | "disneyland" | "disneysea">("all");
 
@@ -133,227 +146,57 @@ export const PlacesAndGuides: React.FC = () => {
         </button>
       </div>
 
-      {/* 1. COMPREHENSIVE DESTINATION GUIDES WITH REAL PHOTOGRAPHY */}
+      {/* 1. DESTINATION GUIDES — compact index. The full write-up for each
+          place (what you'll see, must-do list, facilities, transit) lives
+          once, on its itinerary day at /itinerary — this just points there
+          instead of repeating it. */}
       {guideTab === "destinations" && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 gap-6">
-            {placeGuides.map((place) => {
-              const isExpanded = expandedPlaceId === place.id;
-              return (
-                <div
-                  key={place.id}
-                  className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-lg transition-all"
-                >
-                  {/* Destination Card Header with Real Photo Banner */}
-                  <div className="relative min-h-[220px] sm:min-h-[260px] flex flex-col justify-end p-6 sm:p-8 text-white overflow-hidden">
-                    {/* Real Destination Photo */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={place.image}
-                      alt={place.name}
-                      className="absolute inset-0 h-full w-full object-cover object-center filter brightness-[0.75] transition-transform duration-700 hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#132540] via-[#132540]/60 to-transparent" />
-
-                    <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="rounded-full bg-[#FF5F93] px-3 py-0.5 font-mono text-[11px] font-bold text-white shadow-sm">
-                            {place.japaneseName}
-                          </span>
-                          <span className="rounded-full bg-white/20 px-3 py-0.5 text-[11px] font-semibold text-stone-200 backdrop-blur-md">
-                            {place.district}
-                          </span>
-                        </div>
-                        <h3 className="font-serif text-2xl sm:text-3xl font-extrabold text-white mt-1.5 drop-shadow-md">
-                          {place.name}
-                        </h3>
-                        <p className="text-xs sm:text-sm text-stone-200 font-medium mt-1 max-w-xl drop-shadow">
-                          {place.tagline}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-2 self-start sm:self-auto">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-white/25 px-3 py-1 font-mono text-xs font-bold text-[#FFD66B] backdrop-blur-md border border-white/20">
-                          <Clock className="h-3.5 w-3.5" />
-                          {place.recommendedDuration}
-                        </span>
-                        <button
-                          onClick={() => setExpandedPlaceId(isExpanded ? null : place.id)}
-                          className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#1F3A5F] shadow-md hover:bg-stone-100 transition"
-                        >
-                          <span>{isExpanded ? "Collapse Guide" : "Open Guide"}</span>
-                          {isExpanded ? (
-                            <ChevronUp className="h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {placeGuides.map((place) => (
+            <Link
+              key={place.id}
+              href={`/itinerary#day-${placeIdToDay[place.id] || "01"}`}
+              className="group overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-md hover:shadow-lg transition-all"
+            >
+              <div className="relative h-40 w-full overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={place.image}
+                  alt={place.name}
+                  className="absolute inset-0 h-full w-full object-cover object-center filter brightness-[0.8] transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#132540] via-[#132540]/50 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-4 flex items-end justify-between gap-2">
+                  <div>
+                    <span className="rounded-full bg-[#FF5F93] px-2.5 py-0.5 font-mono text-[10px] font-bold text-white shadow-sm">
+                      {place.japaneseName}
+                    </span>
+                    <h3 className="font-serif text-xl font-extrabold text-white mt-1 drop-shadow-md">
+                      {place.name}
+                    </h3>
                   </div>
-
-                  {/* Expandable Guide Details */}
-                  {isExpanded && (
-                    <div className="p-6 sm:p-8 space-y-6 border-t border-stone-200 bg-[#FBF8F0]/40">
-                      {/* Grid: What You'll See + Suggested Sequence */}
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* What You'll See */}
-                        <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm space-y-3">
-                          <h4 className="font-serif text-base font-bold text-[#1F3A5F] flex items-center gap-2">
-                            <span>👀</span> What You&apos;ll See & Experience
-                          </h4>
-                          <ul className="space-y-2 text-xs text-stone-700 leading-relaxed font-medium">
-                            {place.whatYoullSee.map((item, idx) => (
-                              <li key={idx} className="flex items-start gap-2">
-                                <span className="text-[#FF5F93] font-bold">•</span>
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        {/* Suggested Sequence */}
-                        <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm space-y-3">
-                          <h4 className="font-serif text-base font-bold text-[#1F3A5F] flex items-center gap-2">
-                            <Footprints className="h-4 w-4 text-[#C1802E]" /> Suggested Sequence
-                          </h4>
-                          <div className="space-y-2 text-xs text-stone-700 leading-relaxed font-medium">
-                            {place.suggestedSequence.map((step, idx) => (
-                              <div key={idx} className="flex items-start gap-2">
-                                <span className="font-mono font-bold text-[#C1802E]">{idx + 1}.</span>
-                                <span>{step.replace(/^[0-9]+\.\s*/, "")}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Must-Do vs Optional / Skippable */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* Must-Do */}
-                        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 space-y-2">
-                          <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
-                            <CheckCircle2 className="h-4 w-4 text-emerald-600" /> Must-Do Highlights
-                          </span>
-                          <ul className="space-y-1.5 text-xs text-emerald-950 font-medium">
-                            {place.mustDo.map((must, idx) => (
-                              <li key={idx} className="flex items-start gap-1.5">
-                                <span className="text-emerald-600 font-bold">✓</span>
-                                <span>{must}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        {/* Optional / Skippable */}
-                        <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 space-y-2">
-                          <span className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
-                            <Info className="h-4 w-4 text-amber-600" /> Optional / Skippable
-                          </span>
-                          <ul className="space-y-1.5 text-xs text-amber-950 font-medium">
-                            {place.optionalOrSkippable.map((opt, idx) => (
-                              <li key={idx} className="flex items-start gap-1.5">
-                                <span className="text-amber-600 font-bold">~</span>
-                                <span>{opt}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-
-                      {/* Practical Ground Specs: Cost, Food, Facilities, Weather, Transit */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {/* Cost & Food */}
-                        <div className="rounded-2xl border border-stone-200 bg-white p-4 space-y-3 shadow-sm">
-                          <div>
-                            <span className="text-[11px] font-black uppercase tracking-wider text-stone-500 flex items-center gap-1">
-                              <DollarSign className="h-3.5 w-3.5 text-stone-700" /> Expected Cost
-                            </span>
-                            <p className="mt-1 text-xs text-stone-800 font-medium leading-relaxed">
-                              {place.expectedCost}
-                            </p>
-                          </div>
-                          <div className="pt-2 border-t border-stone-100">
-                            <span className="text-[11px] font-black uppercase tracking-wider text-stone-500 flex items-center gap-1">
-                              <Utensils className="h-3.5 w-3.5 text-[#C1502E]" /> Food Nearby
-                            </span>
-                            <p className="mt-1 text-xs text-stone-800 font-medium leading-relaxed">
-                              {place.foodNearby}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Facilities & Accessibility */}
-                        <div className="rounded-2xl border border-stone-200 bg-white p-4 space-y-2 shadow-sm text-xs">
-                          <span className="text-[11px] font-black uppercase tracking-wider text-stone-500">
-                            🚻 Facilities & Lockers
-                          </span>
-                          <p className="text-stone-700 font-medium">
-                            <b>Toilets:</b> {place.facilities.toilets}
-                          </p>
-                          <p className="text-stone-700 font-medium">
-                            <b>Lockers:</b> {place.facilities.lockers}
-                          </p>
-                          {place.facilities.accessibility && (
-                            <p className="text-stone-700 font-medium">
-                              <b>Access:</b> {place.facilities.accessibility}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Weather Suitability */}
-                        <div className="rounded-2xl border border-stone-200 bg-white p-4 space-y-2 shadow-sm text-xs">
-                          <span className="text-[11px] font-black uppercase tracking-wider text-stone-500">
-                            🌤️ Weather Suitability
-                          </span>
-                          <p className="text-stone-700 font-medium">
-                            <b>☀️ Sun:</b> {place.weatherSuitability.sunAdvice}
-                          </p>
-                          <p className="text-stone-700 font-medium">
-                            <b>☔ Rain:</b> {place.weatherSuitability.rainAdvice}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Transit From Base Hotel */}
-                      <div className="rounded-2xl border border-sky-200 bg-sky-50/80 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
-                        <div>
-                          <span className="font-bold text-sky-900 uppercase tracking-wider text-[11px]">
-                            🚆 Transit from Asakusa Base:
-                          </span>
-                          <p className="mt-0.5 text-sky-950 font-medium">
-                            {place.transitFromBase.route} (Exit: <b>{place.transitFromBase.exit}</b>)
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className="rounded-md bg-white px-2.5 py-1 font-mono font-bold text-sky-900 border border-sky-200">
-                            {place.transitFromBase.time}
-                          </span>
-                          <span className="rounded-md bg-amber-100 px-2.5 py-1 font-mono font-bold text-amber-900 border border-amber-200">
-                            {place.transitFromBase.fare}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Next Destination Hint */}
-                      {place.nextDestinationHint && (
-                        <div className="text-right text-xs font-bold text-stone-500 flex items-center justify-end gap-1.5">
-                          <span>Next suggested stop:</span>
-                          <span className="text-[#FF5F93]">{place.nextDestinationHint}</span>
-                          <ArrowRight className="h-3.5 w-3.5 text-[#FF5F93]" />
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/25 px-2.5 py-1 font-mono text-[10px] font-bold text-[#FFD66B] backdrop-blur-md border border-white/20 flex-shrink-0">
+                    <Clock className="h-3 w-3" />
+                    {place.recommendedDuration}
+                  </span>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+              <div className="p-4 flex items-center justify-between gap-2">
+                <p className="text-xs text-stone-600 font-medium leading-relaxed">
+                  {place.tagline}
+                </p>
+                <span className="flex-shrink-0 inline-flex items-center gap-1 text-xs font-bold text-[#1F3A5F] group-hover:text-[#FF5F93] transition">
+                  Full Guide <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </div>
+            </Link>
+          ))}
         </div>
       )}
 
-      {/* 2. DISNEY RIDE GUIDE */}
+      {/* 2. DISNEY RIDE GUIDE — rope-drop strategy stays here since it's a
+          quick, decision-relevant tip; the full ride-by-ride tier list and
+          photos live once, on the matching park day at /itinerary. */}
       {guideTab === "rides" && (
         <div className="space-y-6">
           {/* Park Selector */}
@@ -390,69 +233,31 @@ export const PlacesAndGuides: React.FC = () => {
             </p>
           </div>
 
-          {/* Lands & Rides List */}
-          <div className="space-y-6">
-            {currentParkGuide.lands.map((land, lIdx) => (
-              <div key={lIdx} className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-md">
-                <div className="bg-stone-50 px-5 py-3 border-b border-stone-200 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{land.icon}</span>
-                    <div>
-                      <h4 className="font-serif text-lg font-bold text-[#1F3A5F]">{land.name}</h4>
-                      <p className="text-xs text-stone-500 font-mono">{land.sub}</p>
-                    </div>
-                  </div>
-                  <span className="text-xs font-semibold text-stone-400">
-                    {land.rides.length} attractions
-                  </span>
-                </div>
-
-                <div className="divide-y divide-stone-100">
-                  {land.rides.map((ride, rIdx) => (
-                    <div key={rIdx} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 hover:bg-stone-50/50 transition">
-                      <div className="flex items-center gap-2 sm:flex-col sm:items-center">
-                        <span
-                          className={`inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs font-black ${
-                            ride.tier === 1
-                              ? "bg-[#1F3A5F] text-white"
-                              : ride.tier === 2
-                              ? "bg-amber-100 text-amber-800"
-                              : "bg-stone-100 text-stone-600"
-                          }`}
-                        >
-                          T{ride.tier}
-                        </span>
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-stone-400 hidden sm:inline">
-                          Tier {ride.tier}
-                        </span>
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h5 className="font-serif text-base font-bold text-stone-900">
-                            {ride.name}
-                          </h5>
-                          {ride.heightRequirement && (
-                            <span className="rounded bg-purple-50 px-2 py-0.5 text-[10px] font-bold text-purple-700 border border-purple-200">
-                              {ride.heightRequirement}
-                            </span>
-                          )}
-                          {ride.isHighFall && (
-                            <span className="inline-flex items-center gap-1 rounded bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-700 border border-red-200">
-                              <AlertTriangle className="h-3 w-3" /> High Fall
-                            </span>
-                          )}
-                        </div>
-                        <p className="mt-1 text-xs text-stone-600 leading-relaxed">
-                          {ride.desc}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+          {/* Compact Lands Summary + Link Out */}
+          <Link
+            href={`/itinerary#day-${parkDayNumber[selectedPark]}`}
+            className="group block overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-md hover:shadow-lg transition"
+          >
+            <div className="p-5 sm:p-6 flex items-center justify-between gap-4">
+              <div>
+                <h4 className="font-serif text-lg font-bold text-[#1F3A5F]">
+                  {currentParkGuide.lands.length} lands ·{" "}
+                  {currentParkGuide.lands.reduce((sum, l) => sum + l.rides.length, 0)} attractions
+                </h4>
+                <p className="mt-1 text-xs text-stone-600">
+                  Tier 1 must-rides:{" "}
+                  {currentParkGuide.lands
+                    .flatMap((l) => l.rides)
+                    .filter((r) => r.tier === 1)
+                    .map((r) => r.name)
+                    .join(" · ")}
+                </p>
               </div>
-            ))}
-          </div>
+              <span className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-full bg-[#1F3A5F] px-4 py-2 text-xs font-bold text-white shadow-sm group-hover:bg-[#132540] transition">
+                Full Ride Guide <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            </div>
+          </Link>
 
           {/* Parades & Shows */}
           <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-md p-5 sm:p-6">
@@ -483,7 +288,9 @@ export const PlacesAndGuides: React.FC = () => {
         </div>
       )}
 
-      {/* 3. DISNEY DINING GUIDE */}
+      {/* 3. DISNEY DINING GUIDE — the Priority Seating tip is quick and
+          decision-relevant so it stays; full restaurant photos and menus
+          live once, on the matching park day at /itinerary. */}
       {guideTab === "dining" && (
         <div className="space-y-6">
           <div className="flex items-center gap-2 rounded-2xl bg-stone-100 p-1.5 max-w-md border border-stone-200">
@@ -517,33 +324,26 @@ export const PlacesAndGuides: React.FC = () => {
             <b>Priority Seating (PS) Tip:</b> Priority Seating opens 1 month ahead at 10:00 AM on the official Tokyo Disney Resort app, with same-day booking slots opening at 9:00 AM. For delicious meals without reservations, Hungry Bear (Disneyland) and Casbah Food Court (DisneySea) offer quick seating and fast turnaround.
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredRestaurants.map((resto, rIdx) => (
-              <div key={rIdx} className="rounded-2xl border border-stone-200 bg-white p-5 shadow-md flex flex-col justify-between space-y-3">
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">{resto.icon}</span>
-                      <div>
-                        <h4 className="font-serif text-lg font-bold text-stone-900">{resto.name}</h4>
-                        <span className="text-[11px] font-mono text-stone-500">{resto.land}</span>
-                      </div>
-                    </div>
-                    <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[10px] font-bold text-stone-700">
-                      {resto.serviceType}
-                    </span>
-                  </div>
-
-                  <p className="mt-2 text-xs text-stone-600 leading-relaxed">{resto.desc}</p>
-                </div>
-
-                <div className="rounded-lg bg-stone-50 p-2.5 border border-stone-100 text-xs">
-                  <span className="font-bold text-[#C1502E]">Signature Menu: </span>
-                  <span className="text-stone-700">{resto.signatureMenu}</span>
-                </div>
+          <Link
+            href={`/itinerary#day-${
+              diningPark === "disneysea" ? parkDayNumber.disneysea : parkDayNumber.disneyland
+            }`}
+            className="group block overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-md hover:shadow-lg transition"
+          >
+            <div className="p-5 sm:p-6 flex items-center justify-between gap-4">
+              <div>
+                <h4 className="font-serif text-lg font-bold text-[#1F3A5F]">
+                  {filteredRestaurants.length} restaurant{filteredRestaurants.length === 1 ? "" : "s"}
+                </h4>
+                <p className="mt-1 text-xs text-stone-600">
+                  {filteredRestaurants.map((r) => r.name).join(" · ")}
+                </p>
               </div>
-            ))}
-          </div>
+              <span className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-full bg-[#1F3A5F] px-4 py-2 text-xs font-bold text-white shadow-sm group-hover:bg-[#132540] transition">
+                Photos & Menus <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            </div>
+          </Link>
         </div>
       )}
 

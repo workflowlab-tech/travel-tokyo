@@ -29,12 +29,20 @@ import {
   ShieldCheck,
   ExternalLink,
   ArrowRight,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 
 export const TripTools: React.FC = () => {
   const [toolTab, setToolTab] = useState<
-    "bookings" | "documents" | "packing" | "memories"
+    "bookings" | "documents" | "memories"
   >("bookings");
+
+  // Packing lives in its own Trip Prep card, not the on-trip tab switcher —
+  // it's a before-you-leave checklist, not something you reach for mid-day
+  // alongside tickets and documents. Collapsed by default so it doesn't
+  // compete with bookings/documents for attention once the trip is underway.
+  const [isPrepOpen, setIsPrepOpen] = useState(false);
 
   const { rate: liveFxRate } = useFXRate(
     tripMeta.defaultCurrencies.homeCurrency,
@@ -383,6 +391,161 @@ export const TripTools: React.FC = () => {
         </Link>
       </div>
 
+      {/* TRIP PREP: packing lives here, separate from the on-trip tabs below */}
+      <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-md">
+        <button
+          onClick={() => setIsPrepOpen((v) => !v)}
+          className="w-full flex items-center justify-between gap-3 p-5"
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-2xl bg-[#FBF0DC] flex items-center justify-center flex-shrink-0">
+              <CheckSquare className="h-5 w-5 text-[#C1802E]" />
+            </div>
+            <div className="text-left">
+              <span className="text-[11px] font-black uppercase tracking-wider text-[#C1802E]">
+                Trip Prep
+              </span>
+              <h3 className="font-serif text-base font-bold text-stone-900">
+                Smart Packing ({packedCount}/{totalPackingCount})
+              </h3>
+            </div>
+          </div>
+          {isPrepOpen ? (
+            <ChevronUp className="h-5 w-5 text-stone-400 flex-shrink-0" />
+          ) : (
+            <ChevronDown className="h-5 w-5 text-stone-400 flex-shrink-0" />
+          )}
+        </button>
+
+        {isPrepOpen && (
+          <div className="p-5 sm:p-6 pt-0 space-y-6 border-t border-stone-100">
+            {/* Packing Progress Bar */}
+            <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4">
+              <div className="flex items-center justify-between text-xs font-bold">
+                <span className="text-stone-700">Packing Progress</span>
+                <span className="text-[#FF5F93]">
+                  {packedCount} of {totalPackingCount} packed ({packedPercentage}%)
+                </span>
+              </div>
+              <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-white">
+                <div
+                  className="h-full bg-[#FF5F93] transition-all duration-300"
+                  style={{ width: `${packedPercentage}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Add Custom Item */}
+            <form onSubmit={handleAddCustomPacking} className="flex gap-2">
+              <input
+                type="text"
+                value={newCustomItem}
+                onChange={(e) => setNewCustomItem(e.target.value)}
+                placeholder="Add personal item (e.g. Camera lenses, extra sneakers, kids snacks)..."
+                className="flex-1 rounded-xl border border-stone-200 bg-white p-3 text-xs font-medium outline-none focus:border-[#1F3A5F]"
+              />
+              <button
+                type="submit"
+                className="rounded-xl bg-[#1F3A5F] px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#132540]"
+              >
+                Add Item
+              </button>
+            </form>
+
+            {/* Categorized Checklist */}
+            <div className="space-y-6">
+              {["documents", "clothing", "weather", "electronics", "park"].map((cat) => {
+                const items = packingPresets.filter((p) => p.category === cat);
+                return (
+                  <div
+                    key={cat}
+                    className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm"
+                  >
+                    <div className="bg-stone-50 px-5 py-3 border-b border-stone-200 font-serif text-sm font-bold text-[#1F3A5F] uppercase tracking-wider">
+                      {cat === "documents"
+                        ? "📄 Essential Documents & Money"
+                        : cat === "clothing"
+                        ? "👕 Clothing & Footwear"
+                        : cat === "weather"
+                        ? "☀️ Rain & Heat Protection"
+                        : cat === "electronics"
+                        ? "🔌 Electronics & Medications"
+                        : "🎒 Disney & Daypack Gear"}
+                    </div>
+
+                    <div className="divide-y divide-stone-100">
+                      {items.map((item) => {
+                        const isChecked = !!packedMap[item.id];
+                        return (
+                          <label
+                            key={item.id}
+                            className="flex items-start gap-3 p-4 cursor-pointer hover:bg-stone-50 transition"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => togglePacked(item.id)}
+                              className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#FF5F93] focus:ring-[#FF5F93]"
+                            />
+                            <div className="flex-1">
+                              <span
+                                className={`text-xs font-semibold ${
+                                  isChecked ? "text-stone-400 line-through" : "text-stone-900"
+                                }`}
+                              >
+                                {item.title}
+                              </span>
+                              {item.note && (
+                                <p className="text-[11px] text-stone-500 mt-0.5">{item.note}</p>
+                              )}
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Custom Added Items */}
+              {customItems.length > 0 && (
+                <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm">
+                  <div className="bg-stone-50 px-5 py-3 border-b border-stone-200 font-serif text-sm font-bold text-[#1F3A5F]">
+                    ⭐ Custom Personal Items
+                  </div>
+                  <div className="divide-y divide-stone-100">
+                    {customItems.map((cItem, i) => {
+                      const cId = `custom-${i}`;
+                      const isChecked = !!packedMap[cId];
+                      return (
+                        <label
+                          key={cId}
+                          className="flex items-start gap-3 p-4 cursor-pointer hover:bg-stone-50 transition"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => togglePacked(cId)}
+                            className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#FF5F93]"
+                          />
+                          <span
+                            className={`text-xs font-semibold ${
+                              isChecked ? "text-stone-400 line-through" : "text-stone-900"
+                            }`}
+                          >
+                            {cItem}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Tool Navigation Tabs */}
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
         <button
@@ -407,18 +570,6 @@ export const TripTools: React.FC = () => {
         >
           <FolderLock className="h-4 w-4 text-[#FFD66B]" />
           <span>Travel Documents Folder (Passports & Visas)</span>
-        </button>
-
-        <button
-          onClick={() => setToolTab("packing")}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition flex-shrink-0 border ${
-            toolTab === "packing"
-              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md ring-2 ring-[#FF5F93]/30"
-              : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
-          }`}
-        >
-          <CheckSquare className="h-4 w-4 text-[#FFD66B]" />
-          <span>Smart Packing ({packedCount}/{totalPackingCount})</span>
         </button>
 
         <button
@@ -779,136 +930,7 @@ export const TripTools: React.FC = () => {
         </div>
       )}
 
-      {/* 3. SMART PACKING CHECKLIST */}
-      {toolTab === "packing" && (
-        <div className="space-y-6">
-          {/* Packing Progress Bar */}
-          <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-md">
-            <div className="flex items-center justify-between text-xs font-bold">
-              <span className="text-stone-700">Packing Progress</span>
-              <span className="text-[#FF5F93]">
-                {packedCount} of {totalPackingCount} packed ({packedPercentage}%)
-              </span>
-            </div>
-            <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-stone-100">
-              <div
-                className="h-full bg-[#FF5F93] transition-all duration-300"
-                style={{ width: `${packedPercentage}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Add Custom Item */}
-          <form onSubmit={handleAddCustomPacking} className="flex gap-2">
-            <input
-              type="text"
-              value={newCustomItem}
-              onChange={(e) => setNewCustomItem(e.target.value)}
-              placeholder="Add personal item (e.g. Camera lenses, extra sneakers, kids snacks)..."
-              className="flex-1 rounded-xl border border-stone-200 bg-white p-3 text-xs font-medium outline-none focus:border-[#1F3A5F]"
-            />
-            <button
-              type="submit"
-              className="rounded-xl bg-[#1F3A5F] px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#132540]"
-            >
-              Add Item
-            </button>
-          </form>
-
-          {/* Categorized Checklist */}
-          <div className="space-y-6">
-            {["documents", "clothing", "weather", "electronics", "park"].map((cat) => {
-              const items = packingPresets.filter((p) => p.category === cat);
-              return (
-                <div
-                  key={cat}
-                  className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm"
-                >
-                  <div className="bg-stone-50 px-5 py-3 border-b border-stone-200 font-serif text-sm font-bold text-[#1F3A5F] uppercase tracking-wider">
-                    {cat === "documents"
-                      ? "📄 Essential Documents & Money"
-                      : cat === "clothing"
-                      ? "👕 Clothing & Footwear"
-                      : cat === "weather"
-                      ? "☀️ Rain & Heat Protection"
-                      : cat === "electronics"
-                      ? "🔌 Electronics & Medications"
-                      : "🎒 Disney & Daypack Gear"}
-                  </div>
-
-                  <div className="divide-y divide-stone-100">
-                    {items.map((item) => {
-                      const isChecked = !!packedMap[item.id];
-                      return (
-                        <label
-                          key={item.id}
-                          className="flex items-start gap-3 p-4 cursor-pointer hover:bg-stone-50 transition"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => togglePacked(item.id)}
-                            className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#FF5F93] focus:ring-[#FF5F93]"
-                          />
-                          <div className="flex-1">
-                            <span
-                              className={`text-xs font-semibold ${
-                                isChecked ? "text-stone-400 line-through" : "text-stone-900"
-                              }`}
-                            >
-                              {item.title}
-                            </span>
-                            {item.note && (
-                              <p className="text-[11px] text-stone-500 mt-0.5">{item.note}</p>
-                            )}
-                          </div>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* Custom Added Items */}
-            {customItems.length > 0 && (
-              <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm">
-                <div className="bg-stone-50 px-5 py-3 border-b border-stone-200 font-serif text-sm font-bold text-[#1F3A5F]">
-                  ⭐ Custom Personal Items
-                </div>
-                <div className="divide-y divide-stone-100">
-                  {customItems.map((cItem, i) => {
-                    const cId = `custom-${i}`;
-                    const isChecked = !!packedMap[cId];
-                    return (
-                      <label
-                        key={cId}
-                        className="flex items-start gap-3 p-4 cursor-pointer hover:bg-stone-50 transition"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => togglePacked(cId)}
-                          className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#FF5F93]"
-                        />
-                        <span
-                          className={`text-xs font-semibold ${
-                            isChecked ? "text-stone-400 line-through" : "text-stone-900"
-                          }`}
-                        >
-                          {cItem}
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* 4. TRIP MEMORIES GALLERY (STORED IN INDEXEDDB) */}
+      {/* 3. TRIP MEMORIES GALLERY (STORED IN INDEXEDDB) */}
       {toolTab === "memories" && (
         <div className="space-y-6">
           {/* Upload Photo Form */}
