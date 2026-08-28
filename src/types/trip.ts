@@ -92,7 +92,9 @@ export interface TripMeta {
     homeSymbol: string;
     destSymbol: string;
     defaultConvertAmount: number;
+    plannedBudgetPHP: number;
     plannedBudgetJPY: number;
+    initialCashJPY: number;
   };
 }
 
@@ -252,15 +254,37 @@ export interface SouvenirDistrict {
   }[];
 }
 
+export type PaymentMethod =
+  | "Cash"
+  | "BDO JCB"
+  | "BDO Mastercard"
+  | "RCBC Visa"
+  | "GCash"
+  | "MariBank"
+  | "UnionBank Visa"
+  | "Other Card / Wallet";
+
+export type ExpenseCategory =
+  | "hotel"
+  | "flights"
+  | "food"
+  | "transport"
+  | "shopping"
+  | "tickets"
+  | "documents"
+  | "other";
+
 export interface ExpenseRecord {
   id: string;
   title: string;
-  amount: number;
+  amount: number; // JPY
   currency: string;
-  category: "food" | "transport" | "shopping" | "tickets" | "stay" | "other";
-  paymentMethod: "cash" | "card";
+  category: ExpenseCategory;
+  paymentMethod: PaymentMethod;
   date: string;
-  convertedAmount?: number;
+  status: "paid" | "planned";
+  notes?: string;
+  convertedAmountPHP?: number;
 }
 
 export interface BookingDocument {

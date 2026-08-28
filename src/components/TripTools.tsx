@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { tripMeta, packingPresets } from "../data/trip-config";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useFXRate } from "../hooks/useFXRate";
@@ -12,7 +13,7 @@ import {
   saveMemory as saveMemoryToIDB,
   deleteMemory as deleteMemoryFromIDB,
 } from "../lib/indexedDb";
-import { ExpenseRecord, BookingDocument, MemoryPhoto } from "../types/trip";
+import { BookingDocument, MemoryPhoto, ExpenseRecord } from "../types/trip";
 import {
   Wallet,
   Ticket,
@@ -24,85 +25,36 @@ import {
   Lock,
   Download,
   Camera,
-  CreditCard,
-  Banknote,
-  TrendingUp,
   Eye,
   EyeOff,
   ShieldCheck,
-  Plane,
-  Building,
-  UserCheck,
   ExternalLink,
+  ArrowRight,
 } from "lucide-react";
 
 export const TripTools: React.FC = () => {
   const [toolTab, setToolTab] = useState<
-    "budget" | "bookings" | "documents" | "packing" | "memories"
-  >("budget");
-
-  // =========================================================================
-  // 1. Budget State (Stored in LocalStorage)
-  // =========================================================================
-  const [expenses, setExpenses] = useLocalStorage<ExpenseRecord[]>("travel_tokyo_expenses", []);
-  const [plannedBudgetJPY, setPlannedBudgetJPY] = useLocalStorage<number>(
-    "travel_tokyo_planned_budget",
-    tripMeta.defaultCurrencies.plannedBudgetJPY || 150000
-  );
-  const [isEditingBudget, setIsEditingBudget] = useState(false);
-  const [tempBudgetInput, setTempBudgetInput] = useState(String(plannedBudgetJPY));
-
-  const [expenseTitle, setExpenseTitle] = useState("");
-  const [expenseAmount, setExpenseAmount] = useState("");
-  const [expenseCategory, setExpenseCategory] = useState<ExpenseRecord["category"]>("food");
-  const [expensePaymentMethod, setExpensePaymentMethod] = useState<"cash" | "card">("card");
+    "bookings" | "documents" | "packing" | "memories"
+  >("bookings");
 
   const { rate: liveFxRate } = useFXRate(
     tripMeta.defaultCurrencies.homeCurrency,
     tripMeta.defaultCurrencies.destCurrency
   );
-  const currentFxRate = liveFxRate || 2.70;
+  const fxRate = liveFxRate || 2.70;
 
-  const totalSpentJPY = expenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
-  const totalSpentPHP = Math.round(totalSpentJPY / currentFxRate);
-  const remainingBudgetJPY = plannedBudgetJPY - totalSpentJPY;
-  const remainingBudgetPHP = Math.round(remainingBudgetJPY / currentFxRate);
-  const budgetSpentPercent =
-    plannedBudgetJPY > 0 ? Math.min(100, Math.round((totalSpentJPY / plannedBudgetJPY) * 100)) : 0;
-
-  const handleAddExpense = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!expenseTitle.trim() || !expenseAmount) return;
-
-    const numericAmount = parseFloat(expenseAmount.replace(/[^0-9.]/g, "")) || 0;
-    const newExpense: ExpenseRecord = {
-      id: "exp-" + Date.now(),
-      title: expenseTitle.trim(),
-      amount: numericAmount,
-      currency: "JPY",
-      category: expenseCategory,
-      paymentMethod: expensePaymentMethod,
-      date: new Date().toISOString().split("T")[0],
-      convertedAmount: Math.round(numericAmount / currentFxRate),
-    };
-
-    setExpenses([newExpense, ...expenses]);
-    setExpenseTitle("");
-    setExpenseAmount("");
-  };
-
-  const handleDeleteExpense = (id: string) => {
-    setExpenses(expenses.filter((e) => e.id !== id));
-  };
-
-  const handleSaveBudget = () => {
-    const val = parseFloat(tempBudgetInput.replace(/[^0-9.]/g, "")) || 150000;
-    setPlannedBudgetJPY(val);
-    setIsEditingBudget(false);
-  };
+  // Load summary stats for Budget banner
+  const [paidExpenses] = useLocalStorage<ExpenseRecord[]>("travel_tokyo_paid_expenses_v2", []);
+  const [plannedBudgetPHP] = useLocalStorage<number>(
+    "travel_tokyo_budget_php",
+    tripMeta.defaultCurrencies.plannedBudgetPHP || 150000
+  );
+  const plannedBudgetJPY = Math.round(plannedBudgetPHP * fxRate);
+  const totalPaidJPY = paidExpenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  const remainingJPY = plannedBudgetJPY - totalPaidJPY;
 
   // =========================================================================
-  // 2. Bookings & Tickets State (Stored in IndexedDB)
+  // 1. Bookings & Tickets State (Stored in IndexedDB)
   // =========================================================================
   const [documents, setDocuments] = useState<BookingDocument[]>([]);
   const [isDocsLoading, setIsDocsLoading] = useState(true);
@@ -229,7 +181,7 @@ export const TripTools: React.FC = () => {
   };
 
   // =========================================================================
-  // 3. Travel Documents (Passports & Visas) Privacy State
+  // 2. Travel Documents (Passports & Visas) Privacy State
   // =========================================================================
   const [revealedDocs, setRevealedDocs] = useState<Record<string, boolean>>({});
 
@@ -241,7 +193,7 @@ export const TripTools: React.FC = () => {
   };
 
   // =========================================================================
-  // 4. Smart Packing State (Stored in LocalStorage)
+  // 3. Smart Packing State (Stored in LocalStorage)
   // =========================================================================
   const [packedMap, setPackedMap] = useLocalStorage<Record<string, boolean>>(
     "travel_tokyo_packing_checks",
@@ -266,7 +218,7 @@ export const TripTools: React.FC = () => {
   const packedPercentage = totalPackingCount > 0 ? Math.round((packedCount / totalPackingCount) * 100) : 0;
 
   // =========================================================================
-  // 5. Memories State (Stored in IndexedDB)
+  // 4. Memories State (Stored in IndexedDB)
   // =========================================================================
   const [memories, setMemories] = useState<MemoryPhoto[]>([]);
   const [isMemoriesLoading, setIsMemoriesLoading] = useState(true);
@@ -341,24 +293,40 @@ export const TripTools: React.FC = () => {
           Personal Travel Control Room
         </span>
         <h2 className="font-serif text-2xl font-bold text-stone-900 sm:text-3xl">
-          Budget, Bookings, Passports & Memories.
+          Bookings, Passports, Packing & Memories.
         </h2>
       </div>
 
-      {/* Tool Navigation Tabs (Clean 5-Tab Architecture) */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-        <button
-          onClick={() => setToolTab("budget")}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition flex-shrink-0 border ${
-            toolTab === "budget"
-              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md ring-2 ring-[#FF5F93]/30"
-              : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
-          }`}
-        >
-          <Wallet className="h-4 w-4 text-[#FFD66B]" />
-          <span>Budget & Expenses</span>
-        </button>
+      {/* DEDICATED BUDGET PLANNER LINK BANNER */}
+      <div className="overflow-hidden rounded-3xl border border-stone-200 bg-gradient-to-br from-[#1F3A5F] to-[#132540] p-6 text-white shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+        <div className="space-y-1.5">
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-[#FF86A8]">
+            <Wallet className="h-3.5 w-3.5 text-[#FFD66B]" />
+            <span>Dedicated Budget & Expense Page</span>
+          </div>
+          <h3 className="font-serif text-xl sm:text-2xl font-bold text-white">
+            Plan, track & categorize all Tokyo finances.
+          </h3>
+          <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-stone-300 font-medium">
+            <span>Planned: <b>₱{plannedBudgetPHP.toLocaleString()}</b> (≈ ¥{plannedBudgetJPY.toLocaleString()})</span>
+            <span>·</span>
+            <span>Paid: <b>¥{totalPaidJPY.toLocaleString()}</b></span>
+            <span>·</span>
+            <span>Remaining: <b className="text-emerald-300">¥{remainingJPY.toLocaleString()}</b></span>
+          </div>
+        </div>
 
+        <Link
+          href="/budget"
+          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#FF5F93] px-6 py-3.5 text-xs font-bold text-white shadow-lg hover:bg-[#e84e80] transition active:scale-95 flex-shrink-0"
+        >
+          <span>Open Full Budget Planner</span>
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+
+      {/* Tool Navigation Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
         <button
           onClick={() => setToolTab("bookings")}
           className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition flex-shrink-0 border ${
@@ -408,289 +376,7 @@ export const TripTools: React.FC = () => {
         </button>
       </div>
 
-      {/* 1. ENHANCED BUDGET & EXPENSE TRACKER */}
-      {toolTab === "budget" && (
-        <div className="space-y-6">
-          {/* Planned vs Spent vs Remaining Overview Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* Planned Budget */}
-            <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-black uppercase tracking-wider text-stone-500">
-                  Planned Budget
-                </span>
-                <button
-                  onClick={() => setIsEditingBudget(!isEditingBudget)}
-                  className="text-[11px] font-bold text-[#FF5F93] hover:underline"
-                >
-                  {isEditingBudget ? "Cancel" : "Edit"}
-                </button>
-              </div>
-
-              {isEditingBudget ? (
-                <div className="flex items-center gap-2 pt-1">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={tempBudgetInput}
-                    onChange={(e) => setTempBudgetInput(e.target.value)}
-                    className="w-full rounded-lg border border-stone-300 p-1.5 text-sm font-bold"
-                  />
-                  <button
-                    onClick={handleSaveBudget}
-                    className="rounded-lg bg-[#1F3A5F] px-3 py-1.5 text-xs font-bold text-white"
-                  >
-                    Save
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  <div className="font-serif text-2xl sm:text-3xl font-extrabold text-stone-900">
-                    ¥ {plannedBudgetJPY.toLocaleString()}
-                  </div>
-                  <p className="text-xs text-stone-500 mt-0.5">
-                    ≈ ₱ {Math.round(plannedBudgetJPY / currentFxRate).toLocaleString()} PHP
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Actual Spent */}
-            <div className="rounded-3xl border border-amber-200 bg-[#FBF0DC]/80 p-5 shadow-sm space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-black uppercase tracking-wider text-[#C1802E]">
-                  Actual Spent
-                </span>
-                <span className="rounded-full bg-amber-200 px-2 py-0.5 font-mono text-[10px] font-bold text-[#8B5E14]">
-                  {budgetSpentPercent}% used
-                </span>
-              </div>
-              <div className="font-serif text-2xl sm:text-3xl font-extrabold text-stone-900">
-                ¥ {totalSpentJPY.toLocaleString()}
-              </div>
-              <p className="text-xs text-stone-600 mt-0.5 font-medium">
-                ≈ ₱ {totalSpentPHP.toLocaleString()} PHP ({expenses.length} logs)
-              </p>
-            </div>
-
-            {/* Remaining Budget */}
-            <div
-              className={`rounded-3xl border p-5 shadow-sm space-y-2 ${
-                remainingBudgetJPY >= 0
-                  ? "border-emerald-200 bg-emerald-50/70"
-                  : "border-red-200 bg-red-50/70"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span
-                  className={`text-[11px] font-black uppercase tracking-wider ${
-                    remainingBudgetJPY >= 0 ? "text-emerald-800" : "text-red-800"
-                  }`}
-                >
-                  Remaining Balance
-                </span>
-                <TrendingUp
-                  className={`h-4 w-4 ${remainingBudgetJPY >= 0 ? "text-emerald-600" : "text-red-600"}`}
-                />
-              </div>
-              <div
-                className={`font-serif text-2xl sm:text-3xl font-extrabold ${
-                  remainingBudgetJPY >= 0 ? "text-emerald-950" : "text-red-950"
-                }`}
-              >
-                ¥ {remainingBudgetJPY.toLocaleString()}
-              </div>
-              <p
-                className={`text-xs mt-0.5 font-medium ${
-                  remainingBudgetJPY >= 0 ? "text-emerald-800" : "text-red-800"
-                }`}
-              >
-                ≈ ₱ {remainingBudgetPHP.toLocaleString()} PHP
-              </p>
-            </div>
-          </div>
-
-          {/* Budget Progress Bar */}
-          <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm space-y-1.5">
-            <div className="flex items-center justify-between text-xs font-bold text-stone-700">
-              <span>Overall Budget Utilization</span>
-              <span>
-                ¥ {totalSpentJPY.toLocaleString()} / ¥ {plannedBudgetJPY.toLocaleString()} ({budgetSpentPercent}%)
-              </span>
-            </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-stone-100">
-              <div
-                className={`h-full transition-all duration-500 ${
-                  budgetSpentPercent > 90 ? "bg-red-500" : budgetSpentPercent > 70 ? "bg-amber-500" : "bg-[#FF5F93]"
-                }`}
-                style={{ width: `${budgetSpentPercent}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Add Expense Form */}
-          <form
-            onSubmit={handleAddExpense}
-            className="rounded-3xl border border-stone-200 bg-white p-6 shadow-md space-y-4"
-          >
-            <h4 className="font-serif text-base font-bold text-stone-900">
-              Log New Trip Expense
-            </h4>
-
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-              <input
-                type="text"
-                value={expenseTitle}
-                onChange={(e) => setExpenseTitle(e.target.value)}
-                placeholder="What did you buy? (e.g. Asakusa Menchi, Disney Popcorn Bucket, Train Fare)"
-                className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] focus:ring-1 focus:ring-[#1F3A5F] sm:col-span-5"
-                required
-              />
-
-              <input
-                type="text"
-                inputMode="numeric"
-                value={expenseAmount}
-                onChange={(e) => setExpenseAmount(e.target.value.replace(/[^0-9.]/g, ""))}
-                placeholder="Amount in ¥ JPY"
-                className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] focus:ring-1 focus:ring-[#1F3A5F] sm:col-span-3"
-                required
-              />
-
-              <select
-                value={expenseCategory}
-                onChange={(e) => setExpenseCategory(e.target.value as ExpenseRecord["category"])}
-                className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] sm:col-span-2"
-              >
-                <option value="food">🍱 Food & Snacks</option>
-                <option value="transport">🚆 Transport & IC</option>
-                <option value="shopping">🛍️ Shopping & Tax-Free</option>
-                <option value="tickets">🎟️ Tickets & Tours</option>
-                <option value="stay">🏨 Hotel & Amenities</option>
-                <option value="other">📦 Other</option>
-              </select>
-
-              {/* Cash vs Card Selector */}
-              <div className="flex rounded-xl bg-stone-100 p-1 border border-stone-200 sm:col-span-2">
-                <button
-                  type="button"
-                  onClick={() => setExpensePaymentMethod("card")}
-                  className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition flex items-center justify-center gap-1 ${
-                    expensePaymentMethod === "card"
-                      ? "bg-[#1F3A5F] text-white shadow-sm"
-                      : "text-stone-600 hover:text-stone-900"
-                  }`}
-                >
-                  <CreditCard className="h-3 w-3" /> Card
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setExpensePaymentMethod("cash")}
-                  className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition flex items-center justify-center gap-1 ${
-                    expensePaymentMethod === "cash"
-                      ? "bg-[#C1802E] text-white shadow-sm"
-                      : "text-stone-600 hover:text-stone-900"
-                  }`}
-                >
-                  <Banknote className="h-3 w-3" /> Cash
-                </button>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
-              <span className="text-xs text-stone-500">
-                Rate reference: 1 ₱ ≈ {currentFxRate.toFixed(2)} ¥ (JPY amounts automatically calculate PHP estimate)
-              </span>
-
-              <button
-                type="submit"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF5F93] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#e84e80] transition active:scale-95"
-              >
-                <Plus className="h-4 w-4" /> Add Expense
-              </button>
-            </div>
-          </form>
-
-          {/* Expense History List */}
-          <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-md divide-y divide-stone-100">
-            {expenses.length === 0 ? (
-              <div className="p-12 text-center text-xs text-stone-500 space-y-1">
-                <p className="font-semibold text-stone-700">No expenses recorded yet.</p>
-                <p>Add your first train fare, snack, or shopping purchase using the form above.</p>
-              </div>
-            ) : (
-              expenses.map((exp) => {
-                const phpEquiv = Math.round(exp.amount / currentFxRate);
-                return (
-                  <div
-                    key={exp.id}
-                    className="p-4 sm:p-5 flex items-center justify-between gap-3 hover:bg-stone-50 transition"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">
-                        {exp.category === "food"
-                          ? "🍱"
-                          : exp.category === "transport"
-                          ? "🚆"
-                          : exp.category === "shopping"
-                          ? "🛍️"
-                          : exp.category === "tickets"
-                          ? "🎟️"
-                          : "💵"}
-                      </span>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h5 className="font-serif text-sm font-bold text-stone-900">{exp.title}</h5>
-                          <span
-                            className={`inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${
-                              exp.paymentMethod === "cash"
-                                ? "bg-amber-100 text-amber-800 border border-amber-200"
-                                : "bg-sky-100 text-sky-800 border border-sky-200"
-                            }`}
-                          >
-                            {exp.paymentMethod === "cash" ? (
-                              <>
-                                <Banknote className="h-2.5 w-2.5" /> Cash
-                              </>
-                            ) : (
-                              <>
-                                <CreditCard className="h-2.5 w-2.5" /> Card
-                              </>
-                            )}
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-mono text-stone-500">
-                          {exp.date} · {exp.category}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <div className="font-serif text-base font-bold text-stone-900">
-                          ¥ {Number(exp.amount).toLocaleString()}
-                        </div>
-                        <div className="text-[10px] text-stone-500 font-mono">
-                          ≈ ₱ {phpEquiv.toLocaleString()} PHP
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleDeleteExpense(exp.id)}
-                        className="p-1.5 text-stone-400 hover:text-red-600 transition rounded-lg hover:bg-stone-100"
-                        aria-label="Delete expense"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* 2. BOOKINGS & TICKETS */}
+      {/* 1. BOOKINGS & TICKETS */}
       {toolTab === "bookings" && (
         <div className="space-y-6">
           {/* Add Booking / Ticket Form */}
@@ -837,7 +523,7 @@ export const TripTools: React.FC = () => {
         </div>
       )}
 
-      {/* 3. TRAVEL DOCUMENTS FOLDER (PASSPORTS, VISAS & INSURANCE WITH PRIVACY TOGGLE) */}
+      {/* 2. TRAVEL DOCUMENTS FOLDER (PASSPORTS, VISAS & INSURANCE WITH PRIVACY TOGGLE) */}
       {toolTab === "documents" && (
         <div className="space-y-6">
           {/* Privacy Notice Banner */}
@@ -988,7 +674,7 @@ export const TripTools: React.FC = () => {
         </div>
       )}
 
-      {/* 4. SMART PACKING CHECKLIST */}
+      {/* 3. SMART PACKING CHECKLIST */}
       {toolTab === "packing" && (
         <div className="space-y-6">
           {/* Packing Progress Bar */}
@@ -1117,7 +803,7 @@ export const TripTools: React.FC = () => {
         </div>
       )}
 
-      {/* 5. TRIP MEMORIES GALLERY (STORED IN INDEXEDDB) */}
+      {/* 4. TRIP MEMORIES GALLERY (STORED IN INDEXEDDB) */}
       {toolTab === "memories" && (
         <div className="space-y-6">
           {/* Upload Photo Form */}

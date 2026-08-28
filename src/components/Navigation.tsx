@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { tripMeta } from "../data/trip-config";
-import { Calendar, Compass, ShieldAlert, Sparkles, Wrench } from "lucide-react";
+import { Calendar, Compass, ShieldAlert, Sparkles, Wrench, Wallet } from "lucide-react";
 
 interface NavigationProps {
   activeTab: "today" | "itinerary" | "guides" | "tools" | "emergency";
@@ -54,6 +55,13 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab 
             >
               Places & Guides
             </button>
+            <Link
+              href="/budget"
+              className="transition-colors hover:text-white text-stone-200 font-semibold flex items-center gap-1"
+            >
+              <Wallet className="h-3.5 w-3.5 text-[#FFD66B]" />
+              <span>Budget</span>
+            </Link>
             <button
               onClick={() => scrollToSection("tools")}
               className={`transition-colors hover:text-white ${activeTab === "tools" ? "text-[#FF86A8] font-bold" : ""}`}
@@ -69,13 +77,13 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab 
           </nav>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => scrollToSection("tools")}
+            <Link
+              href="/budget"
               className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm backdrop-blur-sm transition hover:bg-white/20"
             >
-              <Wrench className="h-3.5 w-3.5 text-[#FFD66B]" />
-              <span>Trip Tools</span>
-            </button>
+              <Wallet className="h-3.5 w-3.5 text-[#FFD66B]" />
+              <span>Budget Planner</span>
+            </Link>
           </div>
         </div>
       </header>
@@ -87,52 +95,60 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab 
       >
         <button
           onClick={() => scrollToSection("today")}
-          className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition ${
+          className={`flex items-center gap-1.5 rounded-full px-2.5 py-2 text-xs font-semibold transition ${
             activeTab === "today" ? "bg-[#FF5F93] text-white shadow-md" : "text-stone-300 hover:text-white"
           }`}
         >
           <Sparkles className="h-4 w-4" />
-          <span className={activeTab === "today" ? "inline" : "hidden sm:inline"}>Today</span>
+          <span className={activeTab === "today" ? "inline" : "hidden"}>Today</span>
         </button>
 
         <button
           onClick={() => scrollToSection("itinerary")}
-          className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition ${
+          className={`flex items-center gap-1.5 rounded-full px-2.5 py-2 text-xs font-semibold transition ${
             activeTab === "itinerary" ? "bg-[#FF5F93] text-white shadow-md" : "text-stone-300 hover:text-white"
           }`}
         >
           <Calendar className="h-4 w-4" />
-          <span className={activeTab === "itinerary" ? "inline" : "hidden sm:inline"}>Itinerary</span>
+          <span className={activeTab === "itinerary" ? "inline" : "hidden"}>Itinerary</span>
         </button>
 
         <button
           onClick={() => scrollToSection("guides")}
-          className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition ${
+          className={`flex items-center gap-1.5 rounded-full px-2.5 py-2 text-xs font-semibold transition ${
             activeTab === "guides" ? "bg-[#FF5F93] text-white shadow-md" : "text-stone-300 hover:text-white"
           }`}
         >
           <Compass className="h-4 w-4" />
-          <span className={activeTab === "guides" ? "inline" : "hidden sm:inline"}>Guides</span>
+          <span className={activeTab === "guides" ? "inline" : "hidden"}>Guides</span>
         </button>
+
+        <Link
+          href="/budget"
+          className="flex items-center gap-1.5 rounded-full px-2.5 py-2 text-xs font-semibold transition text-stone-300 hover:text-white"
+        >
+          <Wallet className="h-4 w-4 text-[#FFD66B]" />
+          <span className="hidden">Budget</span>
+        </Link>
 
         <button
           onClick={() => scrollToSection("tools")}
-          className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition ${
+          className={`flex items-center gap-1.5 rounded-full px-2.5 py-2 text-xs font-semibold transition ${
             activeTab === "tools" ? "bg-[#FF5F93] text-white shadow-md" : "text-stone-300 hover:text-white"
           }`}
         >
           <Wrench className="h-4 w-4" />
-          <span className={activeTab === "tools" ? "inline" : "hidden sm:inline"}>Tools</span>
+          <span className={activeTab === "tools" ? "inline" : "hidden"}>Tools</span>
         </button>
 
         <button
           onClick={() => scrollToSection("emergency")}
-          className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition ${
+          className={`flex items-center gap-1.5 rounded-full px-2.5 py-2 text-xs font-semibold transition ${
             activeTab === "emergency" ? "bg-red-600 text-white shadow-md" : "text-stone-300 hover:text-white"
           }`}
         >
           <ShieldAlert className="h-4 w-4 text-red-300" />
-          <span className={activeTab === "emergency" ? "inline" : "hidden sm:inline"}>SOS</span>
+          <span className={activeTab === "emergency" ? "inline" : "hidden"}>SOS</span>
         </button>
       </nav>
     </>

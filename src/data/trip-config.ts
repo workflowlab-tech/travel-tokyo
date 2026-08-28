@@ -185,7 +185,9 @@ export const tripMeta: TripMeta = {
     homeSymbol: "₱",
     destSymbol: "¥",
     defaultConvertAmount: 1000,
-    plannedBudgetJPY: 150000,
+    plannedBudgetPHP: 150000,
+    plannedBudgetJPY: 405000,
+    initialCashJPY: 100000,
   },
 };
 
