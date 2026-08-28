@@ -396,7 +396,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://travel-tokyo.vercel.app/api/expenses",
+        "url": "https://traveltokyo.workflowlab.site/api/expenses",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
