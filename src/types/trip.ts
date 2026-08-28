@@ -1,0 +1,210 @@
+export interface FlightInfo {
+  code: string;
+  route: string;
+  departureTime: string;
+  arrivalTime?: string;
+  notes: string;
+}
+
+export interface HomeBase {
+  name: string;
+  japaneseName: string;
+  address: string;
+  japaneseAddress: string;
+  nearestStation: string;
+  amenities: string[];
+  mapQuery: string;
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
+}
+
+export interface EmergencyContact {
+  label: string;
+  number: string;
+  japaneseLabel: string;
+  desc: string;
+  isDialable: boolean;
+}
+
+export interface TripMeta {
+  tripName: string;
+  japaneseTitle: string;
+  destination: string;
+  tagline: string;
+  description: string;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  dateDisplay: string;
+  travelerCount: number;
+  travelersLabel: string;
+  marqueeHighlights: string[];
+  stats: {
+    days: number;
+    travelers: number;
+    highlights: string;
+  };
+  homeBase: HomeBase;
+  flights: {
+    outbound: FlightInfo;
+    inbound: FlightInfo;
+  };
+  emergencyContacts: EmergencyContact[];
+  defaultCurrencies: {
+    homeCurrency: string; // e.g. "PHP"
+    destCurrency: string; // e.g. "JPY"
+    homeSymbol: string;
+    destSymbol: string;
+    defaultConvertAmount: number;
+  };
+}
+
+export interface TimelineEvent {
+  time: string;
+  title: string;
+  desc: string;
+  icon?: string;
+  badges?: string[];
+}
+
+export interface ItineraryDay {
+  dayNumber: string; // "01", "02", etc.
+  date: string; // "TUE · SEP 1"
+  shortDate: string; // "Sep 1"
+  fullDateString: string; // "2026-09-01"
+  title: string;
+  area: string;
+  icon: string;
+  transitNote: string;
+  sunPlan: TimelineEvent[];
+  rainPlan: TimelineEvent[];
+  foodQuest: string;
+  weatherAdvice?: {
+    sun: string;
+    rain: string;
+  };
+}
+
+export interface RideAttraction {
+  name: string;
+  tier: 1 | 2 | 3;
+  desc: string;
+  land: string;
+  heightRequirement?: string;
+  isHighFall?: boolean;
+  isClosed?: boolean;
+  closedNotice?: string;
+}
+
+export interface ShowPerformance {
+  name: string;
+  desc: string;
+  schedule: string;
+  icon: string;
+}
+
+export interface DisneyParkGuide {
+  parkId: "disneyland" | "disneysea";
+  parkName: string;
+  icon: string;
+  dateStr: string;
+  ropeDropStrategy: string;
+  lands: {
+    name: string;
+    icon: string;
+    sub: string;
+    rides: RideAttraction[];
+  }[];
+  shows: ShowPerformance[];
+  hourlyPlan: {
+    time: string;
+    activity: string;
+  }[];
+}
+
+export interface RestaurantItem {
+  name: string;
+  land: string;
+  serviceType: "Table service" | "Counter service" | "Snack / cart" | "Show restaurant" | "Hotel lounge";
+  cuisine: string;
+  desc: string;
+  signatureMenu: string;
+  isPrioritySeating: boolean;
+  isRestricted?: boolean;
+  restrictedNote?: string;
+  icon: string;
+}
+
+export interface TransportRoute {
+  id: string;
+  title: string;
+  dateOrFrequency: string;
+  estimatedTime: string;
+  totalFare: string;
+  transfers: number;
+  icon: string;
+  legs: {
+    step: number | string;
+    title: string;
+    detail: string;
+    badges: string[];
+  }[];
+  tips?: string;
+}
+
+export interface PackingItemPreset {
+  id: string;
+  title: string;
+  category: "documents" | "clothing" | "weather" | "electronics" | "park" | "custom";
+  note?: string;
+  isRequired?: boolean;
+}
+
+export interface EtiquetteRule {
+  category: "trains" | "dining" | "temples" | "bath" | "disney";
+  type: "do" | "dont";
+  title: string;
+  desc: string;
+}
+
+export interface SouvenirDistrict {
+  district: string;
+  dayRef: string;
+  icon: string;
+  shops: {
+    name: string;
+    desc: string;
+    whatToBuy: string;
+  }[];
+}
+
+export interface ExpenseRecord {
+  id: string;
+  title: string;
+  amount: number;
+  currency: string;
+  category: "food" | "transport" | "shopping" | "tickets" | "stay" | "other";
+  date: string;
+  convertedAmount?: number;
+}
+
+export interface BookingDocument {
+  id: string;
+  title: string;
+  type: "ticket" | "hotel" | "flight" | "passport" | "insurance" | "qr" | "other";
+  confirmationCode?: string;
+  fileData?: string; // base64 / data URL
+  fileName?: string;
+  fileType?: string;
+  notes?: string;
+  dateAdded: string;
+}
+
+export interface MemoryPhoto {
+  id: string;
+  caption: string;
+  location?: string;
+  photoData: string; // base64
+  dateTaken: string;
+}

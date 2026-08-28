@@ -1,0 +1,16 @@
+{
+  "name": "TravelTokyo — Personal Trip Companion",
+  "short_name": "TravelTokyo",
+  "description": "Mobile-first Tokyo travel companion with live weather itineraries, transit routes, and private tools.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1F3A5F",
+  "theme_color": "#1F3A5F",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}
