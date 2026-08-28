@@ -103,28 +103,6 @@ export default function BudgetPage() {
       notes: "Cebu Pacific 5 Pax: ₱4,902.99 x 3 + ₱9,805.98 = Total ₱24,514.95 PHP · PNRs: WETQNY, WC2HXE, MH1ZRC, NLNDWD",
     },
     {
-      id: "paid-hp-studio-tickets",
-      title: "Warner Bros. Studio Tour Tokyo Timed Entry (5 Tickets)",
-      amount: 32500,
-      currency: "JPY",
-      category: "tickets",
-      paymentMethod: "BDO JCB",
-      date: "2026-09-03",
-      status: "paid",
-      notes: "Sep 3 · 1:00 PM Entry · Toshimaen",
-    },
-    {
-      id: "paid-disney-passports",
-      title: "Tokyo Disney Resort Park Tickets (Disneyland & DisneySea 5 Pax)",
-      amount: 84000,
-      currency: "JPY",
-      category: "tickets",
-      paymentMethod: "BDO Mastercard",
-      date: "2026-09-02",
-      status: "paid",
-      notes: "Disneyland Sep 2 & DisneySea Sep 4 (Official App)",
-    },
-    {
       id: "paid-vfs-visa-fees",
       title: "VFS Global Japan Visa Application Fees (5 Applicants)",
       amount: 10800,
@@ -137,13 +115,35 @@ export default function BudgetPage() {
     },
   ];
 
-  const [paidExpenses, setPaidExpenses] = useLocalStorage<ExpenseRecord[]>(
+  const [paidExpenses, setPaidExpenses, paidExpensesLoaded] = useLocalStorage<ExpenseRecord[]>(
     "travel_tokyo_paid_expenses_v3",
     defaultPaidExpenses
   );
 
   // 3. Planned / Expected Budget (Section 2)
   const defaultPlannedExpenses: ExpenseRecord[] = [
+    {
+      id: "plan-hp-studio-tickets",
+      title: "Warner Bros. Studio Tour Tokyo Timed Entry (5 Tickets)",
+      amount: 32500,
+      currency: "JPY",
+      category: "tickets",
+      paymentMethod: "BDO JCB",
+      date: "2026-09-03",
+      status: "planned",
+      notes: "Not booked yet. Target: Sep 3 afternoon · Toshimaen.",
+    },
+    {
+      id: "plan-disney-passports",
+      title: "Tokyo Disney Resort Park Tickets (Disneyland & DisneySea 5 Pax)",
+      amount: 84000,
+      currency: "JPY",
+      category: "tickets",
+      paymentMethod: "BDO Mastercard",
+      date: "2026-09-02",
+      status: "planned",
+      notes: "Not booked yet. Plan: Disneyland Sep 2 & DisneySea Sep 4 (Official App).",
+    },
     {
       id: "plan-food-7days",
       title: "Food & Dining Daily Allowance (7 Days x 5 Pax)",
@@ -205,6 +205,44 @@ export default function BudgetPage() {
     "travel_tokyo_planned_expenses_v2",
     defaultPlannedExpenses
   );
+
+  // One-time correction: HP Studio and Disney tickets were originally seeded as
+  // "paid" before either was actually booked. If an earlier visit to this browser
+  // already saved that stale "paid" data, move both back to planned/not-yet-paid
+  // once, without touching anything since edited or deleted by hand.
+  React.useEffect(() => {
+    // Wait for the real localStorage read to finish — otherwise this would
+    // evaluate against the pre-load default value instead of what's actually
+    // stored in this browser.
+    if (!paidExpensesLoaded) return;
+
+    const alreadyCorrected =
+      typeof window !== "undefined" &&
+      window.localStorage.getItem("travel_tokyo_expense_status_corrected_v1") === "true";
+    if (alreadyCorrected) return;
+
+    const staleIds = ["paid-hp-studio-tickets", "paid-disney-passports"];
+    const stalePaid = paidExpenses.filter((e) => staleIds.includes(e.id));
+    if (stalePaid.length > 0) {
+      setPaidExpenses((prev) => prev.filter((e) => !staleIds.includes(e.id)));
+      setPlannedExpenses((prev) => {
+        const existingIds = new Set(prev.map((e) => e.id));
+        const toAdd = stalePaid
+          .map((e) => {
+            const replacement = defaultPlannedExpenses.find(
+              (p) => p.id === e.id.replace("paid-", "plan-")
+            );
+            return replacement;
+          })
+          .filter((e): e is ExpenseRecord => !!e && !existingIds.has(e.id));
+        return [...toAdd, ...prev];
+      });
+    }
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("travel_tokyo_expense_status_corrected_v1", "true");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paidExpensesLoaded, paidExpenses]);
 
   // Form State
   const [modalType, setModalType] = useState<"addPaid" | "addPlanned" | "edit" | "markPaid" | "addWithdrawal" | null>(null);
@@ -512,10 +550,10 @@ export default function BudgetPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-stone-200 pb-3">
             <div>
               <span className="text-xs font-black uppercase tracking-widest text-[#FF5F93]">
-                Trip Financial Overview
+                Budget
               </span>
               <h2 className="font-serif text-2xl font-bold text-stone-900 sm:text-3xl">
-                Dual-Currency Trip Budget & Ledger
+                Your Tokyo Trip Budget
               </h2>
             </div>
 
@@ -738,10 +776,10 @@ export default function BudgetPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-stone-100 pb-4">
             <div>
               <span className="text-xs font-black uppercase tracking-widest text-[#C1802E] flex items-center gap-1.5">
-                <Banknote className="h-4 w-4 text-[#C1802E]" /> Physical Cash Management
+                <Banknote className="h-4 w-4 text-[#C1802E]" /> Cash Wallet
               </span>
               <h3 className="font-serif text-xl sm:text-2xl font-bold text-stone-900 mt-1">
-                Cash Withdrawn − Actual Spent Cash = Balance On-Hand
+                Your cash on hand
               </h3>
             </div>
 
@@ -768,7 +806,7 @@ export default function BudgetPage() {
             {/* 1. Total Cash Withdrawn */}
             <div className="md:col-span-3 rounded-2xl border border-amber-200 bg-[#FBF0DC]/70 p-5 space-y-1">
               <span className="text-[10px] font-black uppercase tracking-wider text-[#8B5E14]">
-                1. Total Amount Withdrawn
+                Withdrawn
               </span>
               <div className="font-serif text-2xl sm:text-3xl font-extrabold text-stone-900">
                 {destSymbol} {totalCashWithdrawnJPY.toLocaleString()}
@@ -789,7 +827,7 @@ export default function BudgetPage() {
             {/* 2. Less: Actual Spent Cash */}
             <div className="md:col-span-3 rounded-2xl border border-rose-200 bg-rose-50/70 p-5 space-y-1">
               <span className="text-[10px] font-black uppercase tracking-wider text-rose-800">
-                2. Less: Actual Spent Cash
+                Spent in Cash
               </span>
               <div className="font-serif text-2xl sm:text-3xl font-extrabold text-rose-950">
                 {destSymbol} {actualSpentCashJPY.toLocaleString()}
@@ -816,7 +854,7 @@ export default function BudgetPage() {
               }`}
             >
               <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 flex items-center justify-between">
-                <span>3. Balance Cash On-Hand</span>
+                <span>Cash On Hand</span>
                 <span className="rounded bg-emerald-200/80 px-1.5 py-0.5 text-[9px] font-bold text-emerald-900">
                   Wallet
                 </span>
@@ -864,7 +902,7 @@ export default function BudgetPage() {
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-stone-200">
           <div className="flex items-center gap-2">
             <span className="text-xs font-black uppercase tracking-widest text-stone-500">
-              Expense Operations
+              Add an Expense
             </span>
           </div>
 

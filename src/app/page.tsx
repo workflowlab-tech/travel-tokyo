@@ -13,6 +13,8 @@ import { Sparkles, ArrowRight, MapPin } from "lucide-react";
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"today" | "itinerary" | "guides" | "tools" | "emergency">("today");
   const [currentDayIndex, setCurrentDayIndex] = useState<number>(0);
+  const [tripStatus, setTripStatus] = useState<"before" | "active" | "after">("before");
+  const [daysUntilTrip, setDaysUntilTrip] = useState<number>(0);
 
   // Automatically determine if today falls within trip dates
   useEffect(() => {
@@ -20,7 +22,14 @@ export default function Home() {
       const now = new Date();
       const tripStart = new Date(`${tripMeta.startDate}T00:00:00+09:00`);
       const diffDays = Math.floor((now.getTime() - tripStart.getTime()) / (1000 * 60 * 60 * 24));
-      if (diffDays >= 0 && diffDays < itineraryDays.length) {
+      if (diffDays < 0) {
+        setTripStatus("before");
+        setDaysUntilTrip(Math.abs(diffDays));
+      } else if (diffDays >= itineraryDays.length) {
+        setTripStatus("after");
+        setCurrentDayIndex(itineraryDays.length - 1);
+      } else {
+        setTripStatus("active");
         setCurrentDayIndex(diffDays);
       }
     } catch {
@@ -160,9 +169,15 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 border-b border-stone-200 pb-3">
             <div>
               <span className="text-xs font-black uppercase tracking-widest text-[#FF5F93]">
-                Today Mode · Active Trip Day
+                {tripStatus === "before"
+                  ? `Trip Starts In ${daysUntilTrip} Day${daysUntilTrip === 1 ? "" : "s"}`
+                  : tripStatus === "after"
+                  ? "Trip Complete · Recap"
+                  : "Today Mode · Active Trip Day"}
               </span>
               <h2 className="font-serif text-2xl font-bold text-stone-900 sm:text-3xl">
+                {tripStatus === "before" && "Coming Up: "}
+                {tripStatus === "after" && "Looking Back: "}
                 Day {itineraryDays[currentDayIndex].dayNumber} · {itineraryDays[currentDayIndex].title}
               </h2>
             </div>

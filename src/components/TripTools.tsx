@@ -23,7 +23,6 @@ import {
   Plus,
   Trash2,
   Lock,
-  Download,
   Camera,
   Eye,
   EyeOff,
@@ -85,21 +84,55 @@ export const TripTools: React.FC = () => {
       id: "booking-hp-studio",
       title: "Warner Bros. Studio Tour Tokyo (The Making of Harry Potter)",
       type: "ticket",
-      confirmationCode: "WBST-2026-0903-1300",
-      notes: "Sep 3 · 1:00 PM Timed Entry · Toshimaen Station",
-      amount: "Booked & Paid",
+      notes: "Not booked yet. Target: Sep 3 afternoon · Toshimaen Station.",
+      amount: "Not Booked Yet · Planned",
       dateAdded: "2026-09-03",
     },
     {
       id: "booking-disney-parks",
       title: "Tokyo Disney Resort Park Tickets (Disneyland & DisneySea)",
       type: "ticket",
-      confirmationCode: "TDR-APP-PASSPORT",
-      notes: "Tokyo Disneyland (Sep 2) & Tokyo DisneySea (Sep 4) · Available in Official App",
-      amount: "Booked & Paid",
+      notes: "Not booked yet. Plan: Disneyland (Sep 2) & DisneySea (Sep 4) · Buy via Official Disney App.",
+      amount: "Not Booked Yet · Planned",
       dateAdded: "2026-09-02",
     },
   ];
+
+  // One-time correction: the HP Studio and Disney entries were originally seeded
+  // into IndexedDB showing "Booked & Paid" with fabricated confirmation codes,
+  // before either was actually booked. This patches any already-seeded copy of
+  // those two records (by id) back to an honest "not booked yet" status, once,
+  // without touching anything the user has since edited or deleted themselves.
+  const correctStaleBookingStatus = async (docs: BookingDocument[]): Promise<BookingDocument[]> => {
+    const staleIds = new Set(["booking-hp-studio", "booking-disney-parks"]);
+    const alreadyCorrected =
+      typeof window !== "undefined" &&
+      window.localStorage.getItem("travel_tokyo_booking_status_corrected_v1") === "true";
+    if (alreadyCorrected) return docs;
+
+    let changed = false;
+    const patched = await Promise.all(
+      docs.map(async (doc) => {
+        if (staleIds.has(doc.id) && doc.amount === "Booked & Paid") {
+          const fresh = defaultBookings.find((d) => d.id === doc.id)!;
+          const correctedDoc: BookingDocument = {
+            ...doc,
+            confirmationCode: undefined,
+            notes: fresh.notes,
+            amount: fresh.amount,
+          };
+          await saveDocToIDB(correctedDoc);
+          changed = true;
+          return correctedDoc;
+        }
+        return doc;
+      })
+    );
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("travel_tokyo_booking_status_corrected_v1", "true");
+    }
+    return changed ? patched : docs;
+  };
 
   useEffect(() => {
     async function loadDocs() {
@@ -117,7 +150,7 @@ export const TripTools: React.FC = () => {
           window.localStorage.setItem("travel_tokyo_bookings_seeded", "true");
           setDocuments(defaultBookings);
         } else {
-          setDocuments(stored);
+          setDocuments(await correctStaleBookingStatus(stored));
         }
       } catch (err) {
         console.warn("Failed to load documents from IndexedDB:", err);
@@ -535,10 +568,9 @@ export const TripTools: React.FC = () => {
                       href={doc.fileData}
                       target="_blank"
                       rel="noreferrer"
-                      download={doc.fileName || "booking-document"}
                       className="inline-flex items-center gap-1 text-xs font-bold text-[#1F3A5F] hover:underline"
                     >
-                      <Download className="h-3.5 w-3.5" /> View / Download
+                      <Eye className="h-3.5 w-3.5" /> View
                     </a>
                   </div>
                 )}
@@ -885,7 +917,7 @@ export const TripTools: React.FC = () => {
             className="rounded-3xl border border-stone-200 bg-white p-6 shadow-md space-y-4"
           >
             <h4 className="font-serif text-base font-bold text-stone-900">
-              Save a Tokyo Memory (Persisted in IndexedDB)
+              Save a Tokyo Memory
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
