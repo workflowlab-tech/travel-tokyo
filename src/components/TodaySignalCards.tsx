@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { tripMeta, itineraryDays } from "../data/trip-config";
 import { useWeather } from "../hooks/useWeather";
 import { useFXRate } from "../hooks/useFXRate";
-import { CloudSun, ArrowRightLeft, MapPin, ExternalLink, Sparkles, Navigation } from "lucide-react";
+import { CloudSun, ArrowRightLeft, MapPin, ExternalLink, Sparkles } from "lucide-react";
 
 interface TodaySignalCardsProps {
   currentDayIndex: number;
@@ -33,28 +33,28 @@ export const TodaySignalCards: React.FC<TodaySignalCardsProps> = ({ currentDayIn
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {/* 1. UP NEXT / TODAY'S FEATURE CARD */}
-      <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br from-[#1F3A5F] to-[#132540] p-5 text-white shadow-lg border border-white/10">
+      <div className="relative flex flex-col justify-between overflow-hidden rounded-3xl bg-gradient-to-br from-[#1F3A5F] to-[#132540] p-6 text-white shadow-lg border border-white/10">
         <div className="flex items-center justify-between">
-          <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-[#FF86A8]">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-[#FF86A8]">
             <Sparkles className="h-3.5 w-3.5" /> Up Next · {currentDay.shortDate}
           </span>
-          <span className="rounded-md bg-white/10 px-2 py-0.5 font-mono text-xs text-[#FFD66B]">
+          <span className="rounded-md bg-white/10 px-2 py-0.5 font-mono text-xs text-[#FFD66B] border border-white/15">
             {firstEvent.time}
           </span>
         </div>
 
         <div className="my-4">
-          <h3 className="font-serif text-xl font-bold leading-tight sm:text-2xl text-white">
+          <h3 className="font-serif text-xl font-bold leading-snug sm:text-2xl text-white">
             {firstEvent.title}
           </h3>
-          <p className="mt-1.5 text-xs leading-relaxed text-stone-300">
+          <p className="mt-1.5 text-xs leading-relaxed text-stone-300 line-clamp-3">
             {firstEvent.desc}
           </p>
         </div>
 
         <button
           onClick={onOpenItinerary}
-          className="mt-auto inline-flex items-center gap-1.5 text-xs font-bold text-[#FF86A8] transition hover:text-white"
+          className="mt-auto inline-flex items-center gap-1.5 text-xs font-bold text-[#FF86A8] transition hover:text-white pt-2 border-t border-white/10"
         >
           <span>View Day {currentDay.dayNumber} Timeline</span>
           <span>→</span>
@@ -62,7 +62,7 @@ export const TodaySignalCards: React.FC<TodaySignalCardsProps> = ({ currentDayIn
       </div>
 
       {/* 2. TOKYO NOW (LIVE WEATHER VIA OPEN-METEO) */}
-      <div className="relative flex flex-col justify-between rounded-2xl border border-stone-200 bg-white p-5 shadow-md">
+      <div className="relative flex flex-col justify-between rounded-3xl border border-stone-200 bg-white p-6 shadow-md">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-black uppercase tracking-wider text-[#1F3A5F]">
             Tokyo Weather
@@ -79,14 +79,14 @@ export const TodaySignalCards: React.FC<TodaySignalCardsProps> = ({ currentDayIn
           ) : weather ? (
             <>
               <div className="flex items-baseline gap-2">
-                <strong className="font-serif text-3xl font-bold text-stone-900 sm:text-4xl">
+                <strong className="font-serif text-3xl font-extrabold text-stone-900 sm:text-4xl">
                   {weather.currentTemp ?? weather.high}°C
                 </strong>
-                <span className="text-xs text-stone-500">
+                <span className="text-xs text-stone-500 font-medium">
                   {weather.high}° / {weather.low}°
                 </span>
               </div>
-              <p className="mt-1 text-xs font-medium text-stone-700">
+              <p className="mt-1 text-xs font-semibold text-stone-700">
                 {weather.condition} · {weather.rainProbability}% rain chance
               </p>
             </>
@@ -104,7 +104,7 @@ export const TodaySignalCards: React.FC<TodaySignalCardsProps> = ({ currentDayIn
       </div>
 
       {/* 3. CURRENCY CONVERTER (PHP ⇄ JPY / LIVE FX) */}
-      <div className="relative flex flex-col justify-between rounded-2xl border border-stone-200 bg-white p-5 shadow-md">
+      <div className="relative flex flex-col justify-between rounded-3xl border border-stone-200 bg-white p-6 shadow-md">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-black uppercase tracking-wider text-[#1F3A5F]">
             {tripMeta.defaultCurrencies.homeCurrency} ⇄ {tripMeta.defaultCurrencies.destCurrency}
@@ -113,24 +113,24 @@ export const TodaySignalCards: React.FC<TodaySignalCardsProps> = ({ currentDayIn
         </div>
 
         <div className="my-2">
-          <div className="text-xs text-stone-500">
+          <div className="text-xs text-stone-500 font-medium">
             {fxLoading ? "Loading rate..." : `1 ₱ ≈ ${fxRate ? fxRate.toFixed(2) : "2.70"} ¥`}
           </div>
-          <div className="mt-1 font-serif text-2xl font-bold text-stone-900 sm:text-3xl">
+          <div className="mt-1 font-serif text-2xl font-extrabold text-stone-900 sm:text-3xl">
             ¥ {convertedJPY.toLocaleString()}
           </div>
         </div>
 
         <div className="mt-auto pt-2 border-t border-stone-100">
-          <div className="flex items-center rounded-lg border border-stone-200 bg-stone-50 px-2.5 py-1.5 focus-within:border-[#1F3A5F] focus-within:ring-1 focus-within:ring-[#1F3A5F]">
-            <span className="text-xs font-semibold text-stone-500">₱</span>
+          <div className="flex items-center rounded-xl border border-stone-200 bg-stone-50 px-3 py-1.5 focus-within:border-[#1F3A5F] focus-within:ring-1 focus-within:ring-[#1F3A5F]">
+            <span className="text-xs font-bold text-stone-500">₱</span>
             <input
               type="text"
               inputMode="decimal"
               value={convertAmount}
               onChange={(e) => setConvertAmount(e.target.value.replace(/[^0-9.]/g, ""))}
               placeholder="1000"
-              className="ml-2 w-full bg-transparent text-sm font-semibold text-stone-900 outline-none"
+              className="ml-2 w-full bg-transparent text-sm font-bold text-stone-900 outline-none"
               aria-label="Convert currency amount"
             />
           </div>
@@ -138,7 +138,7 @@ export const TodaySignalCards: React.FC<TodaySignalCardsProps> = ({ currentDayIn
       </div>
 
       {/* 4. HOME BASE / HOTEL CARD */}
-      <div className="relative flex flex-col justify-between rounded-2xl border border-amber-200 bg-[#FBF0DC]/60 p-5 shadow-md">
+      <div className="relative flex flex-col justify-between rounded-3xl border border-amber-200 bg-[#FBF0DC]/80 p-6 shadow-md">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-black uppercase tracking-wider text-[#C1802E]">
             Home Base · Asakusa
@@ -155,7 +155,7 @@ export const TodaySignalCards: React.FC<TodaySignalCardsProps> = ({ currentDayIn
           </p>
           <div className="mt-2 flex flex-wrap gap-1">
             {tripMeta.homeBase.amenities.slice(0, 2).map((amenity, i) => (
-              <span key={i} className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-[#8B5E14]">
+              <span key={i} className="rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-[#8B5E14] border border-amber-200/60">
                 {amenity}
               </span>
             ))}
@@ -166,7 +166,7 @@ export const TodaySignalCards: React.FC<TodaySignalCardsProps> = ({ currentDayIn
           href={`https://www.google.com/maps/search/?api=1&query=${tripMeta.homeBase.mapQuery}`}
           target="_blank"
           rel="noreferrer"
-          className="mt-auto inline-flex items-center gap-1 text-xs font-bold text-[#C1502E] hover:underline"
+          className="mt-auto inline-flex items-center gap-1 text-xs font-bold text-[#C1502E] hover:underline pt-2 border-t border-amber-200/60"
         >
           <span>Open Google Maps</span>
           <ExternalLink className="h-3 w-3" />

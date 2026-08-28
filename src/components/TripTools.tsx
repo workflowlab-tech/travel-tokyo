@@ -23,54 +23,58 @@ import {
   Lock,
   Download,
   Camera,
-  CheckCircle2,
+  CreditCard,
+  Banknote,
+  TrendingUp,
+  Percent,
 } from "lucide-react";
 
 export const TripTools: React.FC = () => {
   const [toolTab, setToolTab] = useState<"budget" | "documents" | "packing" | "memories">("budget");
 
-  // ==========================================
-  // 1. Budget State (Stored in LocalStorage)
-  // ==========================================
-  const [expenses, setExpenses] = useLocalStorage<ExpenseRecord[]>("travel_tokyo_expenses", [
-    {
-      id: "exp-1",
-      title: "Keisei Access Express train tickets (5 pax)",
-      amount: 6750,
-      currency: "JPY",
-      category: "transport",
-      date: "2026-09-01",
-    },
-    {
-      id: "exp-2",
-      title: "Asakusa Menchi snacks & drinks",
-      amount: 1800,
-      currency: "JPY",
-      category: "food",
-      date: "2026-09-01",
-    },
-  ]);
+  // =========================================================================
+  // 1. Budget State (Stored in LocalStorage, starts clean/empty for user data)
+  // =========================================================================
+  const [expenses, setExpenses] = useLocalStorage<ExpenseRecord[]>("travel_tokyo_expenses", []);
+  const [plannedBudgetJPY, setPlannedBudgetJPY] = useLocalStorage<number>(
+    "travel_tokyo_planned_budget",
+    tripMeta.defaultCurrencies.plannedBudgetJPY || 150000
+  );
+  const [isEditingBudget, setIsEditingBudget] = useState(false);
+  const [tempBudgetInput, setTempBudgetInput] = useState(String(plannedBudgetJPY));
 
   const [expenseTitle, setExpenseTitle] = useState("");
   const [expenseAmount, setExpenseAmount] = useState("");
   const [expenseCategory, setExpenseCategory] = useState<ExpenseRecord["category"]>("food");
+  const [expensePaymentMethod, setExpensePaymentMethod] = useState<"cash" | "card">("card");
 
-  const { rate: fxRate } = useFXRate("PHP", "JPY");
+  const { rate: liveFxRate } = useFXRate(
+    tripMeta.defaultCurrencies.homeCurrency,
+    tripMeta.defaultCurrencies.destCurrency
+  );
+  const currentFxRate = liveFxRate || 2.70;
 
   const totalSpentJPY = expenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
-  const totalSpentPHP = fxRate ? Math.round(totalSpentJPY / fxRate) : Math.round(totalSpentJPY / 2.7);
+  const totalSpentPHP = Math.round(totalSpentJPY / currentFxRate);
+  const remainingBudgetJPY = plannedBudgetJPY - totalSpentJPY;
+  const remainingBudgetPHP = Math.round(remainingBudgetJPY / currentFxRate);
+  const budgetSpentPercent =
+    plannedBudgetJPY > 0 ? Math.min(100, Math.round((totalSpentJPY / plannedBudgetJPY) * 100)) : 0;
 
   const handleAddExpense = (e: React.FormEvent) => {
     e.preventDefault();
     if (!expenseTitle.trim() || !expenseAmount) return;
 
+    const numericAmount = parseFloat(expenseAmount.replace(/[^0-9.]/g, "")) || 0;
     const newExpense: ExpenseRecord = {
       id: "exp-" + Date.now(),
       title: expenseTitle.trim(),
-      amount: parseFloat(expenseAmount.replace(/[^0-9.]/g, "")) || 0,
+      amount: numericAmount,
       currency: "JPY",
       category: expenseCategory,
+      paymentMethod: expensePaymentMethod,
       date: new Date().toISOString().split("T")[0],
+      convertedAmount: Math.round(numericAmount / currentFxRate),
     };
 
     setExpenses([newExpense, ...expenses]);
@@ -82,9 +86,15 @@ export const TripTools: React.FC = () => {
     setExpenses(expenses.filter((e) => e.id !== id));
   };
 
-  // =======================================================
-  // 2. Bookings & Documents State (Stored in IndexedDB)
-  // =======================================================
+  const handleSaveBudget = () => {
+    const val = parseFloat(tempBudgetInput.replace(/[^0-9.]/g, "")) || 150000;
+    setPlannedBudgetJPY(val);
+    setIsEditingBudget(false);
+  };
+
+  // =========================================================================
+  // 2. Bookings & Documents State (Stored in IndexedDB, starts clean/empty)
+  // =========================================================================
   const [documents, setDocuments] = useState<BookingDocument[]>([]);
   const [isDocsLoading, setIsDocsLoading] = useState(true);
 
@@ -92,30 +102,7 @@ export const TripTools: React.FC = () => {
     async function loadDocs() {
       try {
         const stored = await getAllDocuments();
-        if (stored.length === 0) {
-          // Initialize sample defaults in IndexedDB
-          const sample1: BookingDocument = {
-            id: "doc-sample-1",
-            title: "Hotel Plus Hostel Asakusa Confirmation Voucher",
-            type: "hotel",
-            confirmationCode: "HTL-TOK-2026-901",
-            notes: "2-13-1 Kaminarimon · 5 guests · Check-in 3:00 PM",
-            dateAdded: "2026-08-28",
-          };
-          const sample2: BookingDocument = {
-            id: "doc-sample-2",
-            title: "Warner Bros. Studio Tour Tokyo Timed Entry",
-            type: "ticket",
-            confirmationCode: "WBST-SEP03-1300",
-            notes: "5 Tickets · Sept 3 at 1:00 PM · Toshimaen Station",
-            dateAdded: "2026-08-28",
-          };
-          await saveDocToIDB(sample1);
-          await saveDocToIDB(sample2);
-          setDocuments([sample1, sample2]);
-        } else {
-          setDocuments(stored);
-        }
+        setDocuments(stored);
       } catch (err) {
         console.warn("Failed to load documents from IndexedDB:", err);
       } finally {
@@ -182,9 +169,9 @@ export const TripTools: React.FC = () => {
     }
   };
 
-  // =======================================================
+  // =========================================================================
   // 3. Smart Packing State (Stored in LocalStorage)
-  // =======================================================
+  // =========================================================================
   const [packedMap, setPackedMap] = useLocalStorage<Record<string, boolean>>(
     "travel_tokyo_packing_checks",
     {}
@@ -207,9 +194,9 @@ export const TripTools: React.FC = () => {
   const packedCount = Object.values(packedMap).filter(Boolean).length;
   const packedPercentage = totalPackingCount > 0 ? Math.round((packedCount / totalPackingCount) * 100) : 0;
 
-  // =======================================================
+  // =========================================================================
   // 4. Memories State (Stored in IndexedDB)
-  // =======================================================
+  // =========================================================================
   const [memories, setMemories] = useState<MemoryPhoto[]>([]);
   const [isMemoriesLoading, setIsMemoriesLoading] = useState(true);
 
@@ -293,7 +280,7 @@ export const TripTools: React.FC = () => {
           onClick={() => setToolTab("budget")}
           className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition flex-shrink-0 border ${
             toolTab === "budget"
-              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md"
+              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md ring-2 ring-[#FF5F93]/30"
               : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
           }`}
         >
@@ -305,7 +292,7 @@ export const TripTools: React.FC = () => {
           onClick={() => setToolTab("documents")}
           className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition flex-shrink-0 border ${
             toolTab === "documents"
-              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md"
+              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md ring-2 ring-[#FF5F93]/30"
               : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
           }`}
         >
@@ -317,7 +304,7 @@ export const TripTools: React.FC = () => {
           onClick={() => setToolTab("packing")}
           className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition flex-shrink-0 border ${
             toolTab === "packing"
-              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md"
+              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md ring-2 ring-[#FF5F93]/30"
               : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
           }`}
         >
@@ -329,7 +316,7 @@ export const TripTools: React.FC = () => {
           onClick={() => setToolTab("memories")}
           className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition flex-shrink-0 border ${
             toolTab === "memories"
-              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md"
+              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md ring-2 ring-[#FF5F93]/30"
               : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
           }`}
         >
@@ -338,41 +325,145 @@ export const TripTools: React.FC = () => {
         </button>
       </div>
 
-      {/* 1. BUDGET & EXPENSE TRACKER */}
+      {/* 1. ENHANCED BUDGET & EXPENSE TRACKER */}
       {toolTab === "budget" && (
         <div className="space-y-6">
-          {/* Total Spent Summary Card */}
-          <div className="rounded-3xl bg-gradient-to-br from-[#1F3A5F] to-[#132540] p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[#FF86A8]">
-                Total Spent on Trip
-              </span>
-              <div className="mt-1 font-serif text-3xl sm:text-5xl font-bold">
+          {/* Planned vs Spent vs Remaining Overview Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Planned Budget */}
+            <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-wider text-stone-500">
+                  Planned Budget
+                </span>
+                <button
+                  onClick={() => setIsEditingBudget(!isEditingBudget)}
+                  className="text-[11px] font-bold text-[#FF5F93] hover:underline"
+                >
+                  {isEditingBudget ? "Cancel" : "Edit"}
+                </button>
+              </div>
+
+              {isEditingBudget ? (
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={tempBudgetInput}
+                    onChange={(e) => setTempBudgetInput(e.target.value)}
+                    className="w-full rounded-lg border border-stone-300 p-1.5 text-sm font-bold"
+                  />
+                  <button
+                    onClick={handleSaveBudget}
+                    className="rounded-lg bg-[#1F3A5F] px-3 py-1.5 text-xs font-bold text-white"
+                  >
+                    Save
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <div className="font-serif text-2xl sm:text-3xl font-extrabold text-stone-900">
+                    ¥ {plannedBudgetJPY.toLocaleString()}
+                  </div>
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    ≈ ₱ {Math.round(plannedBudgetJPY / currentFxRate).toLocaleString()} PHP
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Actual Spent */}
+            <div className="rounded-3xl border border-amber-200 bg-[#FBF0DC]/80 p-5 shadow-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-wider text-[#C1802E]">
+                  Actual Spent
+                </span>
+                <span className="rounded-full bg-amber-200 px-2 py-0.5 font-mono text-[10px] font-bold text-[#8B5E14]">
+                  {budgetSpentPercent}% used
+                </span>
+              </div>
+              <div className="font-serif text-2xl sm:text-3xl font-extrabold text-stone-900">
                 ¥ {totalSpentJPY.toLocaleString()}
               </div>
-              <p className="mt-1 text-xs text-stone-300">
-                ≈ ₱ {totalSpentPHP.toLocaleString()} PHP (at 1 ₱ ≈ {fxRate?.toFixed(2) || "2.70"} ¥)
+              <p className="text-xs text-stone-600 mt-0.5 font-medium">
+                ≈ ₱ {totalSpentPHP.toLocaleString()} PHP ({expenses.length} logs)
               </p>
             </div>
-            <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold text-[#FFD66B] self-start sm:self-auto">
-              {expenses.length} Recorded Expenses
-            </span>
+
+            {/* Remaining Budget */}
+            <div
+              className={`rounded-3xl border p-5 shadow-sm space-y-2 ${
+                remainingBudgetJPY >= 0
+                  ? "border-emerald-200 bg-emerald-50/70"
+                  : "border-red-200 bg-red-50/70"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span
+                  className={`text-[11px] font-black uppercase tracking-wider ${
+                    remainingBudgetJPY >= 0 ? "text-emerald-800" : "text-red-800"
+                  }`}
+                >
+                  Remaining Balance
+                </span>
+                <TrendingUp
+                  className={`h-4 w-4 ${remainingBudgetJPY >= 0 ? "text-emerald-600" : "text-red-600"}`}
+                />
+              </div>
+              <div
+                className={`font-serif text-2xl sm:text-3xl font-extrabold ${
+                  remainingBudgetJPY >= 0 ? "text-emerald-950" : "text-red-950"
+                }`}
+              >
+                ¥ {remainingBudgetJPY.toLocaleString()}
+              </div>
+              <p
+                className={`text-xs mt-0.5 font-medium ${
+                  remainingBudgetJPY >= 0 ? "text-emerald-800" : "text-red-800"
+                }`}
+              >
+                ≈ ₱ {remainingBudgetPHP.toLocaleString()} PHP
+              </p>
+            </div>
+          </div>
+
+          {/* Budget Progress Bar */}
+          <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm space-y-1.5">
+            <div className="flex items-center justify-between text-xs font-bold text-stone-700">
+              <span>Overall Budget Utilization</span>
+              <span>
+                ¥ {totalSpentJPY.toLocaleString()} / ¥ {plannedBudgetJPY.toLocaleString()} ({budgetSpentPercent}%)
+              </span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-stone-100">
+              <div
+                className={`h-full transition-all duration-500 ${
+                  budgetSpentPercent > 90 ? "bg-red-500" : budgetSpentPercent > 70 ? "bg-amber-500" : "bg-[#FF5F93]"
+                }`}
+                style={{ width: `${budgetSpentPercent}%` }}
+              />
+            </div>
           </div>
 
           {/* Add Expense Form */}
-          <form onSubmit={handleAddExpense} className="rounded-2xl border border-stone-200 bg-white p-5 shadow-md space-y-4">
+          <form
+            onSubmit={handleAddExpense}
+            className="rounded-3xl border border-stone-200 bg-white p-6 shadow-md space-y-4"
+          >
             <h4 className="font-serif text-base font-bold text-stone-900">
-              Record New Expense
+              Log New Trip Expense
             </h4>
+
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
               <input
                 type="text"
                 value={expenseTitle}
                 onChange={(e) => setExpenseTitle(e.target.value)}
-                placeholder="What did you buy? (e.g. Ramen in Asakusa, Disney Popcorn)"
-                className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] focus:ring-1 focus:ring-[#1F3A5F] sm:col-span-6"
+                placeholder="What did you buy? (e.g. Asakusa Menchi, Disney Popcorn Bucket, Train Fare)"
+                className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] focus:ring-1 focus:ring-[#1F3A5F] sm:col-span-5"
                 required
               />
+
               <input
                 type="text"
                 inputMode="numeric"
@@ -382,68 +473,135 @@ export const TripTools: React.FC = () => {
                 className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] focus:ring-1 focus:ring-[#1F3A5F] sm:col-span-3"
                 required
               />
+
               <select
                 value={expenseCategory}
                 onChange={(e) => setExpenseCategory(e.target.value as ExpenseRecord["category"])}
-                className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] sm:col-span-3"
+                className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] sm:col-span-2"
               >
                 <option value="food">🍱 Food & Snacks</option>
                 <option value="transport">🚆 Transport & IC</option>
-                <option value="shopping">🛍️ Shopping & Souvenirs</option>
+                <option value="shopping">🛍️ Shopping & Tax-Free</option>
                 <option value="tickets">🎟️ Tickets & Tours</option>
                 <option value="stay">🏨 Hotel & Amenities</option>
                 <option value="other">📦 Other</option>
               </select>
+
+              {/* Cash vs Card Selector */}
+              <div className="flex rounded-xl bg-stone-100 p-1 border border-stone-200 sm:col-span-2">
+                <button
+                  type="button"
+                  onClick={() => setExpensePaymentMethod("card")}
+                  className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition flex items-center justify-center gap-1 ${
+                    expensePaymentMethod === "card"
+                      ? "bg-[#1F3A5F] text-white shadow-sm"
+                      : "text-stone-600 hover:text-stone-900"
+                  }`}
+                >
+                  <CreditCard className="h-3 w-3" /> Card
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setExpensePaymentMethod("cash")}
+                  className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition flex items-center justify-center gap-1 ${
+                    expensePaymentMethod === "cash"
+                      ? "bg-[#C1802E] text-white shadow-sm"
+                      : "text-stone-600 hover:text-stone-900"
+                  }`}
+                >
+                  <Banknote className="h-3 w-3" /> Cash
+                </button>
+              </div>
             </div>
-            <button
-              type="submit"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#FF5F93] px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#e84e80] transition"
-            >
-              <Plus className="h-4 w-4" /> Add Expense
-            </button>
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+              <span className="text-xs text-stone-500">
+                Rate reference: 1 ₱ ≈ {currentFxRate.toFixed(2)} ¥ (JPY amounts automatically calculate PHP estimate)
+              </span>
+
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF5F93] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#e84e80] transition active:scale-95"
+              >
+                <Plus className="h-4 w-4" /> Add Expense
+              </button>
+            </div>
           </form>
 
           {/* Expense History List */}
-          <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-md divide-y divide-stone-100">
+          <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-md divide-y divide-stone-100">
             {expenses.length === 0 ? (
-              <div className="p-8 text-center text-xs text-stone-500">
-                No expenses logged yet. Add your first snack or transit fare above!
+              <div className="p-12 text-center text-xs text-stone-500 space-y-1">
+                <p className="font-semibold text-stone-700">No expenses recorded yet.</p>
+                <p>Add your first train fare, snack, or shopping purchase using the form above.</p>
               </div>
             ) : (
-              expenses.map((exp) => (
-                <div key={exp.id} className="p-4 sm:p-5 flex items-center justify-between gap-3 hover:bg-stone-50 transition">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">
-                      {exp.category === "food"
-                        ? "🍱"
-                        : exp.category === "transport"
-                        ? "🚆"
-                        : exp.category === "shopping"
-                        ? "🛍️"
-                        : exp.category === "tickets"
-                        ? "🎟️"
-                        : "💵"}
-                    </span>
-                    <div>
-                      <h5 className="font-serif text-sm font-bold text-stone-900">{exp.title}</h5>
-                      <span className="text-[10px] font-mono text-stone-500">{exp.date} · {exp.category}</span>
+              expenses.map((exp) => {
+                const phpEquiv = Math.round(exp.amount / currentFxRate);
+                return (
+                  <div
+                    key={exp.id}
+                    className="p-4 sm:p-5 flex items-center justify-between gap-3 hover:bg-stone-50 transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">
+                        {exp.category === "food"
+                          ? "🍱"
+                          : exp.category === "transport"
+                          ? "🚆"
+                          : exp.category === "shopping"
+                          ? "🛍️"
+                          : exp.category === "tickets"
+                          ? "🎟️"
+                          : "💵"}
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h5 className="font-serif text-sm font-bold text-stone-900">{exp.title}</h5>
+                          <span
+                            className={`inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${
+                              exp.paymentMethod === "cash"
+                                ? "bg-amber-100 text-amber-800 border border-amber-200"
+                                : "bg-sky-100 text-sky-800 border border-sky-200"
+                            }`}
+                          >
+                            {exp.paymentMethod === "cash" ? (
+                              <>
+                                <Banknote className="h-2.5 w-2.5" /> Cash
+                              </>
+                            ) : (
+                              <>
+                                <CreditCard className="h-2.5 w-2.5" /> Card
+                              </>
+                            )}
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-mono text-stone-500">
+                          {exp.date} · {exp.category}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <div className="font-serif text-base font-bold text-stone-900">
+                          ¥ {Number(exp.amount).toLocaleString()}
+                        </div>
+                        <div className="text-[10px] text-stone-500 font-mono">
+                          ≈ ₱ {phpEquiv.toLocaleString()} PHP
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteExpense(exp.id)}
+                        className="p-1.5 text-stone-400 hover:text-red-600 transition rounded-lg hover:bg-stone-100"
+                        aria-label="Delete expense"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-3">
-                    <span className="font-serif text-base font-bold text-stone-900">
-                      ¥ {Number(exp.amount).toLocaleString()}
-                    </span>
-                    <button
-                      onClick={() => handleDeleteExpense(exp.id)}
-                      className="p-1 text-stone-400 hover:text-red-600 transition"
-                      aria-label="Delete expense"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
@@ -456,17 +614,20 @@ export const TripTools: React.FC = () => {
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-xs text-emerald-950 leading-relaxed flex items-start gap-3">
             <Lock className="h-4 w-4 text-emerald-700 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold">Offline & Private Device Storage (IndexedDB)</p>
+              <p className="font-bold">Device-Local & Offline Document Storage</p>
               <p className="mt-0.5 text-emerald-800">
-                Documents, tickets, QR codes, receipts, and confirmations are stored safely inside your device&apos;s IndexedDB. They remain fully available even offline during flights or in subway tunnels without network.
+                Upload your tickets, confirmation QR codes, passport/visa copies, or insurance documents. They are stored inside your device&apos;s IndexedDB and remain accessible offline during transit and flights.
               </p>
             </div>
           </div>
 
           {/* Add Document Form */}
-          <form onSubmit={handleAddDocument} className="rounded-2xl border border-stone-200 bg-white p-5 shadow-md space-y-4">
+          <form
+            onSubmit={handleAddDocument}
+            className="rounded-3xl border border-stone-200 bg-white p-6 shadow-md space-y-4"
+          >
             <h4 className="font-serif text-base font-bold text-stone-900">
-              Add Booking / Ticket / Document
+              Add Booking / Ticket / Travel Document
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
@@ -474,7 +635,7 @@ export const TripTools: React.FC = () => {
                 type="text"
                 value={docTitle}
                 onChange={(e) => setDocTitle(e.target.value)}
-                placeholder="Document Title (e.g. DisneySea QR Tickets, Hotel Booking, Insurance)"
+                placeholder="Document Title (e.g. DisneySea QR Tickets, Hotel Booking, Travel Insurance)"
                 className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] sm:col-span-6"
                 required
               />
@@ -506,13 +667,13 @@ export const TripTools: React.FC = () => {
                 type="text"
                 value={docNotes}
                 onChange={(e) => setDocNotes(e.target.value)}
-                placeholder="Notes (e.g. 5 tickets, Gate South, Sep 4 rope drop)"
+                placeholder="Notes (e.g. 5 tickets, South Gate, 1:00 PM timed slot)"
                 className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] sm:col-span-7"
               />
 
               <div className="sm:col-span-5 flex items-center gap-2">
                 <label className="flex-1 cursor-pointer rounded-xl border border-dashed border-stone-300 bg-stone-50 p-3 text-center text-xs font-semibold text-stone-700 hover:bg-stone-100 transition">
-                  <span>{docFileName ? docFileName : "📎 Attach File / QR / Image"}</span>
+                  <span>{docFileName ? docFileName : "📎 Attach File / QR / Screenshot"}</span>
                   <input
                     type="file"
                     accept="image/*,application/pdf"
@@ -525,9 +686,9 @@ export const TripTools: React.FC = () => {
 
             <button
               type="submit"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#1F3A5F] px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#132540] transition"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#1F3A5F] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#132540] transition"
             >
-              <Plus className="h-4 w-4" /> Save Document
+              <Plus className="h-4 w-4" /> Save to Documents
             </button>
           </form>
 
@@ -537,13 +698,17 @@ export const TripTools: React.FC = () => {
               Loading saved documents from device storage...
             </div>
           ) : documents.length === 0 ? (
-            <div className="rounded-2xl border border-stone-200 bg-white p-8 text-center text-xs text-stone-500">
-              No documents saved yet. Upload tickets, hotel vouchers, or QR codes above!
+            <div className="rounded-3xl border border-stone-200 bg-white p-12 text-center text-xs text-stone-500 space-y-1">
+              <p className="font-semibold text-stone-700">No documents saved yet.</p>
+              <p>Upload your real tickets, hotel vouchers, or QR passes above to keep them offline-ready.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {documents.map((doc) => (
-                <div key={doc.id} className="rounded-2xl border border-stone-200 bg-white p-5 shadow-md flex flex-col justify-between space-y-3">
+                <div
+                  key={doc.id}
+                  className="rounded-3xl border border-stone-200 bg-white p-5 shadow-md flex flex-col justify-between space-y-3"
+                >
                   <div>
                     <div className="flex items-start justify-between gap-2">
                       <div>
@@ -564,13 +729,13 @@ export const TripTools: React.FC = () => {
                     </div>
 
                     {doc.confirmationCode && (
-                      <div className="mt-2 rounded bg-stone-100 px-2 py-1 font-mono text-xs font-bold text-[#1F3A5F] w-fit">
+                      <div className="mt-2 rounded-md bg-stone-100 px-2.5 py-1 font-mono text-xs font-bold text-[#1F3A5F] w-fit border border-stone-200/60">
                         REF: {doc.confirmationCode}
                       </div>
                     )}
 
                     {doc.notes && (
-                      <p className="mt-2 text-xs text-stone-600 leading-relaxed">
+                      <p className="mt-2 text-xs text-stone-600 leading-relaxed font-medium">
                         {doc.notes}
                       </p>
                     )}
@@ -579,7 +744,7 @@ export const TripTools: React.FC = () => {
                   {doc.fileData && (
                     <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
                       <span className="text-xs text-stone-500 truncate max-w-[200px]">
-                        {doc.fileName || "Attached file"}
+                        {doc.fileName || "Attached document"}
                       </span>
                       <a
                         href={doc.fileData}
@@ -601,10 +766,12 @@ export const TripTools: React.FC = () => {
       {toolTab === "packing" && (
         <div className="space-y-6">
           {/* Packing Progress Bar */}
-          <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-md">
+          <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-md">
             <div className="flex items-center justify-between text-xs font-bold">
               <span className="text-stone-700">Packing Progress</span>
-              <span className="text-[#FF5F93]">{packedCount} of {totalPackingCount} packed ({packedPercentage}%)</span>
+              <span className="text-[#FF5F93]">
+                {packedCount} of {totalPackingCount} packed ({packedPercentage}%)
+              </span>
             </div>
             <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-stone-100">
               <div
@@ -620,12 +787,12 @@ export const TripTools: React.FC = () => {
               type="text"
               value={newCustomItem}
               onChange={(e) => setNewCustomItem(e.target.value)}
-              placeholder="Add personal item (e.g. Camera lenses, kids snacks)..."
+              placeholder="Add personal item (e.g. Camera lenses, extra sneakers, kids snacks)..."
               className="flex-1 rounded-xl border border-stone-200 bg-white p-3 text-xs font-medium outline-none focus:border-[#1F3A5F]"
             />
             <button
               type="submit"
-              className="rounded-xl bg-[#1F3A5F] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#132540]"
+              className="rounded-xl bg-[#1F3A5F] px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#132540]"
             >
               Add Item
             </button>
@@ -636,7 +803,10 @@ export const TripTools: React.FC = () => {
             {["documents", "clothing", "weather", "electronics", "park"].map((cat) => {
               const items = packingPresets.filter((p) => p.category === cat);
               return (
-                <div key={cat} className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+                <div
+                  key={cat}
+                  className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm"
+                >
                   <div className="bg-stone-50 px-5 py-3 border-b border-stone-200 font-serif text-sm font-bold text-[#1F3A5F] uppercase tracking-wider">
                     {cat === "documents"
                       ? "📄 Essential Documents & Money"
@@ -685,7 +855,7 @@ export const TripTools: React.FC = () => {
 
             {/* Custom Added Items */}
             {customItems.length > 0 && (
-              <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+              <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm">
                 <div className="bg-stone-50 px-5 py-3 border-b border-stone-200 font-serif text-sm font-bold text-[#1F3A5F]">
                   ⭐ Custom Personal Items
                 </div>
@@ -725,7 +895,10 @@ export const TripTools: React.FC = () => {
       {toolTab === "memories" && (
         <div className="space-y-6">
           {/* Upload Photo Form */}
-          <form onSubmit={handleAddMemory} className="rounded-2xl border border-stone-200 bg-white p-5 shadow-md space-y-4">
+          <form
+            onSubmit={handleAddMemory}
+            className="rounded-3xl border border-stone-200 bg-white p-6 shadow-md space-y-4"
+          >
             <h4 className="font-serif text-base font-bold text-stone-900">
               Save a Tokyo Memory (Persisted in IndexedDB)
             </h4>
@@ -777,27 +950,33 @@ export const TripTools: React.FC = () => {
               Loading photos from device storage...
             </div>
           ) : memories.length === 0 ? (
-            <div className="rounded-2xl border border-stone-200 bg-white p-12 text-center text-xs text-stone-500">
-              No photos saved yet. Capture your favorite moments in Tokyo and store them here!
+            <div className="rounded-3xl border border-stone-200 bg-white p-12 text-center text-xs text-stone-500 space-y-1">
+              <p className="font-semibold text-stone-700">No photos saved yet.</p>
+              <p>Capture your favorite moments in Tokyo and store them here for quick offline access!</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {memories.map((mem) => (
-                <div key={mem.id} className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-md flex flex-col">
+                <div
+                  key={mem.id}
+                  className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-md flex flex-col"
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={mem.photoData}
                     alt={mem.caption}
                     className="aspect-square w-full object-cover"
                   />
-                  <div className="p-3 flex items-center justify-between">
+                  <div className="p-3.5 flex items-center justify-between">
                     <div>
                       <h5 className="font-serif text-sm font-bold text-stone-900">{mem.caption}</h5>
-                      <span className="text-[10px] text-stone-500">{mem.location} · {mem.dateTaken}</span>
+                      <span className="text-[10px] text-stone-500">
+                        {mem.location} · {mem.dateTaken}
+                      </span>
                     </div>
                     <button
                       onClick={() => handleDeleteMemory(mem.id)}
-                      className="p-1 text-stone-400 hover:text-red-600 transition"
+                      className="p-1.5 text-stone-400 hover:text-red-600 transition rounded-lg hover:bg-stone-50"
                       aria-label="Delete memory"
                     >
                       <Trash2 className="h-4 w-4" />

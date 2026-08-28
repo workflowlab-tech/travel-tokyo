@@ -1,6 +1,7 @@
 import {
   TripMeta,
   ItineraryDay,
+  PlaceGuide,
   DisneyParkGuide,
   RestaurantItem,
   TransportRoute,
@@ -15,7 +16,9 @@ export const tripMeta: TripMeta = {
   destination: "Tokyo, Japan",
   tagline: "Tokyo, ready when you are.",
   description:
-    "One calm, mobile-first companion for the itinerary, live weather signals, bookings, expenses and every important family detail.",
+    "One calm, mobile-first companion for the itinerary, live weather signals, bookings, expenses and every important travel detail.",
+  heroImage:
+    "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=2000&q=80",
   startDate: "2026-09-01",
   endDate: "2026-09-07",
   dateDisplay: "Sep 1–7, 2026",
@@ -97,6 +100,7 @@ export const tripMeta: TripMeta = {
     homeSymbol: "₱",
     destSymbol: "¥",
     defaultConvertAmount: 1000,
+    plannedBudgetJPY: 150000,
   },
 };
 
@@ -109,6 +113,8 @@ export const itineraryDays: ItineraryDay[] = [
     title: "Arrival & Asakusa",
     area: "Narita → Kaminarimon",
     icon: "⛩️",
+    image:
+      "https://images.unsplash.com/photo-1583084332453-83802d149087?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Narita → Asakusa Station · Keisei Access Express (~60–80 min direct, ¥1,300–1,350), then short walk to hotel",
     sunPlan: [
@@ -186,6 +192,8 @@ export const itineraryDays: ItineraryDay[] = [
     title: "Tokyo Disneyland",
     area: "Disney Resort (Maihama)",
     icon: "🏰",
+    image:
+      "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Asakusa → Maihama: Ginza Line to Kanda → JR to Tokyo → JR Keiyo Line (~50–55 min total, allow 10 min inside Tokyo Station)",
     sunPlan: [
@@ -263,6 +271,8 @@ export const itineraryDays: ItineraryDay[] = [
     title: "Warner Bros. Studio Tour & Hotel Bath",
     area: "Asakusa → Toshimaen",
     icon: "🪄",
+    image:
+      "https://images.unsplash.com/photo-1551269901-5c5e14c25df7?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Eat lunch before leaving · Asakusa/Kuramae to Toshimaen on Toei Oedo Line direct (~55 min) · allow 60–75 min door-to-door",
     sunPlan: [
@@ -354,6 +364,8 @@ export const itineraryDays: ItineraryDay[] = [
     title: "Tokyo DisneySea",
     area: "Disney Resort (Maihama)",
     icon: "🌊",
+    image:
+      "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Hotel → Maihama → Disney Resort Line monorail to Tokyo DisneySea Station · dedicate full day to the park",
     sunPlan: [
@@ -438,6 +450,8 @@ export const itineraryDays: ItineraryDay[] = [
     title: "Shibuya & Harajuku",
     area: "West Tokyo",
     icon: "🚦",
+    image:
+      "https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Asakusa → Shibuya: Direct Tokyo Metro Ginza Line (~35–40 min, 0 transfers, ¥320) · exit at Hachiko Exit",
     sunPlan: [
@@ -515,6 +529,8 @@ export const itineraryDays: ItineraryDay[] = [
     title: "Akihabara Electric Town",
     area: "Electric Town & Anime Hub",
     icon: "🕹️",
+    image:
+      "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Asakusa → Akihabara: Tsukuba Express direct (~15 min, ¥150) · exit at Electric Town Exit",
     sunPlan: [
@@ -585,6 +601,8 @@ export const itineraryDays: ItineraryDay[] = [
     title: "Departure & Narita Airport",
     area: "Asakusa → Narita Airport",
     icon: "🛫",
+    image:
+      "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Asakusa Station → Narita Airport (NRT): Keisei Access Express direct (~55–80 min, ¥1,300–1,350) · 0 transfers",
     sunPlan: [
@@ -656,12 +674,324 @@ export const itineraryDays: ItineraryDay[] = [
   },
 ];
 
+export const placeGuides: PlaceGuide[] = [
+  {
+    id: "asakusa-sensoji",
+    name: "Sensō-ji Temple & Asakusa",
+    japaneseName: "浅草寺・雷門",
+    district: "Asakusa, Taito City",
+    tagline: "Tokyo's oldest temple, giant red lanterns, and historic market stalls.",
+    image:
+      "https://images.unsplash.com/photo-1583084332453-83802d149087?auto=format&fit=crop&w=1200&q=80",
+    recommendedDuration: "2 to 3 hours",
+    whatYoullSee: [
+      "Kaminarimon (Thunder Gate) with iconic 700kg red chochin lantern",
+      "Nakamise-dori: 250-meter bustling historic craft and snack shopping street",
+      "Sensō-ji Main Hall (Kannondo) and 5-Story Pagoda",
+      "Sumida River promenade with direct views of Tokyo Skytree & Asahi Flame",
+    ],
+    suggestedSequence: [
+      "1. Enter through Kaminarimon Gate and take photos under the giant red lantern",
+      "2. Stroll along Nakamise-dori sampling fresh ningyo-yaki and melon pan",
+      "3. Purify at the dragon water chozuya pavilion and wave incense smoke for good fortune",
+      "4. Draw an omikuji fortune (¥100 coin) inside the Main Hall",
+      "5. Walk 5 min to Azumabashi bridge for golden hour Skytree views",
+    ],
+    mustDo: [
+      "Draw an Omikuji fortune at the temple hall",
+      "Eat freshly fried Asakusa Menchi croquettes on the side alley",
+      "See the temple illuminated in the evening (free of daytime crowds)",
+    ],
+    optionalOrSkippable: [
+      "Asakusa Hanayashiki amusement park (skippable unless with very small toddlers)",
+      "Rickshaw rides (fun but pricey: ~¥4,000–9,000)",
+    ],
+    expectedCost: "Free entry to temple grounds · ¥100 for Omikuji · ¥300–800 for street snacks",
+    foodNearby: "Asakusa Menchi, Kagetsudo Melon Pan, Daikokuya Tempura, Sometaro Okonomiyaki",
+    facilities: {
+      toilets: "Clean public restrooms at Asakusa Culture Tourist Center (opposite Kaminarimon) and behind temple hall.",
+      lockers: "Coin lockers inside Asakusa Station (Toei & Metro lines) and Tourist Center.",
+      accessibility: "Flat stone walkways throughout Nakamise; ramp access to Main Hall elevator.",
+    },
+    weatherSuitability: {
+      sunAdvice: "Visit in late afternoon (after 4:00 PM) when pagoda lighting turns golden and direct sun softens.",
+      rainAdvice: "Nakamise arcade is completely roofed. If downpours hit, cross river to Tokyo Solamachi indoor mall.",
+    },
+    transitFromBase: {
+      route: "Direct 2 to 4 minute neighborhood walk from Hotel Plus Hostel Asakusa 1.",
+      time: "2–4 min walk",
+      fare: "Free (Walking)",
+      exit: "Kaminarimon Exit",
+    },
+    nextDestinationHint: "Tokyo Disneyland on Day 2 or Tokyo Skytree via short walk.",
+  },
+  {
+    id: "tokyo-disneyland",
+    name: "Tokyo Disneyland",
+    japaneseName: "東京ディズニーランド",
+    district: "Maihama, Urayasu",
+    tagline: "The world's most charming Disney park, featuring exclusive trackless marvels.",
+    image:
+      "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=1200&q=80",
+    recommendedDuration: "Full day (10 to 12 hours)",
+    whatYoullSee: [
+      "Enchanted Tale of Beauty and the Beast inside the colossal pink Beast's Castle",
+      "Pooh's Hunny Hunt — Tokyo's world-first trackless masterpiece",
+      "Cinderella Castle & World Bazaar Victorian covered glass canopy",
+      "Disney Harmony in Color daytime parade & Dreamlights illuminated night parade",
+    ],
+    suggestedSequence: [
+      "1. Arrive at gates by 7:15–7:30 AM for rope drop",
+      "2. Head straight to Beauty and the Beast in Fantasyland, then Pooh's Hunny Hunt",
+      "3. Knock out Monsters, Inc. Ride & Go Seek! in Tomorrowland before 10:00 AM",
+      "4. Big Thunder Mountain & Splash Mountain in Westernland/Critter Country",
+      "5. Air-conditioned dark rides (Haunted Mansion, Pirates) during midday heat",
+      "6. Secure parade spot for Harmony in Color and evening castle fireworks",
+    ],
+    mustDo: [
+      "Beauty and the Beast (Tier 1)",
+      "Pooh's Hunny Hunt (Tier 1 Tokyo Exclusive)",
+      "Monsters, Inc. Ride & Go Seek! (Tier 1)",
+      "Electrical Parade Dreamlights (World's best Disney night parade)",
+    ],
+    optionalOrSkippable: [
+      "Snow White / Pinocchio (older dark rides with quick turns)",
+      "Peter Pan's Flight (skip if line exceeds 60 min; ride in DisneySea instead)",
+    ],
+    expectedCost: "Park tickets booked & paid · ¥2,000 for optional Premier Access per headliner",
+    foodNearby: "Hungry Bear Restaurant (curry), Queen of Hearts Banquet Hall, Sweetheart Cafe",
+    facilities: {
+      toilets: "Restrooms in every land; largest near Tomorrowland Terrace and Fantasyland.",
+      lockers: "Large baggage coin lockers outside Maihama Station and near front park gates.",
+    },
+    weatherSuitability: {
+      sunAdvice: "Westernland and Critter Country have limited shade. Duck into Country Bear Theater for A/C rest.",
+      rainAdvice: "Most headliner queues (Beauty, Pooh, Monsters, Mansion) are 100% indoors. Wear a light poncho.",
+    },
+    transitFromBase: {
+      route: "Asakusa (Ginza Line) → Kanda (JR Line) → Tokyo Station → JR Keiyo Line → Maihama Station.",
+      time: "50–55 min",
+      fare: "≈ ¥410–470",
+      exit: "Maihama Station South Exit (5-min walk to gate)",
+    },
+    nextDestinationHint: "Rest Day / Harry Potter Warner Bros Studio Tour on Day 3.",
+  },
+  {
+    id: "warner-bros-studio",
+    name: "Warner Bros. Studio Tour Tokyo – The Making of Harry Potter",
+    japaneseName: "ワーナー ブラザース スタジオツアー東京",
+    district: "Toshimaen, Nerima City",
+    tagline: "The largest indoor Harry Potter attraction in the world.",
+    image:
+      "https://images.unsplash.com/photo-1551269901-5c5e14c25df7?auto=format&fit=crop&w=1200&q=80",
+    recommendedDuration: "3.5 to 4.5 hours",
+    whatYoullSee: [
+      "Authentic Great Hall set with house tables and floating candles",
+      "Platform 9 ¾ and full-scale Hogwarts Express steam train",
+      "Tokyo-Exclusive Ministry of Magic set (over 30 feet tall)",
+      "Diagon Alley with Ollivanders, Weasleys' Wizard Wheezes, and Gringotts",
+      "World's largest Butterbeer Bar and Backlot Studio sets",
+    ],
+    suggestedSequence: [
+      "1. Enjoy a slow, restful morning in Asakusa and eat lunch before departure",
+      "2. Arrive at Toshimaen Station around 12:30 PM for 1:00 PM ticket entry",
+      "3. Walk through Great Hall, Gryffindor Common Room, and Dumbledore's Office",
+      "4. Mid-tour Butterbeer & themed snack break at Backlot Cafe",
+      "5. Step through Diagon Alley and Tokyo Ministry of Magic Floo Network",
+      "6. Return directly to Asakusa for hotel public bath & sauna wind-down",
+    ],
+    mustDo: [
+      "Step onto the interactive Ministry of Magic Floo Network photo op",
+      "Drink draft Butterbeer (you get to keep the commemorative souvenir tankard)",
+      "Walk the cobblestones of Diagon Alley under changing twilight lighting",
+    ],
+    optionalOrSkippable: [
+      "Digital broomstick green-screen experience (long queues, paid photo packages)",
+      "Optional Ikebukuro detour afterward (skip to prioritize hotel sauna rest)",
+    ],
+    expectedCost: "Timed tickets booked & paid · ¥1,100 for Butterbeer with souvenir tankard",
+    foodNearby: "Studio Tour Food Hall & Backlot Cafe; traditional dinner back in Asakusa",
+    facilities: {
+      toilets: "Spacious modern restrooms at entrance lobby and mid-tour Backlot area.",
+      lockers: "Free digital coat and bag cloakroom inside entrance lobby.",
+    },
+    weatherSuitability: {
+      sunAdvice: "100% air-conditioned indoor experience with only a brief 10-minute outdoor Backlot section.",
+      rainAdvice: "Completely weatherproof. 2-minute covered walk from Toshimaen Station exit.",
+    },
+    transitFromBase: {
+      route: "Kuramae Station → Toei Oedo Line direct (bound for Hikarigaoka) → Toshimaen Station.",
+      time: "55–60 min (0 transfers)",
+      fare: "≈ ¥325–330 (IC Card)",
+      exit: "Toshimaen Station Main Exit (2-min walk)",
+    },
+    nextDestinationHint: "Hotel Plus Hostel Sento Bath tonight; DisneySea full day tomorrow.",
+  },
+  {
+    id: "tokyo-disneysea",
+    name: "Tokyo DisneySea & Fantasy Springs",
+    japaneseName: "東京ディズニーシー・ファンタジースプリングス",
+    district: "Maihama, Urayasu",
+    tagline: "Widely acclaimed as the most magnificent theme park ever built.",
+    image:
+      "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1200&q=80",
+    recommendedDuration: "Full day (11 to 13 hours)",
+    whatYoullSee: [
+      "Fantasy Springs: Anna & Elsa's Frozen Journey, Peter Pan's Never Land, Rapunzel's Lantern Festival",
+      "Mount Prometheus active volcano erupting over Mediterranean Harbor",
+      "Journey to the Center of the Earth & Indiana Jones Adventure",
+      "Tower of Terror in American Waterfront & Sindbad's Storybook Voyage",
+      "Believe! Sea of Dreams nighttime harbor spectacular",
+    ],
+    suggestedSequence: [
+      "1. Arrive at gates early; open app immediately to secure Frozen Journey Premier Access",
+      "2. Rope drop straight to Fantasy Springs (Peter Pan / Frozen)",
+      "3. Cross to Mysterious Island for Journey to the Center of the Earth",
+      "4. Lost River Delta for Indiana Jones Adventure (use Single Rider)",
+      "5. Relaxing afternoon at Arabian Coast & Triton's Kingdom in Mermaid Lagoon",
+      "6. Sunset Venetian Gondola ride through the canals",
+      "7. Mediterranean Harbor viewing for Believe! Sea of Dreams",
+    ],
+    mustDo: [
+      "Anna and Elsa's Frozen Journey (Top park headliner)",
+      "Journey to the Center of the Earth (Flagship thrill dark ride)",
+      "Soaring: Fantastic Flight (Scenic hang-glider simulator)",
+      "Believe! Sea of Dreams (Harbor night show)",
+    ],
+    optionalOrSkippable: [
+      "Raging Spirits 360° coaster (short, rough ride with long waits)",
+      "Mermaid Lagoon kiddie spinners (skip if no toddlers in group)",
+    ],
+    expectedCost: "Park tickets booked & paid · ¥2,000 Premier Access for Frozen / Soaring",
+    foodNearby: "Casbah Food Court (curry), Magellan's, Zambini Brothers, The Snuggly Duckling",
+    facilities: {
+      toilets: "Restrooms in every port; large facilities in American Waterfront and Mermaid Lagoon.",
+      lockers: "Coin lockers at park entrance and Tokyo DisneySea Monorail station.",
+    },
+    weatherSuitability: {
+      sunAdvice: "Midday sun reflects off harbor waters. Use Mermaid Lagoon's indoor caves for cooling down.",
+      rainAdvice: "Mermaid Lagoon is Tokyo Disney's finest all-indoor realm with rides, shops, and restaurants.",
+    },
+    transitFromBase: {
+      route: "Hotel → Asakusa (Ginza Line) → Kanda (JR) → Tokyo → JR Keiyo Line to Maihama → Disney Resort Line monorail.",
+      time: "55–60 min",
+      fare: "≈ ¥470 rail + ¥260 monorail",
+      exit: "Tokyo DisneySea Station (Monorail)",
+    },
+    nextDestinationHint: "Shibuya & Harajuku on Day 5.",
+  },
+  {
+    id: "shibuya-harajuku",
+    name: "Shibuya, Harajuku & Meiji Jingu",
+    japaneseName: "渋谷・原宿・明治神宮",
+    district: "Shibuya City",
+    tagline: "From serene ancient shrine forests to the world's most energetic intersection.",
+    image:
+      "https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=1200&q=80",
+    recommendedDuration: "5 to 6 hours",
+    whatYoullSee: [
+      "Meiji Jingu: Towering cypress torii gate and 170-acre forested sacred path",
+      "Takeshita Street: Colorful Harajuku fashion, crepe shops, and kawaii boutiques",
+      "Shibuya Scramble Crossing & bronze Hachiko memorial statue",
+      "Shibuya PARCO: Official Pokémon Center, Nintendo Tokyo, and CAPCOM stores",
+      "Mega Don Quijote Shibuya: 8 floors of tax-free cosmetics, snacks, and gadgets",
+    ],
+    suggestedSequence: [
+      "1. Take direct Ginza Line from Asakusa to Shibuya, then short walk to Meiji Jingu (start early by 9:00 AM)",
+      "2. Walk through shaded forest approach to Meiji Jingu Shrine main courtyard",
+      "3. Window shop down Takeshita Street and grab a fresh Harajuku crepe",
+      "4. Walk down Cat Street / Meiji-dori to Shibuya Scramble Crossing",
+      "5. Cross the Scramble and view the intersection from Starbucks 2F window",
+      "6. Air-conditioned afternoon shopping at PARCO and Mega Donki",
+    ],
+    mustDo: [
+      "Experience Meiji Jingu forest in the calm morning hours",
+      "Cross Shibuya Scramble during a green light rush",
+      "Explore Pokémon Center Shibuya with life-sized animatronic Mewtwo",
+    ],
+    optionalOrSkippable: [
+      "Takeshita Street crowded midday (walk through briskly or use parallel Meiji-dori)",
+      "Paid Shibuya Sky observation deck (free view from Starbucks / Mag's Park works well)",
+    ],
+    expectedCost: "Free shrine entrance · ¥600 for crepes · ¥1,000–1,500 for ramen lunch",
+    foodNearby: "Marion Crepes Harajuku, Ichiran Ramen Shibuya, Uogashi Nihon-Ichi standing sushi",
+    facilities: {
+      toilets: "Restrooms at Meiji Jingu entrance, Harajuku Station, and Shibuya PARCO/Hikarie.",
+      lockers: "Coin lockers inside Shibuya Station and JR Harajuku Station.",
+    },
+    weatherSuitability: {
+      sunAdvice: "Front-load Meiji Jingu before 11:00 AM for tree shade. Spend midday inside PARCO & Hikarie malls.",
+      rainAdvice: "Shibuya Station is connected underground to Mark City, Hikarie, and ShinQs food halls without stepping outside.",
+    },
+    transitFromBase: {
+      route: "Asakusa Station → Tokyo Metro Ginza Line direct to Shibuya terminal station.",
+      time: "35–40 min (0 transfers)",
+      fare: "¥320 (¥317 IC Card)",
+      exit: "Hachiko Exit (ハチ公口)",
+    },
+    nextDestinationHint: "Akihabara Electric Town on Day 6.",
+  },
+  {
+    id: "akihabara-electric-town",
+    name: "Akihabara Electric Town",
+    japaneseName: "秋葉原電気街",
+    district: "Chiyoda City",
+    tagline: "The world's capital of anime, gaming, electronics, and retro arcades.",
+    image:
+      "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=1200&q=80",
+    recommendedDuration: "4 to 5 hours",
+    whatYoullSee: [
+      "Radio Kaikan: 10 vertical floors of figures, cards, and hobby collectibles",
+      "Animate Akihabara: Japan's premier multi-story anime and manga department store",
+      "Yodobashi Camera Multimedia Akiba: 9 floors of tech, cameras, and duty-free electronics",
+      "GiGO & Taito Station multi-floor claw machine and music rhythm arcades",
+      "Kanda Myojin: 1,300-year-old shrine offering IT and tech blessing talismans",
+    ],
+    suggestedSequence: [
+      "1. Tsukuba Express direct from Asakusa to Akihabara (15 min ride)",
+      "2. Start with calm morning visit to Kanda Myojin Shrine (5 min walk from station)",
+      "3. Explore Radio Kaikan right outside the Electric Town Exit",
+      "4. Walk down Chuo-dori main strip (pedestrian-only on Sunday afternoons)",
+      "5. Play claw machines and Taiko Drum arcade games at GiGO",
+      "6. Complete tax-free electronics and souvenir shopping inside Yodobashi Akiba",
+    ],
+    mustDo: [
+      "Browse the vertical figure showcases inside Radio Kaikan",
+      "Experience Sunday pedestrian paradise (Hokoten) on Chuo-dori",
+      "Try high-speed train conveyor sushi at Uobei Akihabara",
+    ],
+    optionalOrSkippable: [
+      "Maid cafes (novelty experience, but pricier cover charges: ~¥1,500–3,000/person)",
+      "Deep retro component alleys (unless specifically looking for soldering parts)",
+    ],
+    expectedCost: "Free to browse · ¥100–300 per arcade play · ¥1,000–1,500 for conveyor sushi",
+    foodNearby: "Uobei Conveyor Sushi, Radio Kaikan Gyoza, Yodobashi 8F Restaurant Floor",
+    facilities: {
+      toilets: "Clean restrooms on every floor of Yodobashi Camera and inside Radio Kaikan.",
+      lockers: "Hundreds of coin lockers on JR Akihabara Station concourse.",
+    },
+    weatherSuitability: {
+      sunAdvice: "Sunday pedestrian zone has open sun; use air-conditioned megastores for cooling intervals.",
+      rainAdvice: "Radio Kaikan is directly attached to the station exit; Yodobashi is 1 minute covered walk.",
+    },
+    transitFromBase: {
+      route: "Asakusa (Tsukuba Express) → Akihabara Station direct (2 stops).",
+      time: "15 min (0 transfers)",
+      fare: "¥150 (IC Card)",
+      exit: "Electric Town Exit (電気街口)",
+    },
+    nextDestinationHint: "Final packing and Narita Airport departure on Day 7.",
+  },
+];
+
 export const disneyGuides: DisneyParkGuide[] = [
   {
     parkId: "disneyland",
     parkName: "Tokyo Disneyland",
     icon: "🏰",
     dateStr: "Wed, Sep 2, 2026",
+    image:
+      "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=1200&q=80",
     ropeDropStrategy:
       "Arrive at security gates 45–60 min before official open. Rope drop straight to Fantasyland for Enchanted Tale of Beauty and the Beast, followed immediately by Pooh's Hunny Hunt.",
     lands: [
@@ -823,6 +1153,8 @@ export const disneyGuides: DisneyParkGuide[] = [
     parkName: "Tokyo DisneySea",
     icon: "🌊",
     dateStr: "Fri, Sep 4, 2026",
+    image:
+      "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1200&q=80",
     ropeDropStrategy:
       "Arrive early. Open the official Tokyo Disney Resort app as soon as through the turnstile and purchase Premier Access for Anna and Elsa's Frozen Journey, then head to Peter Pan or Journey to the Center of the Earth.",
     lands: [
@@ -1396,7 +1728,7 @@ export const etiquetteRules: EtiquetteRule[] = [
     category: "trains",
     type: "do",
     title: "Set phone to 'Manner Mode' (silent) on all trains",
-    desc: "Keep phone on vibrate and avoid talking on the phone. Speak in quiet whispers with family.",
+    desc: "Keep phone on vibrate and avoid talking on the phone. Speak in quiet whispers with companions.",
   },
   {
     category: "trains",
@@ -1465,6 +1797,8 @@ export const souvenirDistricts: SouvenirDistrict[] = [
     district: "Asakusa (Nakamise & Solamachi)",
     dayRef: "Day 1",
     icon: "⛩️",
+    image:
+      "https://images.unsplash.com/photo-1583084332453-83802d149087?auto=format&fit=crop&w=800&q=80",
     shops: [
       {
         name: "Nakamise Shopping Street",
@@ -1482,6 +1816,8 @@ export const souvenirDistricts: SouvenirDistrict[] = [
     district: "Tokyo Disney Resort",
     dayRef: "Days 2 & 4",
     icon: "🏰",
+    image:
+      "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=800&q=80",
     shops: [
       {
         name: "World Bazaar & Port Shops",
@@ -1494,11 +1830,13 @@ export const souvenirDistricts: SouvenirDistrict[] = [
     district: "Shibuya & Harajuku",
     dayRef: "Day 5",
     icon: "🛍️",
+    image:
+      "https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=800&q=80",
     shops: [
       {
         name: "Mega Don Quijote Shibuya",
         desc: "Gigantic multi-floor discount superstore open late with instant tax-free counter.",
-        whatToBuy: "Japanese skincare, match snack boxes, quirky souvenirs, KitKat regional flavors, beauty gadgets.",
+        whatToBuy: "Japanese skincare, matcha snack boxes, quirky souvenirs, KitKat regional flavors, beauty gadgets.",
       },
       {
         name: "Pokémon Center Shibuya (PARCO)",
@@ -1516,6 +1854,8 @@ export const souvenirDistricts: SouvenirDistrict[] = [
     district: "Akihabara Electric Town",
     dayRef: "Day 6",
     icon: "🕹️",
+    image:
+      "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=800&q=80",
     shops: [
       {
         name: "Radio Kaikan & Animate",
@@ -1533,6 +1873,8 @@ export const souvenirDistricts: SouvenirDistrict[] = [
     district: "Narita Airport Duty-Free",
     dayRef: "Day 7",
     icon: "🍫",
+    image:
+      "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=800&q=80",
     shops: [
       {
         name: "Fa-So-La & Airport Omiyage Shops",

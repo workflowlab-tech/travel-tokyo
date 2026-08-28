@@ -58,7 +58,7 @@ export const ItineraryView: React.FC<ItineraryViewProps> = ({
         </div>
       </div>
 
-      {/* Day Selector Tabs */}
+      {/* Day Selector Tabs with Thumbnails */}
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
         {itineraryDays.map((day, idx) => {
           const isActive = selectedDayIndex === idx;
@@ -66,14 +66,17 @@ export const ItineraryView: React.FC<ItineraryViewProps> = ({
             <button
               key={day.dayNumber}
               onClick={() => setSelectedDayIndex(idx)}
-              className={`flex flex-shrink-0 flex-col items-center justify-center rounded-xl px-4 py-2.5 transition border ${
+              className={`group relative flex flex-shrink-0 flex-col items-center justify-center overflow-hidden rounded-2xl px-4 py-3 transition border text-left ${
                 isActive
-                  ? "border-[#1F3A5F] bg-[#1F3A5F] text-white shadow-md -translate-y-0.5"
+                  ? "border-[#1F3A5F] bg-[#1F3A5F] text-white shadow-lg -translate-y-0.5 ring-2 ring-[#FF5F93]/40"
                   : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50"
               }`}
             >
-              <b className="font-serif text-lg font-bold leading-none">{day.dayNumber}</b>
-              <span className="mt-1 text-[10px] font-bold tracking-wider uppercase opacity-80">
+              <div className="flex items-center gap-2">
+                <span className="text-base">{day.icon}</span>
+                <b className="font-serif text-lg font-black leading-none">{day.dayNumber}</b>
+              </div>
+              <span className="mt-1.5 text-[10px] font-bold tracking-wider uppercase opacity-80">
                 {day.date.split(" · ")[0]}
               </span>
             </button>
@@ -81,51 +84,58 @@ export const ItineraryView: React.FC<ItineraryViewProps> = ({
         })}
       </div>
 
-      {/* Main Day Card */}
+      {/* Main Day Card with Rich Real Destination Photography */}
       <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-xl grid grid-cols-1 lg:grid-cols-12">
-        {/* Left Poster Banner */}
-        <div className="relative bg-gradient-to-br from-[#1F3A5F] via-[#2A4870] to-[#132540] p-6 text-white lg:col-span-4 flex flex-col justify-between overflow-hidden">
-          <div className="pointer-events-none absolute -right-4 -top-6 font-serif text-9xl font-black text-white/5 select-none">
-            {currentDay.dayNumber}
+        {/* Left Poster Banner with Real Destination Photo Background */}
+        <div className="relative min-h-[280px] lg:min-h-[480px] lg:col-span-5 flex flex-col justify-between overflow-hidden p-6 sm:p-8 text-white">
+          {/* Real Destination Photography */}
+          <div className="absolute inset-0 z-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={currentDay.image}
+              alt={currentDay.title}
+              className="h-full w-full object-cover object-center filter brightness-[0.75] transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#132540] via-[#132540]/60 to-[#132540]/30" />
           </div>
 
-          <div>
+          <div className="relative z-10">
             <div className="flex items-center justify-between">
-              <span className="rounded-full bg-white/10 px-3 py-1 font-mono text-xs font-bold text-[#FFD66B] backdrop-blur-sm">
+              <span className="rounded-full bg-white/20 px-3.5 py-1 font-mono text-xs font-bold text-[#FFD66B] backdrop-blur-md border border-white/20">
                 DAY {currentDay.dayNumber} · {currentDay.date}
               </span>
-              <span className="text-3xl">{currentDay.icon}</span>
+              <span className="text-3xl drop-shadow">{currentDay.icon}</span>
             </div>
 
-            <div className="mt-8">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#FF86A8]">
+            <div className="mt-8 sm:mt-12">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#FF86A8] drop-shadow">
                 {currentDay.area}
               </span>
-              <h3 className="font-serif text-2xl font-bold leading-tight text-white sm:text-3xl mt-1">
+              <h3 className="font-serif text-2xl font-extrabold leading-tight text-white sm:text-4xl mt-1 drop-shadow-md">
                 {currentDay.title}
               </h3>
             </div>
           </div>
 
-          <div className="mt-8 pt-4 border-t border-white/10">
-            <div className="flex items-center gap-1.5 text-xs text-stone-300">
+          <div className="relative z-10 mt-8 pt-4 border-t border-white/20">
+            <div className="flex items-center gap-2 text-xs font-medium text-stone-200 drop-shadow">
               <CheckCircle2 className="h-4 w-4 text-[#FFD66B]" />
               <span>
-                {weatherMode === "sun" ? "Good Weather Strategy active" : "Rain & Typhoon Plan active"}
+                {weatherMode === "sun" ? "☀️ Good Weather Strategy Active" : "☔ Rain Plan Active"}
               </span>
             </div>
           </div>
         </div>
 
         {/* Right Content & Timeline */}
-        <div className="p-6 sm:p-8 lg:col-span-8 space-y-6">
+        <div className="p-6 sm:p-8 lg:col-span-7 space-y-6">
           {/* Transit Route Note */}
-          <div className="rounded-xl border border-sky-200 bg-sky-50/70 p-4">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-800">
+          <div className="rounded-2xl border border-sky-200 bg-sky-50/80 p-4 shadow-sm">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-900">
               <Train className="h-4 w-4 text-sky-600" />
               <span>Transit & Route Guidance</span>
             </div>
-            <p className="mt-1 text-xs text-sky-950 leading-relaxed font-medium">
+            <p className="mt-1.5 text-xs text-sky-950 leading-relaxed font-medium">
               {currentDay.transitNote}
             </p>
           </div>
@@ -149,7 +159,7 @@ export const ItineraryView: React.FC<ItineraryViewProps> = ({
                         {event.badges.map((badge, bIdx) => (
                           <span
                             key={bIdx}
-                            className="rounded bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-700"
+                            className="rounded-md bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-700 border border-stone-200/60"
                           >
                             {badge}
                           </span>
@@ -169,12 +179,12 @@ export const ItineraryView: React.FC<ItineraryViewProps> = ({
           </div>
 
           {/* Food Quest Section */}
-          <div className="rounded-xl border border-amber-200 bg-[#FBF0DC]/60 p-4">
+          <div className="rounded-2xl border border-amber-200 bg-[#FBF0DC]/70 p-4 shadow-sm">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#C1802E]">
               <Utensils className="h-4 w-4 text-[#C1502E]" />
               <span>🍙 Food Quest & Recommended Eats</span>
             </div>
-            <p className="mt-1 text-xs text-stone-800 leading-relaxed font-medium">
+            <p className="mt-1.5 text-xs text-stone-800 leading-relaxed font-medium">
               {currentDay.foodQuest}
             </p>
           </div>

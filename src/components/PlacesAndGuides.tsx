@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import {
+  placeGuides,
   disneyGuides,
   disneyRestaurants,
   transportRoutes,
@@ -9,21 +10,31 @@ import {
   souvenirDistricts,
 } from "../data/trip-config";
 import {
+  MapPin,
   RollerCoaster,
   UtensilsCrossed,
   TrainFront,
   Sparkles,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
   ShoppingBag,
-  ExternalLink,
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  Info,
+  DollarSign,
+  Utensils,
+  Footprints,
+  ShieldAlert,
+  ArrowRight,
 } from "lucide-react";
 
 export const PlacesAndGuides: React.FC = () => {
-  const [guideTab, setGuideTab] = useState<"rides" | "dining" | "transport" | "etiquette" | "shopping">(
-    "rides"
-  );
+  const [guideTab, setGuideTab] = useState<
+    "destinations" | "rides" | "dining" | "transport" | "etiquette" | "shopping"
+  >("destinations");
+
+  const [expandedPlaceId, setExpandedPlaceId] = useState<string | null>("asakusa-sensoji");
   const [selectedPark, setSelectedPark] = useState<"disneyland" | "disneysea">("disneyland");
   const [diningPark, setDiningPark] = useState<"all" | "disneyland" | "disneysea">("all");
 
@@ -37,10 +48,10 @@ export const PlacesAndGuides: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Guides Section Header */}
+      {/* Section Header */}
       <div className="border-b border-stone-200 pb-4">
         <span className="text-xs font-black uppercase tracking-widest text-[#FF5F93]">
-          Trip Knowledge & Destination Guides
+          Curated Destination & Travel Guides
         </span>
         <h2 className="font-serif text-2xl font-bold text-stone-900 sm:text-3xl">
           Everything you need on the ground.
@@ -50,10 +61,22 @@ export const PlacesAndGuides: React.FC = () => {
       {/* Guide Category Tabs */}
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
         <button
+          onClick={() => setGuideTab("destinations")}
+          className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition flex-shrink-0 border ${
+            guideTab === "destinations"
+              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md ring-2 ring-[#FF5F93]/30"
+              : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+          }`}
+        >
+          <MapPin className="h-4 w-4 text-[#FFD66B]" />
+          <span>Destination Guides ({placeGuides.length})</span>
+        </button>
+
+        <button
           onClick={() => setGuideTab("rides")}
           className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition flex-shrink-0 border ${
             guideTab === "rides"
-              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md"
+              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md ring-2 ring-[#FF5F93]/30"
               : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
           }`}
         >
@@ -65,7 +88,7 @@ export const PlacesAndGuides: React.FC = () => {
           onClick={() => setGuideTab("dining")}
           className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition flex-shrink-0 border ${
             guideTab === "dining"
-              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md"
+              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md ring-2 ring-[#FF5F93]/30"
               : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
           }`}
         >
@@ -77,7 +100,7 @@ export const PlacesAndGuides: React.FC = () => {
           onClick={() => setGuideTab("transport")}
           className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition flex-shrink-0 border ${
             guideTab === "transport"
-              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md"
+              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md ring-2 ring-[#FF5F93]/30"
               : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
           }`}
         >
@@ -89,7 +112,7 @@ export const PlacesAndGuides: React.FC = () => {
           onClick={() => setGuideTab("etiquette")}
           className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition flex-shrink-0 border ${
             guideTab === "etiquette"
-              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md"
+              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md ring-2 ring-[#FF5F93]/30"
               : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
           }`}
         >
@@ -101,7 +124,7 @@ export const PlacesAndGuides: React.FC = () => {
           onClick={() => setGuideTab("shopping")}
           className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition flex-shrink-0 border ${
             guideTab === "shopping"
-              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md"
+              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md ring-2 ring-[#FF5F93]/30"
               : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
           }`}
         >
@@ -110,7 +133,227 @@ export const PlacesAndGuides: React.FC = () => {
         </button>
       </div>
 
-      {/* 1. DISNEY RIDE GUIDE */}
+      {/* 1. COMPREHENSIVE DESTINATION GUIDES WITH REAL PHOTOGRAPHY */}
+      {guideTab === "destinations" && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-6">
+            {placeGuides.map((place) => {
+              const isExpanded = expandedPlaceId === place.id;
+              return (
+                <div
+                  key={place.id}
+                  className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-lg transition-all"
+                >
+                  {/* Destination Card Header with Real Photo Banner */}
+                  <div className="relative min-h-[220px] sm:min-h-[260px] flex flex-col justify-end p-6 sm:p-8 text-white overflow-hidden">
+                    {/* Real Destination Photo */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={place.image}
+                      alt={place.name}
+                      className="absolute inset-0 h-full w-full object-cover object-center filter brightness-[0.75] transition-transform duration-700 hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#132540] via-[#132540]/60 to-transparent" />
+
+                    <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-full bg-[#FF5F93] px-3 py-0.5 font-mono text-[11px] font-bold text-white shadow-sm">
+                            {place.japaneseName}
+                          </span>
+                          <span className="rounded-full bg-white/20 px-3 py-0.5 text-[11px] font-semibold text-stone-200 backdrop-blur-md">
+                            {place.district}
+                          </span>
+                        </div>
+                        <h3 className="font-serif text-2xl sm:text-3xl font-extrabold text-white mt-1.5 drop-shadow-md">
+                          {place.name}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-stone-200 font-medium mt-1 max-w-xl drop-shadow">
+                          {place.tagline}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 self-start sm:self-auto">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-white/25 px-3 py-1 font-mono text-xs font-bold text-[#FFD66B] backdrop-blur-md border border-white/20">
+                          <Clock className="h-3.5 w-3.5" />
+                          {place.recommendedDuration}
+                        </span>
+                        <button
+                          onClick={() => setExpandedPlaceId(isExpanded ? null : place.id)}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#1F3A5F] shadow-md hover:bg-stone-100 transition"
+                        >
+                          <span>{isExpanded ? "Collapse Guide" : "Open Guide"}</span>
+                          {isExpanded ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Expandable Guide Details */}
+                  {isExpanded && (
+                    <div className="p-6 sm:p-8 space-y-6 border-t border-stone-200 bg-[#FBF8F0]/40">
+                      {/* Grid: What You'll See + Suggested Sequence */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* What You'll See */}
+                        <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm space-y-3">
+                          <h4 className="font-serif text-base font-bold text-[#1F3A5F] flex items-center gap-2">
+                            <span>👀</span> What You&apos;ll See & Experience
+                          </h4>
+                          <ul className="space-y-2 text-xs text-stone-700 leading-relaxed font-medium">
+                            {place.whatYoullSee.map((item, idx) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <span className="text-[#FF5F93] font-bold">•</span>
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Suggested Sequence */}
+                        <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm space-y-3">
+                          <h4 className="font-serif text-base font-bold text-[#1F3A5F] flex items-center gap-2">
+                            <Footprints className="h-4 w-4 text-[#C1802E]" /> Suggested Sequence
+                          </h4>
+                          <div className="space-y-2 text-xs text-stone-700 leading-relaxed font-medium">
+                            {place.suggestedSequence.map((step, idx) => (
+                              <div key={idx} className="flex items-start gap-2">
+                                <span className="font-mono font-bold text-[#C1802E]">{idx + 1}.</span>
+                                <span>{step.replace(/^[0-9]+\.\s*/, "")}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Must-Do vs Optional / Skippable */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Must-Do */}
+                        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 space-y-2">
+                          <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+                            <CheckCircle2 className="h-4 w-4 text-emerald-600" /> Must-Do Highlights
+                          </span>
+                          <ul className="space-y-1.5 text-xs text-emerald-950 font-medium">
+                            {place.mustDo.map((must, idx) => (
+                              <li key={idx} className="flex items-start gap-1.5">
+                                <span className="text-emerald-600 font-bold">✓</span>
+                                <span>{must}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Optional / Skippable */}
+                        <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 space-y-2">
+                          <span className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
+                            <Info className="h-4 w-4 text-amber-600" /> Optional / Skippable
+                          </span>
+                          <ul className="space-y-1.5 text-xs text-amber-950 font-medium">
+                            {place.optionalOrSkippable.map((opt, idx) => (
+                              <li key={idx} className="flex items-start gap-1.5">
+                                <span className="text-amber-600 font-bold">~</span>
+                                <span>{opt}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      {/* Practical Ground Specs: Cost, Food, Facilities, Weather, Transit */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Cost & Food */}
+                        <div className="rounded-2xl border border-stone-200 bg-white p-4 space-y-3 shadow-sm">
+                          <div>
+                            <span className="text-[11px] font-black uppercase tracking-wider text-stone-500 flex items-center gap-1">
+                              <DollarSign className="h-3.5 w-3.5 text-stone-700" /> Expected Cost
+                            </span>
+                            <p className="mt-1 text-xs text-stone-800 font-medium leading-relaxed">
+                              {place.expectedCost}
+                            </p>
+                          </div>
+                          <div className="pt-2 border-t border-stone-100">
+                            <span className="text-[11px] font-black uppercase tracking-wider text-stone-500 flex items-center gap-1">
+                              <Utensils className="h-3.5 w-3.5 text-[#C1502E]" /> Food Nearby
+                            </span>
+                            <p className="mt-1 text-xs text-stone-800 font-medium leading-relaxed">
+                              {place.foodNearby}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Facilities & Accessibility */}
+                        <div className="rounded-2xl border border-stone-200 bg-white p-4 space-y-2 shadow-sm text-xs">
+                          <span className="text-[11px] font-black uppercase tracking-wider text-stone-500">
+                            🚻 Facilities & Lockers
+                          </span>
+                          <p className="text-stone-700 font-medium">
+                            <b>Toilets:</b> {place.facilities.toilets}
+                          </p>
+                          <p className="text-stone-700 font-medium">
+                            <b>Lockers:</b> {place.facilities.lockers}
+                          </p>
+                          {place.facilities.accessibility && (
+                            <p className="text-stone-700 font-medium">
+                              <b>Access:</b> {place.facilities.accessibility}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Weather Suitability */}
+                        <div className="rounded-2xl border border-stone-200 bg-white p-4 space-y-2 shadow-sm text-xs">
+                          <span className="text-[11px] font-black uppercase tracking-wider text-stone-500">
+                            🌤️ Weather Suitability
+                          </span>
+                          <p className="text-stone-700 font-medium">
+                            <b>☀️ Sun:</b> {place.weatherSuitability.sunAdvice}
+                          </p>
+                          <p className="text-stone-700 font-medium">
+                            <b>☔ Rain:</b> {place.weatherSuitability.rainAdvice}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Transit From Base Hotel */}
+                      <div className="rounded-2xl border border-sky-200 bg-sky-50/80 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
+                        <div>
+                          <span className="font-bold text-sky-900 uppercase tracking-wider text-[11px]">
+                            🚆 Transit from Asakusa Base:
+                          </span>
+                          <p className="mt-0.5 text-sky-950 font-medium">
+                            {place.transitFromBase.route} (Exit: <b>{place.transitFromBase.exit}</b>)
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="rounded-md bg-white px-2.5 py-1 font-mono font-bold text-sky-900 border border-sky-200">
+                            {place.transitFromBase.time}
+                          </span>
+                          <span className="rounded-md bg-amber-100 px-2.5 py-1 font-mono font-bold text-amber-900 border border-amber-200">
+                            {place.transitFromBase.fare}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Next Destination Hint */}
+                      {place.nextDestinationHint && (
+                        <div className="text-right text-xs font-bold text-stone-500 flex items-center justify-end gap-1.5">
+                          <span>Next suggested stop:</span>
+                          <span className="text-[#FF5F93]">{place.nextDestinationHint}</span>
+                          <ArrowRight className="h-3.5 w-3.5 text-[#FF5F93]" />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 2. DISNEY RIDE GUIDE */}
       {guideTab === "rides" && (
         <div className="space-y-6">
           {/* Park Selector */}
@@ -240,10 +483,9 @@ export const PlacesAndGuides: React.FC = () => {
         </div>
       )}
 
-      {/* 2. DISNEY DINING GUIDE */}
+      {/* 3. DISNEY DINING GUIDE */}
       {guideTab === "dining" && (
         <div className="space-y-6">
-          {/* Park Filter */}
           <div className="flex items-center gap-2 rounded-2xl bg-stone-100 p-1.5 max-w-md border border-stone-200">
             <button
               onClick={() => setDiningPark("all")}
@@ -271,12 +513,10 @@ export const PlacesAndGuides: React.FC = () => {
             </button>
           </div>
 
-          {/* Dining Tip Box */}
           <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-xs text-sky-950 leading-relaxed">
-            <b>Priority Seating (PS) Tip:</b> Priority Seating opens 1 month ahead at 10:00 AM on the official app, and same-day slots open at 9:00 AM. For quick meals without reservations, Hungry Bear (Disneyland) and Casbah Food Court (DisneySea) have 600+ seats and fast turnaround.
+            <b>Priority Seating (PS) Tip:</b> Priority Seating opens 1 month ahead at 10:00 AM on the official Tokyo Disney Resort app, with same-day booking slots opening at 9:00 AM. For delicious meals without reservations, Hungry Bear (Disneyland) and Casbah Food Court (DisneySea) offer quick seating and fast turnaround.
           </div>
 
-          {/* Restaurant Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredRestaurants.map((resto, rIdx) => (
               <div key={rIdx} className="rounded-2xl border border-stone-200 bg-white p-5 shadow-md flex flex-col justify-between space-y-3">
@@ -307,11 +547,11 @@ export const PlacesAndGuides: React.FC = () => {
         </div>
       )}
 
-      {/* 3. TRANSPORT DIRECTIONS */}
+      {/* 4. TRANSIT DIRECTIONS */}
       {guideTab === "transport" && (
         <div className="space-y-6">
           <div className="rounded-2xl border border-amber-200 bg-[#FBF0DC]/80 p-4 text-xs text-stone-800 leading-relaxed font-medium">
-            💳 <b>Transit Tip:</b> Use digital Suica / PASMO in Apple Wallet or Google Wallet. Tap on and tap off at all gates; fares are deducted automatically. Narita Access Express and Ginza Line run directly from your Asakusa base.
+            💳 <b>Transit Tip:</b> Tap on and tap off with digital Suica / PASMO in Apple Wallet or Google Wallet at all ticket gates. Narita Access Express and Ginza Line run directly from your Asakusa base.
           </div>
 
           <div className="space-y-6">
@@ -365,7 +605,7 @@ export const PlacesAndGuides: React.FC = () => {
         </div>
       )}
 
-      {/* 4. MANNERS & ETIQUETTE */}
+      {/* 5. MANNERS & ETIQUETTE */}
       {guideTab === "etiquette" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -379,9 +619,9 @@ export const PlacesAndGuides: React.FC = () => {
                 }`}
               >
                 {rule.type === "do" ? (
-                  <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
                 ) : (
-                  <XCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <ShieldAlert className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
                 )}
                 <div>
                   <h4 className="font-serif text-base font-bold text-stone-900 leading-snug">
@@ -397,11 +637,11 @@ export const PlacesAndGuides: React.FC = () => {
         </div>
       )}
 
-      {/* 5. SOUVENIRS & SHOPPING */}
+      {/* 6. SOUVENIRS & SHOPPING */}
       {guideTab === "shopping" && (
         <div className="space-y-6">
           <div className="rounded-2xl border border-amber-200 bg-[#FBF0DC]/80 p-4 text-xs text-stone-800 leading-relaxed">
-            🛍️ <b>Tax-Free Shopping Note:</b> Spend at least <b>¥5,000 pre-tax</b> at one store on the same day (e.g. Don Quijote, Yodobashi, department stores) and present your physical passport with entry stamp at checkout for instant 10% tax exemption.
+            🛍️ <b>Tax-Free Shopping Note:</b> Spend at least <b>¥5,000 pre-tax</b> at one store on the same day (Don Quijote, Yodobashi, department stores) and present your physical passport with entry stamp at checkout for instant 10% tax exemption.
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

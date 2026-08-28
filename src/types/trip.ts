@@ -34,6 +34,7 @@ export interface TripMeta {
   destination: string;
   tagline: string;
   description: string;
+  heroImage: string;
   startDate: string; // YYYY-MM-DD
   endDate: string; // YYYY-MM-DD
   dateDisplay: string;
@@ -57,6 +58,7 @@ export interface TripMeta {
     homeSymbol: string;
     destSymbol: string;
     defaultConvertAmount: number;
+    plannedBudgetJPY: number;
   };
 }
 
@@ -76,6 +78,7 @@ export interface ItineraryDay {
   title: string;
   area: string;
   icon: string;
+  image: string;
   transitNote: string;
   sunPlan: TimelineEvent[];
   rainPlan: TimelineEvent[];
@@ -84,6 +87,39 @@ export interface ItineraryDay {
     sun: string;
     rain: string;
   };
+}
+
+export interface PlaceGuide {
+  id: string;
+  name: string;
+  japaneseName: string;
+  district: string;
+  tagline: string;
+  image: string;
+  gallery?: string[];
+  recommendedDuration: string;
+  whatYoullSee: string[];
+  suggestedSequence: string[];
+  mustDo: string[];
+  optionalOrSkippable: string[];
+  expectedCost: string;
+  foodNearby: string;
+  facilities: {
+    toilets: string;
+    lockers: string;
+    accessibility?: string;
+  };
+  weatherSuitability: {
+    sunAdvice: string;
+    rainAdvice: string;
+  };
+  transitFromBase: {
+    route: string;
+    time: string;
+    fare: string;
+    exit: string;
+  };
+  nextDestinationHint?: string;
 }
 
 export interface RideAttraction {
@@ -109,6 +145,7 @@ export interface DisneyParkGuide {
   parkName: string;
   icon: string;
   dateStr: string;
+  image: string;
   ropeDropStrategy: string;
   lands: {
     name: string;
@@ -144,6 +181,7 @@ export interface TransportRoute {
   totalFare: string;
   transfers: number;
   icon: string;
+  image?: string;
   legs: {
     step: number | string;
     title: string;
@@ -172,6 +210,7 @@ export interface SouvenirDistrict {
   district: string;
   dayRef: string;
   icon: string;
+  image?: string;
   shops: {
     name: string;
     desc: string;
@@ -185,6 +224,7 @@ export interface ExpenseRecord {
   amount: number;
   currency: string;
   category: "food" | "transport" | "shopping" | "tickets" | "stay" | "other";
+  paymentMethod: "cash" | "card";
   date: string;
   convertedAmount?: number;
 }
