@@ -36,6 +36,20 @@ export default function Home() {
     }
   };
 
+  // Land on the right section when arriving via a deep link like /#tools or /#emergency
+  // (e.g. tapping "Vault" or "SOS" from the Itinerary/Weather/Budget pages)
+  useEffect(() => {
+    const validTabs = ["today", "itinerary", "guides", "tools", "emergency"] as const;
+    const hash = window.location.hash.replace("#", "");
+    if ((validTabs as readonly string[]).includes(hash)) {
+      const tab = hash as (typeof validTabs)[number];
+      setActiveTab(tab);
+      requestAnimationFrame(() => {
+        document.getElementById(tab)?.scrollIntoView({ behavior: "instant" as ScrollBehavior });
+      });
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#FBF8F0] text-[#2A2620] selection:bg-[#FF5F93] selection:text-white pb-24 md:pb-12">
       {/* Navigation Header & Mobile Thumb Dock */}

@@ -23,7 +23,9 @@ import {
 export default function WeatherPage() {
   const { weather, isLoading } = useWeather(
     tripMeta.homeBase.coordinates.lat,
-    tripMeta.homeBase.coordinates.lng
+    tripMeta.homeBase.coordinates.lng,
+    tripMeta.startDate,
+    tripMeta.endDate
   );
 
   const [selectedDayIndex, setSelectedDayIndex] = useState<number>(0);

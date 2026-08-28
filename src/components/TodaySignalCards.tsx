@@ -47,7 +47,9 @@ export const TodaySignalCards: React.FC<TodaySignalCardsProps> = ({ currentDayIn
 
   const { weather, isLoading: weatherLoading } = useWeather(
     tripMeta.homeBase.coordinates.lat,
-    tripMeta.homeBase.coordinates.lng
+    tripMeta.homeBase.coordinates.lng,
+    tripMeta.startDate,
+    tripMeta.endDate
   );
 
   const homeCurrency = tripMeta.defaultCurrencies.homeCurrency;

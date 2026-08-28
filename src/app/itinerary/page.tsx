@@ -672,18 +672,18 @@ export default function DetailedItineraryPage() {
                 </div>
               )}
 
-              {/* 1-Tap Google Maps Link */}
+              {/* 1-Tap Google Maps Link — no origin is set on purpose, so Google Maps
+                  routes from the traveler's actual current location (works correctly
+                  whether you're at the airport, the hotel, or anywhere else on the day) */}
               <a
-                href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
-                  tripMeta.homeBase.name
-                )}&destination=${encodeURIComponent(
+                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
                   activeTransitRef?.mapQuery || activeTransitRoute?.title || "Tokyo"
                 )}&travelmode=transit`}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1F3A5F] p-3 text-xs font-bold text-white shadow-md hover:bg-[#132540] transition"
               >
-                <span>Open in Google Maps Transit</span>
+                <span>Get Directions From My Location</span>
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
             </div>

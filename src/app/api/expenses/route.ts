@@ -43,9 +43,14 @@ function saveExpenses(expenses: ExpenseRecord[]) {
   }
 }
 
-// CORS Headers
+// CORS Headers — scoped to this site's own domain rather than "*". This endpoint
+// still has no auth token, so it's not appropriate for a public commercial template,
+// but for this personal deployment it at least stops arbitrary third-party web pages
+// from reading/writing expense data via a visitor's browser. It does not affect the
+// n8n/Telegram sync, since that calls this endpoint server-to-server (not subject to
+// browser CORS at all).
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://traveltokyo.workflowlab.site",
   "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
@@ -144,9 +149,10 @@ export async function POST(request: Request) {
       },
       { headers: corsHeaders }
     );
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to process expense";
     return NextResponse.json(
-      { success: false, error: error.message || "Failed to process expense" },
+      { success: false, error: message },
       { status: 500, headers: corsHeaders }
     );
   }
@@ -170,9 +176,10 @@ export async function DELETE(request: Request) {
     saveExpenses(updated);
 
     return NextResponse.json({ success: true, count: updated.length }, { headers: corsHeaders });
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to delete expense";
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: message },
       { status: 500, headers: corsHeaders }
     );
   }

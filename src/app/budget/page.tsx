@@ -82,25 +82,25 @@ export default function BudgetPage() {
   const defaultPaidExpenses: ExpenseRecord[] = [
     {
       id: "paid-hotel-1759447607",
-      title: "Hotel Plus Hostel TOKYO ASAKUSA 2 (Confirmed Booking)",
+      title: "Hotel Plus Hostel TOKYO ASAKUSA 2 (Agoda Booking #1759447607)",
       amount: 89525,
       currency: "JPY",
       category: "hotel",
-      paymentMethod: "Primary Travel Card (Visa)",
+      paymentMethod: "RCBC Visa",
       date: "2026-09-01",
       status: "paid",
       notes: "1-7-10 Hanakawado · 2 Double Rooms · 6 Nights (Sep 1–7)",
     },
     {
       id: "paid-flights-mnl-nrt",
-      title: "Roundtrip International Airfare (5 Travelers)",
+      title: "Airfare: Manila (MNL) ⇄ Tokyo Narita (NRT) for 5 Pax",
       amount: 66190,
       currency: "JPY",
       category: "flights",
-      paymentMethod: "Primary Travel Card (Visa)",
+      paymentMethod: "RCBC Visa",
       date: "2025-10-07",
       status: "paid",
-      notes: "5 Passengers Confirmed · Roundtrip Flights (Booking Ref: TK2026-FLIGHT)",
+      notes: "Cebu Pacific 5 Pax: ₱4,902.99 x 3 + ₱9,805.98 = Total ₱24,514.95 PHP · PNRs: WETQNY, WC2HXE, MH1ZRC, NLNDWD",
     },
     {
       id: "paid-hp-studio-tickets",
@@ -108,7 +108,7 @@ export default function BudgetPage() {
       amount: 32500,
       currency: "JPY",
       category: "tickets",
-      paymentMethod: "Backup Travel Card (Mastercard)",
+      paymentMethod: "BDO JCB",
       date: "2026-09-03",
       status: "paid",
       notes: "Sep 3 · 1:00 PM Entry · Toshimaen",
@@ -119,21 +119,21 @@ export default function BudgetPage() {
       amount: 84000,
       currency: "JPY",
       category: "tickets",
-      paymentMethod: "Backup Travel Card (Mastercard)",
+      paymentMethod: "BDO Mastercard",
       date: "2026-09-02",
       status: "paid",
       notes: "Disneyland Sep 2 & DisneySea Sep 4 (Official App)",
     },
     {
       id: "paid-vfs-visa-fees",
-      title: "Consular Visa Processing & Document Fees (5 Applicants)",
+      title: "VFS Global Japan Visa Application Fees (5 Applicants)",
       amount: 10800,
       currency: "JPY",
       category: "documents",
-      paymentMethod: "Digital Wallet",
+      paymentMethod: "GCash",
       date: "2026-07-04",
       status: "paid",
-      notes: "Visa Application Processing Fees (5 Pax)",
+      notes: "₱800 x 5 pax = ₱4,000 PHP · Reference #1151572948",
     },
   ];
 
@@ -161,7 +161,7 @@ export default function BudgetPage() {
       amount: 25000,
       currency: "JPY",
       category: "transport",
-      paymentMethod: "Apple Pay / Digital IC",
+      paymentMethod: "BDO Mastercard",
       date: "2026-09-01",
       status: "planned",
       notes: "Digital Suica / PASMO top-ups for 5 travelers",
@@ -172,7 +172,7 @@ export default function BudgetPage() {
       amount: 40000,
       currency: "JPY",
       category: "shopping",
-      paymentMethod: "Primary Travel Card (Visa)",
+      paymentMethod: "BDO JCB",
       date: "2026-09-05",
       status: "planned",
       notes: "Tax-free snacks, skincare, character merch, souvenirs",
@@ -194,7 +194,7 @@ export default function BudgetPage() {
       amount: 10000,
       currency: "JPY",
       category: "other",
-      paymentMethod: "Backup Travel Card (Mastercard)",
+      paymentMethod: "MariBank",
       date: "2026-09-07",
       status: "planned",
       notes: "Late night transfers or weather contingency fund",
@@ -219,17 +219,19 @@ export default function BudgetPage() {
 
   // ATM Withdrawal Form State
   const [withdrawalAmountJPY, setWithdrawalAmountJPY] = useState("");
-  const [withdrawalLocation, setWithdrawalLocation] = useState("ATM (Asakusa)");
-  const [withdrawalCard, setWithdrawalCard] = useState("Primary Travel Card (Visa)");
+  const [withdrawalLocation, setWithdrawalLocation] = useState("7-Eleven Bank ATM (Asakusa)");
+  const [withdrawalCard, setWithdrawalCard] = useState("BDO Mastercard");
   const [withdrawalDate, setWithdrawalDate] = useState(new Date().toISOString().split("T")[0]);
 
   // Payment Method Options
   const paymentMethods: PaymentMethod[] = [
     "Cash",
-    "Primary Travel Card (Visa)",
-    "Backup Travel Card (Mastercard)",
-    "Apple Pay / Digital IC",
-    "Digital Wallet",
+    "BDO JCB",
+    "BDO Mastercard",
+    "RCBC Visa",
+    "GCash",
+    "MariBank",
+    "UnionBank Visa",
     "Other Card / Wallet",
   ];
 
@@ -1335,9 +1337,10 @@ export default function BudgetPage() {
                     onChange={(e) => setWithdrawalCard(e.target.value)}
                     className="mt-1 w-full rounded-xl border border-stone-300 p-2.5 text-xs font-medium outline-none focus:border-[#1F3A5F] bg-white"
                   >
-                    <option value="Primary Travel Card (Visa)">Primary Travel Card (Visa)</option>
-                    <option value="Backup Travel Card (Mastercard)">Backup Travel Card (Mastercard)</option>
-                    <option value="Digital Travel Card">Digital Travel Card</option>
+                    <option value="BDO Mastercard">BDO Mastercard</option>
+                    <option value="GCash Card">GCash Card</option>
+                    <option value="MariBank Debit">MariBank Debit</option>
+                    <option value="RCBC Visa">RCBC Visa</option>
                     <option value="Other Bank Card">Other Bank Card</option>
                   </select>
                 </div>

@@ -217,7 +217,7 @@ const fallbackDays: DailyForecast[] = [
   },
 ];
 
-export function useWeather(lat = 35.7135, lng = 139.7995) {
+export function useWeather(lat = 35.7135, lng = 139.7995, tripStartDate?: string, tripEndDate?: string) {
   const [weather, setWeather] = useState<WeatherData>({
     high: 31,
     low: 24,
@@ -236,7 +236,25 @@ export function useWeather(lat = 35.7135, lng = 139.7995) {
 
     async function fetchTokyoWeather() {
       try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code,uv_index_max,wind_speed_10m_max&hourly=temperature_2m,precipitation_probability,relative_humidity_2m,weather_code&timezone=Asia%2FTokyo&forecast_days=7`;
+        // Pin the forecast window to the actual trip dates rather than "today + 7 days",
+        // so a Day N card always shows that day's real forecast, not whatever day
+        // happens to be N days after the visitor's current date.
+        // Open-Meteo's forecast endpoint only has data for ~16 days out from today;
+        // outside that window it silently returns fewer days, so we fall back to
+        // forecast_days when the trip is out of range (the fallbackDays are then used).
+        const today = new Date();
+        const msPerDay = 1000 * 60 * 60 * 24;
+        const start = tripStartDate ? new Date(`${tripStartDate}T00:00:00+09:00`) : null;
+        const end = tripEndDate ? new Date(`${tripEndDate}T00:00:00+09:00`) : null;
+        const daysUntilStart = start ? Math.floor((start.getTime() - today.getTime()) / msPerDay) : null;
+        const withinForecastWindow =
+          start && end && daysUntilStart !== null && daysUntilStart >= -1 && daysUntilStart <= 15;
+
+        const dateRangeParam = withinForecastWindow
+          ? `&start_date=${tripStartDate}&end_date=${tripEndDate}`
+          : `&forecast_days=7`;
+
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code,uv_index_max,wind_speed_10m_max&hourly=temperature_2m,precipitation_probability,relative_humidity_2m,weather_code&timezone=Asia%2FTokyo${dateRangeParam}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error("Failed to fetch weather from Open-Meteo");
         const data = await res.json();
@@ -330,7 +348,7 @@ export function useWeather(lat = 35.7135, lng = 139.7995) {
     return () => {
       isMounted = false;
     };
-  }, [lat, lng]);
+  }, [lat, lng, tripStartDate, tripEndDate]);
 
   return { weather, isLoading, isError };
 }
