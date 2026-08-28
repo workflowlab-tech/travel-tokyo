@@ -201,7 +201,7 @@ export const itineraryDays: ItineraryDay[] = [
     area: "Narita Airport → Hanakawado Asakusa",
     icon: "⛩️",
     image:
-      "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "NAIA T3 Lounge (UnionBank Miles+ Visa) → Flight to Narita (arr 11:35 AM) → Keisei Access Express to Asakusa Station (~60–80 min direct, ¥1,300–1,350) → Hotel Plus Hostel Asakusa 2",
     transitSummary: {
@@ -325,7 +325,7 @@ export const itineraryDays: ItineraryDay[] = [
     area: "Disney Resort (Maihama)",
     icon: "🏰",
     image:
-      "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Asakusa → Maihama: Ginza Line to Kanda → JR to Tokyo → JR Keiyo Line (~50–55 min total, allow 10 min inside Tokyo Station)",
     transitSummary: {
@@ -378,7 +378,7 @@ export const itineraryDays: ItineraryDay[] = [
         icon: "🎆",
         badges: ["Parade / Shows"],
         image:
-          "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
       },
     ],
     rainPlan: [
@@ -427,7 +427,7 @@ export const itineraryDays: ItineraryDay[] = [
     area: "Asakusa → Toshimaen",
     icon: "🪄",
     image:
-      "https://images.unsplash.com/photo-1551269901-5c5e14c25df7?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Eat lunch before leaving · Asakusa/Kuramae to Toshimaen on Toei Oedo Line direct (~55 min) · allow 60–75 min door-to-door",
     transitSummary: {
@@ -461,7 +461,7 @@ export const itineraryDays: ItineraryDay[] = [
         icon: "🪄",
         badges: ["Booked & paid", "100% Indoor"],
         image:
-          "https://images.unsplash.com/photo-1551269901-5c5e14c25df7?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=800&q=80",
         transit: {
           routeId: "hotel-studio-tour",
           title: "Toei Oedo Line to Toshimaen",
@@ -541,7 +541,7 @@ export const itineraryDays: ItineraryDay[] = [
     area: "Disney Resort (Maihama)",
     icon: "🌊",
     image:
-      "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Hotel → Maihama → Disney Resort Line monorail to Tokyo DisneySea Station · dedicate full day to the park",
     transitSummary: {
@@ -603,7 +603,7 @@ export const itineraryDays: ItineraryDay[] = [
         icon: "🌟",
         badges: ["Night Anchor"],
         image:
-          "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=800&q=80",
       },
     ],
     rainPlan: [
@@ -957,7 +957,7 @@ export const placeGuides: PlaceGuide[] = [
     district: "Asakusa, Taito City",
     tagline: "Tokyo's oldest temple, giant red lanterns, and historic market stalls.",
     image:
-      "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1200&q=80",
     recommendedDuration: "2 to 3 hours",
     whatYoullSee: [
       "Kaminarimon (Thunder Gate) with iconic 700kg red chochin lantern",
@@ -1007,7 +1007,7 @@ export const placeGuides: PlaceGuide[] = [
     district: "Maihama, Urayasu",
     tagline: "The world's most charming Disney park, featuring exclusive trackless marvels.",
     image:
-      "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
     recommendedDuration: "Full day (10 to 12 hours)",
     whatYoullSee: [
       "Enchanted Tale of Beauty and the Beast inside the colossal pink Beast's Castle",
@@ -1058,7 +1058,7 @@ export const placeGuides: PlaceGuide[] = [
     district: "Toshimaen, Nerima City",
     tagline: "The largest indoor Harry Potter attraction in the world.",
     image:
-      "https://images.unsplash.com/photo-1551269901-5c5e14c25df7?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=1200&q=80",
     recommendedDuration: "3.5 to 4.5 hours",
     whatYoullSee: [
       "Authentic Great Hall set with house tables and floating candles",
@@ -1109,7 +1109,7 @@ export const placeGuides: PlaceGuide[] = [
     district: "Maihama, Urayasu",
     tagline: "Widely acclaimed as the most magnificent theme park ever built.",
     image:
-      "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=80",
     recommendedDuration: "Full day (11 to 13 hours)",
     whatYoullSee: [
       "Fantasy Springs: Anna & Elsa's Frozen Journey, Peter Pan's Never Land, Rapunzel's Lantern Festival",
@@ -1266,7 +1266,7 @@ export const disneyGuides: DisneyParkGuide[] = [
     icon: "🏰",
     dateStr: "Wed, Sep 2, 2026",
     image:
-      "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
     ropeDropStrategy:
       "Arrive at security gates 45–60 min before official open. Rope drop straight to Fantasyland for Enchanted Tale of Beauty and the Beast, followed immediately by Pooh's Hunny Hunt.",
     lands: [
@@ -1308,7 +1308,7 @@ export const disneyGuides: DisneyParkGuide[] = [
             desc: "Classic boat cruise with added Disney and Pixar character cameos. Great seated A/C break.",
             land: "Fantasyland",
             image:
-              "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=800&q=80",
+              "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
           {
@@ -1424,7 +1424,7 @@ export const disneyGuides: DisneyParkGuide[] = [
         schedule: "Daytime (approx 1:00 PM)",
         icon: "🎊",
         image:
-          "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
       },
       {
         name: "Reach for the Stars: Everlasting Dreams",
@@ -1440,7 +1440,7 @@ export const disneyGuides: DisneyParkGuide[] = [
         schedule: "Nighttime (approx 8:45 PM)",
         icon: "💡",
         image:
-          "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
       },
     ],
     hourlyPlan: [
@@ -1461,7 +1461,7 @@ export const disneyGuides: DisneyParkGuide[] = [
     icon: "🌊",
     dateStr: "Fri, Sep 4, 2026",
     image:
-      "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=80",
     ropeDropStrategy:
       "Arrive early. Open the official Tokyo Disney Resort app as soon as through the turnstile and purchase Premier Access for Anna and Elsa's Frozen Journey, then head to Peter Pan or Journey to the Center of the Earth.",
     lands: [
@@ -1611,7 +1611,7 @@ export const disneyGuides: DisneyParkGuide[] = [
         schedule: "Nighttime (approx 7:30 PM)",
         icon: "🌟",
         image:
-          "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=800&q=80",
       },
       {
         name: "Sparkling Jubilee Celebration",
@@ -1619,7 +1619,7 @@ export const disneyGuides: DisneyParkGuide[] = [
         schedule: "Daytime (1–2 times daily)",
         icon: "💙",
         image:
-          "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
       },
     ],
     hourlyPlan: [
@@ -2198,7 +2198,7 @@ export const souvenirDistricts: SouvenirDistrict[] = [
     dayRef: "Days 2 & 4",
     icon: "🏰",
     image:
-      "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
     shops: [
       {
         name: "World Bazaar & Port Shops",
