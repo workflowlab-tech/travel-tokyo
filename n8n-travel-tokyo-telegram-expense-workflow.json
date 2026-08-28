@@ -408,7 +408,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"id\": \"{{ .id }}\",\n  \"title\": \"{{ .title }}\",\n  \"amount\": {{ .amount }},\n  \"category\": \"{{ .category }}\",\n  \"paymentMethod\": \"{{ .paymentMethod }}\",\n  \"date\": \"{{ .date }}\",\n  \"notes\": \"{{ .notes }}\",\n  \"convertedAmountPHP\": {{ .convertedAmountPHP }}\n}",
+        "jsonBody": "={{ JSON.stringify($json) }}",
         "options": {
           "response": {
             "response": {
