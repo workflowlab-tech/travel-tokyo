@@ -141,7 +141,7 @@ export const TodaySignalCards: React.FC<TodaySignalCardsProps> = ({ currentDayIn
       <div className="relative flex flex-col justify-between rounded-3xl border border-amber-200 bg-[#FBF0DC]/80 p-6 shadow-md">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-black uppercase tracking-wider text-[#C1802E]">
-            Home Base · Asakusa
+            Home Base · Asakusa 2
           </span>
           <MapPin className="h-4 w-4 text-[#C1502E]" />
         </div>
@@ -154,11 +154,12 @@ export const TodaySignalCards: React.FC<TodaySignalCardsProps> = ({ currentDayIn
             {tripMeta.homeBase.japaneseAddress}
           </p>
           <div className="mt-2 flex flex-wrap gap-1">
-            {tripMeta.homeBase.amenities.slice(0, 2).map((amenity, i) => (
-              <span key={i} className="rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-[#8B5E14] border border-amber-200/60">
-                {amenity}
-              </span>
-            ))}
+            <span className="rounded-md bg-stone-900 px-2 py-0.5 text-[10px] font-bold text-white">
+              Agoda #{tripMeta.homeBase.bookingId}
+            </span>
+            <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-[#8B5E14] border border-amber-200/60">
+              ¥{tripMeta.homeBase.totalCostJPY.toLocaleString()} (~₱{tripMeta.homeBase.totalCostPHP.toLocaleString()})
+            </span>
           </div>
         </div>
 

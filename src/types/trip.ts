@@ -1,8 +1,23 @@
+export interface AirportLoungeInfo {
+  airport: string;
+  terminal: string;
+  loungeName: string;
+  primaryCard: string;
+  backupCard?: string;
+  notes?: string;
+}
+
 export interface FlightInfo {
   code: string;
   route: string;
   departureTime: string;
-  arrivalTime?: string;
+  arrivalTime: string;
+  airfareEstimate?: string;
+  passengerPNRs: {
+    name: string;
+    pnr: string;
+  }[];
+  lounge: AirportLoungeInfo;
   notes: string;
 }
 
@@ -12,12 +27,30 @@ export interface HomeBase {
   address: string;
   japaneseAddress: string;
   nearestStation: string;
+  bookingId: string;
+  bookingPlatform: string;
+  totalCostJPY: number;
+  totalCostPHP: number;
+  paymentStatus: string;
+  roomDetails: string;
   amenities: string[];
   mapQuery: string;
   coordinates: {
     lat: number;
     lng: number;
   };
+}
+
+export interface TravelerDocument {
+  id: string;
+  travelerName: string;
+  relationship?: string;
+  pnr: string;
+  passportNumber?: string;
+  passportImage: string;
+  visaNumber: string;
+  visaImage: string;
+  visaExpiry?: string;
 }
 
 export interface EmergencyContact {
@@ -51,6 +84,7 @@ export interface TripMeta {
     outbound: FlightInfo;
     inbound: FlightInfo;
   };
+  travelers: TravelerDocument[];
   emergencyContacts: EmergencyContact[];
   defaultCurrencies: {
     homeCurrency: string; // e.g. "PHP"
@@ -232,12 +266,13 @@ export interface ExpenseRecord {
 export interface BookingDocument {
   id: string;
   title: string;
-  type: "ticket" | "hotel" | "flight" | "passport" | "insurance" | "qr" | "other";
+  type: "ticket" | "hotel" | "flight" | "qr" | "other";
   confirmationCode?: string;
-  fileData?: string; // base64 / data URL
+  fileData?: string; // base64 / data URL / asset path
   fileName?: string;
   fileType?: string;
   notes?: string;
+  amount?: string;
   dateAdded: string;
 }
 

@@ -15,7 +15,8 @@ import {
 import { ExpenseRecord, BookingDocument, MemoryPhoto } from "../types/trip";
 import {
   Wallet,
-  FileText,
+  Ticket,
+  FolderLock,
   CheckSquare,
   Image as ImageIcon,
   Plus,
@@ -26,14 +27,22 @@ import {
   CreditCard,
   Banknote,
   TrendingUp,
-  Percent,
+  Eye,
+  EyeOff,
+  ShieldCheck,
+  Plane,
+  Building,
+  UserCheck,
+  ExternalLink,
 } from "lucide-react";
 
 export const TripTools: React.FC = () => {
-  const [toolTab, setToolTab] = useState<"budget" | "documents" | "packing" | "memories">("budget");
+  const [toolTab, setToolTab] = useState<
+    "budget" | "bookings" | "documents" | "packing" | "memories"
+  >("budget");
 
   // =========================================================================
-  // 1. Budget State (Stored in LocalStorage, starts clean/empty for user data)
+  // 1. Budget State (Stored in LocalStorage)
   // =========================================================================
   const [expenses, setExpenses] = useLocalStorage<ExpenseRecord[]>("travel_tokyo_expenses", []);
   const [plannedBudgetJPY, setPlannedBudgetJPY] = useLocalStorage<number>(
@@ -93,18 +102,65 @@ export const TripTools: React.FC = () => {
   };
 
   // =========================================================================
-  // 2. Bookings & Documents State (Stored in IndexedDB, starts clean/empty)
+  // 2. Bookings & Tickets State (Stored in IndexedDB)
   // =========================================================================
   const [documents, setDocuments] = useState<BookingDocument[]>([]);
   const [isDocsLoading, setIsDocsLoading] = useState(true);
+
+  // Preloaded Verified Bookings
+  const defaultBookings: BookingDocument[] = [
+    {
+      id: "booking-hotel-agoda-1759447607",
+      title: "Hotel Plus Hostel TOKYO ASAKUSA 2 (Agoda Confirmation)",
+      type: "hotel",
+      confirmationCode: "1759447607",
+      fileData: "/documents/hotel/agoda_hotel_confirmation_1759447607.pdf",
+      fileName: "agoda_hotel_confirmation_1759447607.pdf",
+      notes: "1-7-10 Hanakawado, Taito-ku · 2 Double Rooms · 6 Nights (Sep 1–7)",
+      amount: "¥89,525 JPY (≈ ₱33,157 PHP) · Pay Later (Card ending 0006)",
+      dateAdded: "2026-09-01",
+    },
+    {
+      id: "booking-flight-mnl-nrt",
+      title: "Flights: Manila (MNL) ⇄ Tokyo Narita (NRT)",
+      type: "flight",
+      confirmationCode: "WETQNY / WC2HXE / MH1ZRC / NLNDWD",
+      notes: "Outbound Sep 1 (06:10–11:35) · Inbound Sep 7 (13:45–17:40) · 5 Passengers",
+      amount: "Booked & Paid",
+      dateAdded: "2026-09-01",
+    },
+    {
+      id: "booking-hp-studio",
+      title: "Warner Bros. Studio Tour Tokyo (The Making of Harry Potter)",
+      type: "ticket",
+      confirmationCode: "WBST-2026-0903-1300",
+      notes: "Sep 3 · 1:00 PM Timed Entry · Toshimaen Station",
+      amount: "Booked & Paid",
+      dateAdded: "2026-09-03",
+    },
+    {
+      id: "booking-disney-parks",
+      title: "Tokyo Disney Resort Park Tickets (Disneyland & DisneySea)",
+      type: "ticket",
+      confirmationCode: "TDR-APP-PASSPORT",
+      notes: "Tokyo Disneyland (Sep 2) & Tokyo DisneySea (Sep 4) · Available in Official Disney App",
+      amount: "Booked & Paid",
+      dateAdded: "2026-09-02",
+    },
+  ];
 
   useEffect(() => {
     async function loadDocs() {
       try {
         const stored = await getAllDocuments();
-        setDocuments(stored);
+        if (stored.length === 0) {
+          setDocuments(defaultBookings);
+        } else {
+          setDocuments(stored);
+        }
       } catch (err) {
         console.warn("Failed to load documents from IndexedDB:", err);
+        setDocuments(defaultBookings);
       } finally {
         setIsDocsLoading(false);
       }
@@ -116,6 +172,7 @@ export const TripTools: React.FC = () => {
   const [docType, setDocType] = useState<BookingDocument["type"]>("ticket");
   const [docCode, setDocCode] = useState("");
   const [docNotes, setDocNotes] = useState("");
+  const [docAmount, setDocAmount] = useState("");
   const [docFileData, setDocFileData] = useState<string | undefined>();
   const [docFileName, setDocFileName] = useState<string | undefined>();
 
@@ -141,6 +198,7 @@ export const TripTools: React.FC = () => {
       type: docType,
       confirmationCode: docCode.trim() || undefined,
       notes: docNotes.trim() || undefined,
+      amount: docAmount.trim() || undefined,
       fileData: docFileData,
       fileName: docFileName,
       dateAdded: new Date().toISOString().split("T")[0],
@@ -156,6 +214,7 @@ export const TripTools: React.FC = () => {
     setDocTitle("");
     setDocCode("");
     setDocNotes("");
+    setDocAmount("");
     setDocFileData(undefined);
     setDocFileName(undefined);
   };
@@ -170,7 +229,19 @@ export const TripTools: React.FC = () => {
   };
 
   // =========================================================================
-  // 3. Smart Packing State (Stored in LocalStorage)
+  // 3. Travel Documents (Passports & Visas) Privacy State
+  // =========================================================================
+  const [revealedDocs, setRevealedDocs] = useState<Record<string, boolean>>({});
+
+  const toggleReveal = (travelerId: string) => {
+    setRevealedDocs((prev) => ({
+      ...prev,
+      [travelerId]: !prev[travelerId],
+    }));
+  };
+
+  // =========================================================================
+  // 4. Smart Packing State (Stored in LocalStorage)
   // =========================================================================
   const [packedMap, setPackedMap] = useLocalStorage<Record<string, boolean>>(
     "travel_tokyo_packing_checks",
@@ -195,7 +266,7 @@ export const TripTools: React.FC = () => {
   const packedPercentage = totalPackingCount > 0 ? Math.round((packedCount / totalPackingCount) * 100) : 0;
 
   // =========================================================================
-  // 4. Memories State (Stored in IndexedDB)
+  // 5. Memories State (Stored in IndexedDB)
   // =========================================================================
   const [memories, setMemories] = useState<MemoryPhoto[]>([]);
   const [isMemoriesLoading, setIsMemoriesLoading] = useState(true);
@@ -270,11 +341,11 @@ export const TripTools: React.FC = () => {
           Personal Travel Control Room
         </span>
         <h2 className="font-serif text-2xl font-bold text-stone-900 sm:text-3xl">
-          Budget, Documents, Packing & Memories.
+          Budget, Bookings, Passports & Memories.
         </h2>
       </div>
 
-      {/* Tool Navigation Tabs */}
+      {/* Tool Navigation Tabs (Clean 5-Tab Architecture) */}
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
         <button
           onClick={() => setToolTab("budget")}
@@ -289,6 +360,18 @@ export const TripTools: React.FC = () => {
         </button>
 
         <button
+          onClick={() => setToolTab("bookings")}
+          className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition flex-shrink-0 border ${
+            toolTab === "bookings"
+              ? "bg-[#1F3A5F] text-white border-[#1F3A5F] shadow-md ring-2 ring-[#FF5F93]/30"
+              : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+          }`}
+        >
+          <Ticket className="h-4 w-4 text-[#FFD66B]" />
+          <span>Bookings & Tickets ({documents.length})</span>
+        </button>
+
+        <button
           onClick={() => setToolTab("documents")}
           className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition flex-shrink-0 border ${
             toolTab === "documents"
@@ -296,8 +379,8 @@ export const TripTools: React.FC = () => {
               : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
           }`}
         >
-          <FileText className="h-4 w-4 text-[#FFD66B]" />
-          <span>Bookings & Documents ({documents.length})</span>
+          <FolderLock className="h-4 w-4 text-[#FFD66B]" />
+          <span>Travel Documents Folder (Passports & Visas)</span>
         </button>
 
         <button
@@ -607,27 +690,16 @@ export const TripTools: React.FC = () => {
         </div>
       )}
 
-      {/* 2. BOOKINGS & DOCUMENTS (STORED IN INDEXEDDB) */}
-      {toolTab === "documents" && (
+      {/* 2. BOOKINGS & TICKETS */}
+      {toolTab === "bookings" && (
         <div className="space-y-6">
-          {/* Privacy & Storage Notice */}
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-xs text-emerald-950 leading-relaxed flex items-start gap-3">
-            <Lock className="h-4 w-4 text-emerald-700 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-bold">Device-Local & Offline Document Storage</p>
-              <p className="mt-0.5 text-emerald-800">
-                Upload your tickets, confirmation QR codes, passport/visa copies, or insurance documents. They are stored inside your device&apos;s IndexedDB and remain accessible offline during transit and flights.
-              </p>
-            </div>
-          </div>
-
-          {/* Add Document Form */}
+          {/* Add Booking / Ticket Form */}
           <form
             onSubmit={handleAddDocument}
             className="rounded-3xl border border-stone-200 bg-white p-6 shadow-md space-y-4"
           >
             <h4 className="font-serif text-base font-bold text-stone-900">
-              Add Booking / Ticket / Travel Document
+              Add Booking Confirmation / Park Ticket / QR Pass
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
@@ -635,7 +707,7 @@ export const TripTools: React.FC = () => {
                 type="text"
                 value={docTitle}
                 onChange={(e) => setDocTitle(e.target.value)}
-                placeholder="Document Title (e.g. DisneySea QR Tickets, Hotel Booking, Travel Insurance)"
+                placeholder="Booking Title (e.g. DisneySea QR Tickets, Harry Potter Studio, Hotel Voucher)"
                 className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] sm:col-span-6"
                 required
               />
@@ -646,11 +718,9 @@ export const TripTools: React.FC = () => {
                 className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] sm:col-span-3"
               >
                 <option value="ticket">🎟️ Ticket / QR Pass</option>
-                <option value="hotel">🏨 Hotel Voucher</option>
+                <option value="hotel">🏨 Hotel Booking</option>
                 <option value="flight">✈️ Flight Confirmation</option>
-                <option value="passport">🛂 Passport / Visa</option>
-                <option value="insurance">🛡️ Travel Insurance</option>
-                <option value="other">📄 Other Document</option>
+                <option value="other">📄 Other Booking</option>
               </select>
 
               <input
@@ -667,13 +737,21 @@ export const TripTools: React.FC = () => {
                 type="text"
                 value={docNotes}
                 onChange={(e) => setDocNotes(e.target.value)}
-                placeholder="Notes (e.g. 5 tickets, South Gate, 1:00 PM timed slot)"
-                className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] sm:col-span-7"
+                placeholder="Notes (e.g. 5 tickets, South Gate, 1:00 PM slot)"
+                className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] sm:col-span-4"
+              />
+
+              <input
+                type="text"
+                value={docAmount}
+                onChange={(e) => setDocAmount(e.target.value)}
+                placeholder="Amount / Cost (e.g. ¥89,525 JPY)"
+                className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] sm:col-span-3"
               />
 
               <div className="sm:col-span-5 flex items-center gap-2">
                 <label className="flex-1 cursor-pointer rounded-xl border border-dashed border-stone-300 bg-stone-50 p-3 text-center text-xs font-semibold text-stone-700 hover:bg-stone-100 transition">
-                  <span>{docFileName ? docFileName : "📎 Attach File / QR / Screenshot"}</span>
+                  <span>{docFileName ? docFileName : "📎 Attach Voucher PDF / Image"}</span>
                   <input
                     type="file"
                     accept="image/*,application/pdf"
@@ -688,81 +766,229 @@ export const TripTools: React.FC = () => {
               type="submit"
               className="inline-flex items-center gap-2 rounded-xl bg-[#1F3A5F] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#132540] transition"
             >
-              <Plus className="h-4 w-4" /> Save to Documents
+              <Plus className="h-4 w-4" /> Save Booking
             </button>
           </form>
 
-          {/* Document Cards List */}
-          {isDocsLoading ? (
-            <div className="p-8 text-center text-xs text-stone-500">
-              Loading saved documents from device storage...
-            </div>
-          ) : documents.length === 0 ? (
-            <div className="rounded-3xl border border-stone-200 bg-white p-12 text-center text-xs text-stone-500 space-y-1">
-              <p className="font-semibold text-stone-700">No documents saved yet.</p>
-              <p>Upload your real tickets, hotel vouchers, or QR passes above to keep them offline-ready.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {documents.map((doc) => (
-                <div
-                  key={doc.id}
-                  className="rounded-3xl border border-stone-200 bg-white p-5 shadow-md flex flex-col justify-between space-y-3"
-                >
-                  <div>
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <span className="text-xs uppercase font-black tracking-wider text-[#FF5F93]">
-                          {doc.type}
-                        </span>
-                        <h5 className="font-serif text-base font-bold text-stone-900 mt-0.5">
-                          {doc.title}
-                        </h5>
-                      </div>
-                      <button
-                        onClick={() => handleDeleteDocument(doc.id)}
-                        className="text-stone-400 hover:text-red-600 transition"
-                        aria-label="Delete document"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+          {/* Bookings & Tickets Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {documents.map((doc) => (
+              <div
+                key={doc.id}
+                className="rounded-3xl border border-stone-200 bg-white p-5 shadow-md flex flex-col justify-between space-y-3"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="text-xs uppercase font-black tracking-wider text-[#FF5F93]">
+                        {doc.type}
+                      </span>
+                      <h5 className="font-serif text-base font-bold text-stone-900 mt-0.5">
+                        {doc.title}
+                      </h5>
                     </div>
-
-                    {doc.confirmationCode && (
-                      <div className="mt-2 rounded-md bg-stone-100 px-2.5 py-1 font-mono text-xs font-bold text-[#1F3A5F] w-fit border border-stone-200/60">
-                        REF: {doc.confirmationCode}
-                      </div>
-                    )}
-
-                    {doc.notes && (
-                      <p className="mt-2 text-xs text-stone-600 leading-relaxed font-medium">
-                        {doc.notes}
-                      </p>
-                    )}
+                    <button
+                      onClick={() => handleDeleteDocument(doc.id)}
+                      className="text-stone-400 hover:text-red-600 transition"
+                      aria-label="Delete booking"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
 
-                  {doc.fileData && (
-                    <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
-                      <span className="text-xs text-stone-500 truncate max-w-[200px]">
-                        {doc.fileName || "Attached document"}
-                      </span>
-                      <a
-                        href={doc.fileData}
-                        download={doc.fileName || "travel-document"}
-                        className="inline-flex items-center gap-1 text-xs font-bold text-[#1F3A5F] hover:underline"
-                      >
-                        <Download className="h-3.5 w-3.5" /> View / Download
-                      </a>
+                  {doc.confirmationCode && (
+                    <div className="mt-2 rounded-md bg-stone-100 px-2.5 py-1 font-mono text-xs font-bold text-[#1F3A5F] w-fit border border-stone-200/60">
+                      REF: {doc.confirmationCode}
                     </div>
                   )}
+
+                  {doc.notes && (
+                    <p className="mt-2 text-xs text-stone-600 leading-relaxed font-medium">
+                      {doc.notes}
+                    </p>
+                  )}
+
+                  {doc.amount && (
+                    <p className="mt-1 text-xs font-bold text-[#C1502E]">
+                      Amount: {doc.amount}
+                    </p>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
+
+                {doc.fileData && (
+                  <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
+                    <span className="text-xs text-stone-500 truncate max-w-[200px]">
+                      {doc.fileName || "Attached file"}
+                    </span>
+                    <a
+                      href={doc.fileData}
+                      target="_blank"
+                      rel="noreferrer"
+                      download={doc.fileName || "booking-document"}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-[#1F3A5F] hover:underline"
+                    >
+                      <Download className="h-3.5 w-3.5" /> View / Download
+                    </a>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* 3. SMART PACKING CHECKLIST */}
+      {/* 3. TRAVEL DOCUMENTS FOLDER (PASSPORTS, VISAS & INSURANCE WITH PRIVACY TOGGLE) */}
+      {toolTab === "documents" && (
+        <div className="space-y-6">
+          {/* Privacy Notice Banner */}
+          <div className="rounded-3xl border border-indigo-200 bg-indigo-50/80 p-5 text-xs text-indigo-950 leading-relaxed flex items-start gap-3">
+            <Lock className="h-5 w-5 text-indigo-700 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold text-sm">Protected Travel Documents Vault</p>
+              <p className="mt-0.5 text-indigo-800">
+                Passports and Japan Visas are blurred by default on screen so you can safely use your phone in public. Tap <b>&quot;Reveal Document&quot;</b> on any traveler to display their passport and visa image at airport check-in, immigration, or hotel reception. (No password required).
+              </p>
+            </div>
+          </div>
+
+          {/* Passenger Passports & Visas Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {tripMeta.travelers.map((traveler) => {
+              const isRevealed = !!revealedDocs[traveler.id];
+              return (
+                <div
+                  key={traveler.id}
+                  className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-lg flex flex-col justify-between"
+                >
+                  <div className="bg-stone-50 p-5 border-b border-stone-200 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-9 w-9 rounded-full bg-[#1F3A5F] text-white flex items-center justify-center font-bold text-xs">
+                        {traveler.travelerName.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                      </div>
+                      <div>
+                        <h4 className="font-serif text-base font-bold text-stone-900">
+                          {traveler.travelerName}
+                        </h4>
+                        <span className="font-mono text-[10px] font-bold text-[#FF5F93]">
+                          Flight PNR: {traveler.pnr}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => toggleReveal(traveler.id)}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+                        isRevealed
+                          ? "bg-stone-200 text-stone-800 hover:bg-stone-300"
+                          : "bg-[#1F3A5F] text-white hover:bg-[#132540] shadow-sm"
+                      }`}
+                    >
+                      {isRevealed ? (
+                        <>
+                          <EyeOff className="h-3.5 w-3.5" />
+                          <span>Hide</span>
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="h-3.5 w-3.5" />
+                          <span>Reveal</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="p-5 space-y-4">
+                    <div className="flex items-center justify-between text-xs font-medium text-stone-600">
+                      <span>Japan Visa Ref: <b className="font-mono text-stone-900">{traveler.visaNumber}</b></span>
+                      <span className="text-emerald-700 font-semibold">✓ Single Entry Tourism</span>
+                    </div>
+
+                    {/* Document Images (Blurred unless revealed) */}
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Passport Image Card */}
+                      <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-stone-100 aspect-[3/4] flex flex-col justify-end p-2 text-center">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={traveler.passportImage}
+                          alt={`${traveler.travelerName} Passport`}
+                          className={`absolute inset-0 h-full w-full object-cover transition-all duration-300 ${
+                            isRevealed ? "filter-none" : "filter blur-md brightness-75 scale-105"
+                          }`}
+                        />
+                        <div className="relative z-10 rounded-lg bg-black/60 px-2 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
+                          Passport Photo
+                        </div>
+                      </div>
+
+                      {/* Visa Image Card */}
+                      <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-stone-100 aspect-[3/4] flex flex-col justify-end p-2 text-center">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={traveler.visaImage}
+                          alt={`${traveler.travelerName} Visa`}
+                          className={`absolute inset-0 h-full w-full object-cover transition-all duration-300 ${
+                            isRevealed ? "filter-none" : "filter blur-md brightness-75 scale-105"
+                          }`}
+                        />
+                        <div className="relative z-10 rounded-lg bg-black/60 px-2 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
+                          Japan Visa ({traveler.visaNumber})
+                        </div>
+                      </div>
+                    </div>
+
+                    {isRevealed && (
+                      <div className="pt-2 flex items-center justify-between text-xs">
+                        <a
+                          href={traveler.passportImage}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-bold text-[#1F3A5F] hover:underline inline-flex items-center gap-1"
+                        >
+                          <span>Open Full Passport</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                        <a
+                          href={traveler.visaImage}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-bold text-[#1F3A5F] hover:underline inline-flex items-center gap-1"
+                        >
+                          <span>Open Full Visa</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Travel Insurance & Support Documents Section */}
+          <div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-md space-y-4">
+            <h4 className="font-serif text-base font-bold text-[#1F3A5F] flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-emerald-600" />
+              <span>Travel Insurance & Visa Verification Letters</span>
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="rounded-2xl border border-stone-100 bg-stone-50 p-4 space-y-1">
+                <span className="font-bold text-stone-900 text-sm">VFS Global Appointment & Visa Submission</span>
+                <p className="text-stone-600">5 Applicants (Tourism Category) · Reference #1151572948 · Confirmed & Released</p>
+                <span className="inline-block mt-1 font-semibold text-emerald-700">✓ All 5 Visas Approved</span>
+              </div>
+
+              <div className="rounded-2xl border border-stone-100 bg-stone-50 p-4 space-y-1">
+                <span className="font-bold text-stone-900 text-sm">Travel Insurance Policy</span>
+                <p className="text-stone-600">Coverage for 5 travelers for trip duration (Sep 1–7, 2026). Emergency evacuation & medical included.</p>
+                <span className="inline-block mt-1 font-semibold text-sky-700">24/7 International Assistance</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 4. SMART PACKING CHECKLIST */}
       {toolTab === "packing" && (
         <div className="space-y-6">
           {/* Packing Progress Bar */}
@@ -891,7 +1117,7 @@ export const TripTools: React.FC = () => {
         </div>
       )}
 
-      {/* 4. TRIP MEMORIES GALLERY (STORED IN INDEXEDDB) */}
+      {/* 5. TRIP MEMORIES GALLERY (STORED IN INDEXEDDB) */}
       {toolTab === "memories" && (
         <div className="space-y-6">
           {/* Upload Photo Form */}
