@@ -266,6 +266,22 @@ export default function BudgetPage() {
   const balanceCashOnHandJPY = totalCashWithdrawnJPY - actualSpentCashJPY;
   const balanceCashOnHandPHP = Math.round(balanceCashOnHandJPY / fxRate);
 
+  // Sorted arrays by date descending (latest/newest on top)
+  const sortedPaidExpenses = [...paidExpenses].sort((a, b) => {
+    const diff = new Date(b.date).getTime() - new Date(a.date).getTime();
+    return diff !== 0 ? diff : b.id.localeCompare(a.id);
+  });
+
+  const sortedPlannedExpenses = [...plannedExpenses].sort((a, b) => {
+    const diff = new Date(b.date).getTime() - new Date(a.date).getTime();
+    return diff !== 0 ? diff : b.id.localeCompare(a.id);
+  });
+
+  const sortedCashWithdrawals = [...cashWithdrawals].sort((a, b) => {
+    const diff = new Date(b.date).getTime() - new Date(a.date).getTime();
+    return diff !== 0 ? diff : b.id.localeCompare(a.id);
+  });
+
   // Live Sync with /api/expenses (Telegram / n8n)
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
@@ -810,7 +826,7 @@ export default function BudgetPage() {
             <div className="rounded-2xl border border-stone-200 bg-stone-50/80 p-4 space-y-2">
               <span className="text-xs font-bold text-stone-900">Recent ATM Cash Inflows</span>
               <div className="divide-y divide-stone-200">
-                {cashWithdrawals.map((w) => (
+                {sortedCashWithdrawals.map((w) => (
                   <div key={w.id} className="py-2 flex items-center justify-between text-xs">
                     <div>
                       <span className="font-bold text-stone-900">¥{w.amountJPY.toLocaleString()} JPY</span>
@@ -888,12 +904,12 @@ export default function BudgetPage() {
 
           {/* Paid Expenses List */}
           <div className="divide-y divide-stone-200 rounded-3xl border border-stone-200 bg-white shadow-md overflow-hidden">
-            {paidExpenses.length === 0 ? (
+            {sortedPaidExpenses.length === 0 ? (
               <div className="p-8 text-center text-xs text-stone-500">
                 No paid expenses yet. Click &quot;+ Add Paid Expense&quot; above to log your first transaction.
               </div>
             ) : (
-              paidExpenses.map((item) => {
+              sortedPaidExpenses.map((item) => {
                 const phpValue = Math.round(item.amount / fxRate);
                 return (
                   <div
@@ -1000,12 +1016,12 @@ export default function BudgetPage() {
 
           {/* Planned Expenses List */}
           <div className="divide-y divide-stone-200 rounded-3xl border border-stone-200 bg-white shadow-md overflow-hidden">
-            {plannedExpenses.length === 0 ? (
+            {sortedPlannedExpenses.length === 0 ? (
               <div className="p-8 text-center text-xs text-stone-500">
                 All planned expenses have been marked as paid or none entered. Click &quot;+ Add Planned Expense&quot; above.
               </div>
             ) : (
-              plannedExpenses.map((item) => {
+              sortedPlannedExpenses.map((item) => {
                 const phpValue = Math.round(item.amount / fxRate);
                 return (
                   <div
