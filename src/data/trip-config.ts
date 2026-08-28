@@ -201,7 +201,7 @@ export const itineraryDays: ItineraryDay[] = [
     area: "Narita Airport → Hanakawado Asakusa",
     icon: "⛩️",
     image:
-      "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1200&q=80",
+      "/images/destinations/day1-asakusa.jpg",
     transitNote:
       "NAIA T3 Lounge (UnionBank Miles+ Visa) → Flight to Narita (arr 11:35 AM) → Keisei Access Express to Asakusa Station (~60–80 min direct, ¥1,300–1,350) → Hotel Plus Hostel Asakusa 2",
     transitSummary: {
@@ -325,7 +325,7 @@ export const itineraryDays: ItineraryDay[] = [
     area: "Disney Resort (Maihama)",
     icon: "🏰",
     image:
-      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+      "/images/destinations/day2-disneyland.jpg",
     transitNote:
       "Asakusa → Maihama: Ginza Line to Kanda → JR to Tokyo → JR Keiyo Line (~50–55 min total, allow 10 min inside Tokyo Station)",
     transitSummary: {
@@ -461,7 +461,7 @@ export const itineraryDays: ItineraryDay[] = [
         icon: "🪄",
         badges: ["Booked & paid", "100% Indoor"],
         image:
-          "https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=800&q=80",
+          "/images/destinations/day3-harrypotter.jpg",
         transit: {
           routeId: "hotel-studio-tour",
           title: "Toei Oedo Line to Toshimaen",
@@ -541,7 +541,7 @@ export const itineraryDays: ItineraryDay[] = [
     area: "Disney Resort (Maihama)",
     icon: "🌊",
     image:
-      "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=80",
+      "/images/destinations/day4-disneysea.jpg",
     transitNote:
       "Hotel → Maihama → Disney Resort Line monorail to Tokyo DisneySea Station · dedicate full day to the park",
     transitSummary: {
@@ -652,7 +652,7 @@ export const itineraryDays: ItineraryDay[] = [
     area: "West Tokyo (Shibuya City)",
     icon: "🚦",
     image:
-      "https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=1200&q=80",
+      "/images/destinations/day5-shibuya.jpg",
     transitNote:
       "Asakusa → Shibuya: Direct Tokyo Metro Ginza Line (~35–40 min, 0 transfers, ¥320) · exit at Hachiko Exit",
     transitSummary: {
@@ -754,7 +754,7 @@ export const itineraryDays: ItineraryDay[] = [
     area: "Electric Town (Chiyoda City)",
     icon: "🕹️",
     image:
-      "https://images.unsplash.com/photo-1554797589-7241bb691973?auto=format&fit=crop&w=1200&q=80",
+      "/images/destinations/day6-akihabara.jpg",
     transitNote:
       "Asakusa → Akihabara: Tsukuba Express direct (~15 min, ¥150) · exit at Electric Town Exit",
     transitSummary: {
@@ -849,7 +849,7 @@ export const itineraryDays: ItineraryDay[] = [
     area: "Asakusa → Narita Airport T2",
     icon: "🛫",
     image:
-      "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1200&q=80",
+      "/images/destinations/day7-narita.jpg",
     transitNote:
       "Asakusa Station → Narita Airport (NRT T2): Keisei Access Express direct (~55–80 min, ¥1,300–1,350) → Executive Lounge 2 (BDO JCB Platinum)",
     transitSummary: {
@@ -957,7 +957,7 @@ export const placeGuides: PlaceGuide[] = [
     district: "Asakusa, Taito City",
     tagline: "Tokyo's oldest temple, giant red lanterns, and historic market stalls.",
     image:
-      "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1200&q=80",
+      "/images/destinations/day1-asakusa.jpg",
     recommendedDuration: "2 to 3 hours",
     whatYoullSee: [
       "Kaminarimon (Thunder Gate) with iconic 700kg red chochin lantern",
@@ -1007,7 +1007,7 @@ export const placeGuides: PlaceGuide[] = [
     district: "Maihama, Urayasu",
     tagline: "The world's most charming Disney park, featuring exclusive trackless marvels.",
     image:
-      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+      "/images/destinations/day2-disneyland.jpg",
     recommendedDuration: "Full day (10 to 12 hours)",
     whatYoullSee: [
       "Enchanted Tale of Beauty and the Beast inside the colossal pink Beast's Castle",
@@ -1109,7 +1109,7 @@ export const placeGuides: PlaceGuide[] = [
     district: "Maihama, Urayasu",
     tagline: "Widely acclaimed as the most magnificent theme park ever built.",
     image:
-      "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=80",
+      "/images/destinations/day4-disneysea.jpg",
     recommendedDuration: "Full day (11 to 13 hours)",
     whatYoullSee: [
       "Fantasy Springs: Anna & Elsa's Frozen Journey, Peter Pan's Never Land, Rapunzel's Lantern Festival",
@@ -1162,7 +1162,7 @@ export const placeGuides: PlaceGuide[] = [
     district: "Shibuya City",
     tagline: "From serene ancient shrine forests to the world's most energetic intersection.",
     image:
-      "https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=1200&q=80",
+      "/images/destinations/day5-shibuya.jpg",
     recommendedDuration: "5 to 6 hours",
     whatYoullSee: [
       "Meiji Jingu: Towering cypress torii gate and 170-acre forested sacred path",
@@ -1213,7 +1213,7 @@ export const placeGuides: PlaceGuide[] = [
     district: "Chiyoda City",
     tagline: "The world's capital of anime, gaming, electronics, and retro arcades.",
     image:
-      "https://images.unsplash.com/photo-1554797589-7241bb691973?auto=format&fit=crop&w=1200&q=80",
+      "/images/destinations/day6-akihabara.jpg",
     recommendedDuration: "4 to 5 hours",
     whatYoullSee: [
       "Radio Kaikan: 10 vertical floors of figures, cards, and hobby collectibles",
@@ -1266,7 +1266,7 @@ export const disneyGuides: DisneyParkGuide[] = [
     icon: "🏰",
     dateStr: "Wed, Sep 2, 2026",
     image:
-      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+      "/images/destinations/day2-disneyland.jpg",
     ropeDropStrategy:
       "Arrive at security gates 45–60 min before official open. Rope drop straight to Fantasyland for Enchanted Tale of Beauty and the Beast, followed immediately by Pooh's Hunny Hunt.",
     lands: [
@@ -1461,7 +1461,7 @@ export const disneyGuides: DisneyParkGuide[] = [
     icon: "🌊",
     dateStr: "Fri, Sep 4, 2026",
     image:
-      "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=80",
+      "/images/destinations/day4-disneysea.jpg",
     ropeDropStrategy:
       "Arrive early. Open the official Tokyo Disney Resort app as soon as through the turnstile and purchase Premier Access for Anna and Elsa's Frozen Journey, then head to Peter Pan or Journey to the Center of the Earth.",
     lands: [
