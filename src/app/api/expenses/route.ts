@@ -133,6 +133,14 @@ export async function POST(request: Request) {
         message: "Expense successfully recorded on TravelTokyo",
         expense: newExpense,
         totalPaidCount: updated.length,
+        chatId: body.chatId,
+        title: newExpense.title,
+        amount: newExpense.amount,
+        category: newExpense.category,
+        paymentMethod: newExpense.paymentMethod,
+        date: newExpense.date,
+        notes: newExpense.notes,
+        convertedAmountPHP: amountPHP,
       },
       { headers: corsHeaders }
     );
