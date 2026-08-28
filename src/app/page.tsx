@@ -160,7 +160,7 @@ export default function Home() {
           <PlacesAndGuides />
         </section>
 
-        {/* SECTION 4: TRIP TOOLS & VAULT */}
+        {/* SECTION 4: TRIP TOOLS & DOCUMENTS */}
         <section id="tools" className="scroll-mt-20">
           <TripTools />
         </section>
