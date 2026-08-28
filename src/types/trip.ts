@@ -98,12 +98,23 @@ export interface TripMeta {
   };
 }
 
+export interface TransitClickRef {
+  routeId: string;
+  title: string;
+  travelTime: string;
+  fare: string;
+  stepSummary: string;
+  mapQuery?: string;
+}
+
 export interface TimelineEvent {
   time: string;
   title: string;
   desc: string;
   icon?: string;
   badges?: string[];
+  image?: string;
+  transit?: TransitClickRef;
 }
 
 export interface ItineraryDay {
@@ -116,6 +127,13 @@ export interface ItineraryDay {
   icon: string;
   image: string;
   transitNote: string;
+  transitSummary?: {
+    from: string;
+    to: string;
+    time: string;
+    fare: string;
+    routeTitle: string;
+  };
   sunPlan: TimelineEvent[];
   rainPlan: TimelineEvent[];
   foodQuest: string;
@@ -163,6 +181,7 @@ export interface RideAttraction {
   tier: 1 | 2 | 3;
   desc: string;
   land: string;
+  image: string;
   heightRequirement?: string;
   isHighFall?: boolean;
   isClosed?: boolean;
@@ -174,6 +193,7 @@ export interface ShowPerformance {
   desc: string;
   schedule: string;
   icon: string;
+  image?: string;
 }
 
 export interface DisneyParkGuide {
@@ -207,6 +227,8 @@ export interface RestaurantItem {
   isRestricted?: boolean;
   restrictedNote?: string;
   icon: string;
+  image: string; // Restaurant atmosphere
+  menuImage: string; // Signature menu/food photo
 }
 
 export interface TransportRoute {

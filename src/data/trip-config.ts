@@ -197,13 +197,20 @@ export const itineraryDays: ItineraryDay[] = [
     date: "TUE · SEP 1",
     shortDate: "Sep 1",
     fullDateString: "2026-09-01",
-    title: "Arrival & Asakusa",
-    area: "Narita → Hanakawado Asakusa",
+    title: "Arrival & Historic Asakusa",
+    area: "Narita Airport → Hanakawado Asakusa",
     icon: "⛩️",
     image:
       "https://images.unsplash.com/photo-1583084332453-83802d149087?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "NAIA T3 Lounge (UnionBank Miles+ Visa) → Flight to Narita (arr 11:35 AM) → Keisei Access Express to Asakusa Station (~60–80 min direct, ¥1,300–1,350) → Hotel Plus Hostel Asakusa 2",
+    transitSummary: {
+      from: "Narita Airport T2·3",
+      to: "Hotel Plus Hostel Asakusa 2 (Hanakawado)",
+      time: "55–80 min",
+      fare: "≈ ¥1,300–1,350",
+      routeTitle: "Keisei Access Express (Direct to Asakusa)",
+    },
     sunPlan: [
       {
         time: "03:30",
@@ -211,6 +218,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Check-in at NAIA T3. Relax at airport lounge using UnionBank Miles+ Platinum Visa card (Backup: Security Bank Travel Pass).",
         icon: "☕",
         badges: ["Lounge Access", "UnionBank Visa"],
+        image:
+          "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "06:10",
@@ -218,6 +227,14 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Morning flight to Tokyo Narita. PNRs: Mary Joyce (WETQNY), Anita (WC2HXE), Marlon (MH1ZRC), Jane & Bella (NLNDWD).",
         icon: "✈️",
         badges: ["Flight", "Booked & Confirmed"],
+        transit: {
+          routeId: "narita-arrival",
+          title: "Keisei Access Express to Asakusa",
+          travelTime: "55–80 min",
+          fare: "¥1,300–1,350",
+          stepSummary: "Board Keisei Access Express (orange signs) bound for Haneda/Nishi-Magome. Direct ride to Asakusa.",
+          mapQuery: "Narita+Airport+to+Asakusa+Station",
+        },
       },
       {
         time: "15:00",
@@ -225,6 +242,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Hotel Plus Hostel TOKYO ASAKUSA 2 (1-7-10 Hanakawado). Agoda Booking #1759447607 (¥89,525 / ~₱33,157). Freshen up.",
         icon: "🏨",
         badges: ["Agoda #1759447607", "2 Double Rooms"],
+        image:
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "16:30",
@@ -232,6 +251,16 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Gentle afternoon walk through Nakamise shopping street to Sensō-ji. Incense burner and omikuji fortunes.",
         icon: "⛩️",
         badges: ["Free", "Outdoor"],
+        image:
+          "https://images.unsplash.com/photo-1583084332453-83802d149087?auto=format&fit=crop&w=800&q=80",
+        transit: {
+          routeId: "asakusa-local",
+          title: "Walk to Sensō-ji & Kaminarimon",
+          travelTime: "3–5 min walk",
+          fare: "Free (Walking)",
+          stepSummary: "Walk south from Hanakawado along Nakamise arcade to temple gates.",
+          mapQuery: "Senso-ji+Temple+Asakusa",
+        },
       },
       {
         time: "18:00",
@@ -239,6 +268,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Stroll between Azumabashi and Sumida Park with breeze and sunset views of Tokyo Skytree.",
         icon: "🌇",
         badges: ["Free", "Outdoor"],
+        image:
+          "https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?auto=format&fit=crop&w=800&q=80",
       },
     ],
     rainPlan: [
@@ -290,13 +321,20 @@ export const itineraryDays: ItineraryDay[] = [
     date: "WED · SEP 2",
     shortDate: "Sep 2",
     fullDateString: "2026-09-02",
-    title: "Tokyo Disneyland",
+    title: "Tokyo Disneyland Full Day",
     area: "Disney Resort (Maihama)",
     icon: "🏰",
     image:
       "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Asakusa → Maihama: Ginza Line to Kanda → JR to Tokyo → JR Keiyo Line (~50–55 min total, allow 10 min inside Tokyo Station)",
+    transitSummary: {
+      from: "Hotel Plus Hostel Asakusa 2",
+      to: "Tokyo Disneyland (Maihama Station)",
+      time: "50–55 min",
+      fare: "≈ ¥410–470",
+      routeTitle: "Ginza Line → JR Line → JR Keiyo Line to Maihama",
+    },
     sunPlan: [
       {
         time: "08:00",
@@ -304,6 +342,16 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Head straight to Fantasyland for Enchanted Tale of Beauty and the Beast, followed by Pooh's Hunny Hunt.",
         icon: "🎡",
         badges: ["Booked & paid", "Tier 1"],
+        image:
+          "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
+        transit: {
+          routeId: "hotel-disney",
+          title: "Asakusa to Maihama (Disneyland)",
+          travelTime: "50–55 min",
+          fare: "¥410–470",
+          stepSummary: "Ginza Line (Asakusa → Kanda) → JR Yamanote (Kanda → Tokyo) → JR Keiyo Line (Tokyo → Maihama).",
+          mapQuery: "Asakusa+to+Maihama+Station",
+        },
       },
       {
         time: "09:40",
@@ -311,6 +359,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Monsters, Inc. Ride & Go Seek! followed by Big Thunder Mountain and Splash Mountain.",
         icon: "🚀",
         badges: ["Tier 1 Must-Ride"],
+        image:
+          "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "13:00",
@@ -318,6 +368,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Indoor rides (Haunted Mansion, Pirates of the Caribbean) or seated lunch at Hungry Bear / Plaza Pavilion.",
         icon: "🧊",
         badges: ["Indoor Break"],
+        image:
+          "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "17:00",
@@ -325,6 +377,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Catch Disney Harmony in Color parade, followed by Reach for the Stars castle show & Dreamlights electrical parade.",
         icon: "🎆",
         badges: ["Parade / Shows"],
+        image:
+          "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=800&q=80",
       },
     ],
     rainPlan: [
@@ -369,13 +423,20 @@ export const itineraryDays: ItineraryDay[] = [
     date: "THU · SEP 3",
     shortDate: "Sep 3",
     fullDateString: "2026-09-03",
-    title: "Warner Bros. Studio Tour & Hotel Bath",
+    title: "Warner Bros. Harry Potter Studio Tour",
     area: "Asakusa → Toshimaen",
     icon: "🪄",
     image:
       "https://images.unsplash.com/photo-1551269901-5c5e14c25df7?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Eat lunch before leaving · Asakusa/Kuramae to Toshimaen on Toei Oedo Line direct (~55 min) · allow 60–75 min door-to-door",
+    transitSummary: {
+      from: "Hotel Plus Hostel Asakusa 2",
+      to: "Warner Bros. Studio Tour (Toshimaen Station)",
+      time: "55–60 min",
+      fare: "≈ ¥325–330",
+      routeTitle: "Toei Oedo Line Direct from Kuramae to Toshimaen",
+    },
     sunPlan: [
       {
         time: "Morning",
@@ -390,6 +451,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Hearty sit-down lunch near the hotel before crossing Tokyo so the tour is your first fixed event.",
         icon: "🍜",
         badges: ["Local Dining"],
+        image:
+          "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "13:00",
@@ -397,6 +460,16 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "The Making of Harry Potter: Great Hall, Diagon Alley, Hogwarts Express, Butterbeer, and Ministry of Magic.",
         icon: "🪄",
         badges: ["Booked & paid", "100% Indoor"],
+        image:
+          "https://images.unsplash.com/photo-1551269901-5c5e14c25df7?auto=format&fit=crop&w=800&q=80",
+        transit: {
+          routeId: "hotel-studio-tour",
+          title: "Toei Oedo Line to Toshimaen",
+          travelTime: "55–60 min (Direct)",
+          fare: "¥325–330",
+          stepSummary: "Board Toei Oedo Line at Kuramae bound for Hikarigaoka. 0 transfers. 2-min walk from Toshimaen Station.",
+          mapQuery: "Warner+Bros+Studio+Tour+Tokyo+Toshimaen",
+        },
       },
       {
         time: "17:30",
@@ -411,6 +484,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Unwind in the hotel's on-site sento bath and sauna. Perfect recharge before DisneySea tomorrow.",
         icon: "♨️",
         badges: ["Included at Hotel"],
+        image:
+          "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80",
       },
     ],
     rainPlan: [
@@ -462,13 +537,20 @@ export const itineraryDays: ItineraryDay[] = [
     date: "FRI · SEP 4",
     shortDate: "Sep 4",
     fullDateString: "2026-09-04",
-    title: "Tokyo DisneySea",
+    title: "Tokyo DisneySea & Fantasy Springs",
     area: "Disney Resort (Maihama)",
     icon: "🌊",
     image:
       "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Hotel → Maihama → Disney Resort Line monorail to Tokyo DisneySea Station · dedicate full day to the park",
+    transitSummary: {
+      from: "Hotel Plus Hostel Asakusa 2",
+      to: "Tokyo DisneySea Station",
+      time: "55–60 min",
+      fare: "≈ ¥470 rail + ¥260 monorail",
+      routeTitle: "Rail to Maihama + Disney Resort Line Monorail",
+    },
     sunPlan: [
       {
         time: "08:00",
@@ -476,6 +558,16 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Open Tokyo Disney app immediately upon entry. Grab Premier Access for Anna and Elsa's Frozen Journey, then Peter Pan.",
         icon: "❄️",
         badges: ["Booked & paid", "#1 Priority"],
+        image:
+          "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
+        transit: {
+          routeId: "hotel-disney",
+          title: "Asakusa to Tokyo DisneySea",
+          travelTime: "55–60 min",
+          fare: "¥470 + ¥260 monorail",
+          stepSummary: "Ginza Line → JR Keiyo Line to Maihama → Disney Resort Line Monorail to DisneySea Station.",
+          mapQuery: "Tokyo+DisneySea+Maihama",
+        },
       },
       {
         time: "10:15",
@@ -483,6 +575,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Journey to the Center of the Earth, followed by Indiana Jones Adventure (use Single Rider if useful).",
         icon: "🌋",
         badges: ["Flagship Thrills"],
+        image:
+          "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "13:00",
@@ -490,6 +584,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Sit-down lunch at Casbah Food Court or Zambini Brothers, followed by Soaring: Fantastic Flight.",
         icon: "🧭",
         badges: ["Rest & Ride"],
+        image:
+          "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "18:30",
@@ -497,6 +593,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Serene gondola ride through Palazzo Canals during golden hour lighting.",
         icon: "🛶",
         badges: ["Atmosphere"],
+        image:
+          "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "19:30",
@@ -504,6 +602,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Spectacular nighttime harbor show with projection mapping, water fountains, lasers, and fireworks.",
         icon: "🌟",
         badges: ["Night Anchor"],
+        image:
+          "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=800&q=80",
       },
     ],
     rainPlan: [
@@ -548,13 +648,20 @@ export const itineraryDays: ItineraryDay[] = [
     date: "SAT · SEP 5",
     shortDate: "Sep 5",
     fullDateString: "2026-09-05",
-    title: "Shibuya & Harajuku",
-    area: "West Tokyo",
+    title: "Shibuya, Harajuku & Meiji Shrine",
+    area: "West Tokyo (Shibuya City)",
     icon: "🚦",
     image:
       "https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Asakusa → Shibuya: Direct Tokyo Metro Ginza Line (~35–40 min, 0 transfers, ¥320) · exit at Hachiko Exit",
+    transitSummary: {
+      from: "Hotel Plus Hostel Asakusa 2",
+      to: "Shibuya Station (Hachiko Exit)",
+      time: "35–40 min",
+      fare: "¥320 (¥317 IC Card)",
+      routeTitle: "Tokyo Metro Ginza Line Direct (0 Transfers)",
+    },
     sunPlan: [
       {
         time: "09:00",
@@ -562,6 +669,16 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Early shaded walk through the towering evergreen forest before midday heat. Main shrine hall and torii gate.",
         icon: "⛩️",
         badges: ["Free", "Outdoor, Shaded"],
+        image:
+          "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=800&q=80",
+        transit: {
+          routeId: "hotel-shibuya",
+          title: "Ginza Line to Shibuya / Harajuku",
+          travelTime: "35–40 min",
+          fare: "¥320",
+          stepSummary: "Ride Ginza Line from Asakusa direct to Shibuya Station. Walk north toward Meiji Jingu.",
+          mapQuery: "Meiji+Jingu+Shibuya",
+        },
       },
       {
         time: "11:30",
@@ -569,6 +686,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Window shopping, iconic Harajuku crepes, and Kiddy Land character goods (Hello Kitty, Snoopy, Ghibli).",
         icon: "🍡",
         badges: ["Free to browse"],
+        image:
+          "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "13:00",
@@ -576,6 +695,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Cross the world's busiest intersection, take photos at Hachiko, and view the crossing from Starbucks 2F.",
         icon: "🚦",
         badges: ["Iconic Landmark"],
+        image:
+          "https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "14:30",
@@ -583,6 +704,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Air-conditioned shopping at Mega Donki (tax-free snacks/cosmetics) and Shibuya PARCO Pokémon Center.",
         icon: "⚡",
         badges: ["Indoor Shopping"],
+        image:
+          "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80",
       },
     ],
     rainPlan: [
@@ -627,13 +750,20 @@ export const itineraryDays: ItineraryDay[] = [
     date: "SUN · SEP 6",
     shortDate: "Sep 6",
     fullDateString: "2026-09-06",
-    title: "Akihabara Electric Town",
-    area: "Electric Town & Anime Hub",
+    title: "Akihabara Electric Town & Hobby Hub",
+    area: "Electric Town (Chiyoda City)",
     icon: "🕹️",
     image:
       "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Asakusa → Akihabara: Tsukuba Express direct (~15 min, ¥150) · exit at Electric Town Exit",
+    transitSummary: {
+      from: "Hotel Plus Hostel Asakusa 2",
+      to: "Akihabara Station (Electric Town Exit)",
+      time: "15 min",
+      fare: "¥150 (IC Card)",
+      routeTitle: "Tsukuba Express Direct (2 Stops)",
+    },
     sunPlan: [
       {
         time: "10:00",
@@ -641,6 +771,16 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Calm Shinto shrine with IT & tech amulets, just a 5-min walk from Akihabara Station before crowds peak.",
         icon: "⛩️",
         badges: ["Free", "Calm Start"],
+        image:
+          "https://images.unsplash.com/photo-1583084332453-83802d149087?auto=format&fit=crop&w=800&q=80",
+        transit: {
+          routeId: "hotel-akihabara",
+          title: "Tsukuba Express to Akihabara",
+          travelTime: "15 min",
+          fare: "¥150",
+          stepSummary: "Walk to Tsukuba Express Asakusa Station. Ride 2 stops direct to Akihabara Electric Town Exit.",
+          mapQuery: "Akihabara+Electric+Town",
+        },
       },
       {
         time: "11:30",
@@ -648,6 +788,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Multi-floor flagship anime, manga, and collectible hobby stores along the main boulevard.",
         icon: "🛍️",
         badges: ["Indoor Shopping"],
+        image:
+          "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "14:00",
@@ -655,6 +797,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Rhythm games, crane games, and retro arcade floors in the heart of Electric Town.",
         icon: "🕹️",
         badges: ["Entertainment"],
+        image:
+          "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "16:00",
@@ -662,6 +806,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "9 floors of tax-free tech, gadgets, cameras, toys, and souvenirs with English-speaking staff.",
         icon: "📷",
         badges: ["Tax-Free Shopping"],
+        image:
+          "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=800&q=80",
       },
     ],
     rainPlan: [
@@ -699,13 +845,20 @@ export const itineraryDays: ItineraryDay[] = [
     date: "MON · SEP 7",
     shortDate: "Sep 7",
     fullDateString: "2026-09-07",
-    title: "Departure & Narita Airport",
+    title: "Departure & Narita Airport Lounges",
     area: "Asakusa → Narita Airport T2",
     icon: "🛫",
     image:
       "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Asakusa Station → Narita Airport (NRT T2): Keisei Access Express direct (~55–80 min, ¥1,300–1,350) → Executive Lounge 2 (BDO JCB Platinum)",
+    transitSummary: {
+      from: "Hotel Plus Hostel Asakusa 2",
+      to: "Narita Airport Terminal 2",
+      time: "55–80 min",
+      fare: "≈ ¥1,300–1,350",
+      routeTitle: "Keisei Access Express Direct to Narita T2",
+    },
     sunPlan: [
       {
         time: "08:15",
@@ -713,6 +866,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Final room check for passports, chargers, and Suica cards. Quick checkout at Hotel Plus Hostel 2 (Hanakawado).",
         icon: "🏨",
         badges: ["Check-out"],
+        image:
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "08:30",
@@ -720,6 +875,14 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Walk to Asakusa Station and board Access Express bound for Narita Airport T2·3. Direct ride.",
         icon: "🚆",
         badges: ["Direct Airport Train"],
+        transit: {
+          routeId: "hotel-departure",
+          title: "Access Express to Narita Airport T2",
+          travelTime: "55–80 min",
+          fare: "¥1,300–1,350",
+          stepSummary: "Board Keisei Access Express direct from Asakusa Station to Narita Airport Terminal 2.",
+          mapQuery: "Asakusa+to+Narita+Airport+Terminal+2",
+        },
       },
       {
         time: "10:30",
@@ -727,6 +890,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Check in bags, clear security, and enter Narita T2 EXECUTIVE LOUNGE 2 using BDO JCB Platinum card (Backup: Security Bank Travel Pass).",
         icon: "🛋️",
         badges: ["Lounge Access", "BDO JCB Platinum"],
+        image:
+          "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "12:30",
@@ -734,6 +899,8 @@ export const itineraryDays: ItineraryDay[] = [
         desc: "Last-minute tax-free sweets shopping at Fa-So-La (Tokyo Banana, Royce' Nama Chocolate, KitKats).",
         icon: "🛍️",
         badges: ["Duty Free"],
+        image:
+          "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "13:45",
@@ -1111,8 +1278,10 @@ export const disneyGuides: DisneyParkGuide[] = [
           {
             name: "Enchanted Tale of Beauty and the Beast",
             tier: 1,
-            desc: "Trackless dark ride and the most popular headliner in the park. Incredible animatronics and moving dishes.",
+            desc: "Trackless dark ride inside the Beast's towering pink castle. Moving dishes and emotional animatronics.",
             land: "Fantasyland",
+            image:
+              "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
           {
@@ -1120,6 +1289,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 1,
             desc: "Tokyo-exclusive trackless ride bouncing unpredictably through the Hundred Acre Wood. Pure magic.",
             land: "Fantasyland",
+            image:
+              "https://images.unsplash.com/photo-1535572292557-e69509e8f5f6?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
           {
@@ -1127,6 +1298,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 1,
             desc: "Spooky atmospheric dark ride in an air-conditioned doom buggy. Mild scares, no big drops.",
             land: "Fantasyland",
+            image:
+              "https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
           {
@@ -1134,6 +1307,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 2,
             desc: "Classic boat cruise with added Disney and Pixar character cameos. Great seated A/C break.",
             land: "Fantasyland",
+            image:
+              "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
           {
@@ -1141,6 +1316,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 2,
             desc: "Suspended galleon sailing over glowing nighttime London. Shorter queue in late afternoon.",
             land: "Fantasyland",
+            image:
+              "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
         ],
@@ -1153,8 +1330,10 @@ export const disneyGuides: DisneyParkGuide[] = [
           {
             name: "Monsters, Inc. Ride & Go Seek!",
             tier: 1,
-            desc: "Exclusive to Tokyo: use interactive flashlights to illuminate hidden animatronic monsters.",
+            desc: "Exclusive to Tokyo: use interactive flashlights to illuminate hidden animatronic monsters in Monstropolis.",
             land: "Tomorrowland",
+            image:
+              "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
           {
@@ -1162,13 +1341,17 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 2,
             desc: "Upbeat musical whip spinner ride with infectious Japanese pop music.",
             land: "Tomorrowland",
+            image:
+              "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "Over 81cm",
           },
           {
             name: "Star Tours: The Adventures Continue",
             tier: 2,
-            desc: "3D motion simulator with randomized Star Wars film sequences. Fast-moving line.",
+            desc: "3D motion simulator with randomized Star Wars film sequences. Fast-moving queue line.",
             land: "Tomorrowland",
+            image:
+              "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "Over 102cm",
           },
         ],
@@ -1183,6 +1366,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 1,
             desc: "Runaway mine train coaster curving through red rock canyons. Moderate thrill, no inversion.",
             land: "Westernland",
+            image:
+              "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "Over 102cm",
           },
           {
@@ -1190,6 +1375,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 1,
             desc: "Log flume dark ride culminating in a steep 52.5-foot drop. One of the last classic originals in the world.",
             land: "Critter Country",
+            image:
+              "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "Over 90cm",
             isHighFall: true,
           },
@@ -1198,6 +1385,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 3,
             desc: "Seasonal Vacation Jamboree animatronic musical show. Cool shaded rest.",
             land: "Westernland",
+            image:
+              "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
         ],
@@ -1212,6 +1401,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 1,
             desc: "Longest version in any Disney park with elaborate bay scenes and Jack Sparrow animatronics.",
             land: "Adventureland",
+            image:
+              "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
           {
@@ -1219,6 +1410,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 2,
             desc: "Skipper-led boat journey. Extra atmospheric after sunset with nighttime lighting.",
             land: "Adventureland",
+            image:
+              "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
         ],
@@ -1230,18 +1423,24 @@ export const disneyGuides: DisneyParkGuide[] = [
         desc: "Flagship daytime parade featuring 7 vibrant floats from Zootopia, Moana, Coco, Big Hero 6, and Up.",
         schedule: "Daytime (approx 1:00 PM)",
         icon: "🎊",
+        image:
+          "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=800&q=80",
       },
       {
         name: "Reach for the Stars: Everlasting Dreams",
         desc: "Nighttime Cinderella Castle projection mapping and pyrotechnics summer spectacular.",
         schedule: "Nighttime (approx 8:00 PM)",
         icon: "✨",
+        image:
+          "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=800&q=80",
       },
       {
         name: "Tokyo Disneyland Electrical Parade Dreamlights",
         desc: "Legendary illuminated night parade with 20+ million LED lights and Disney classics.",
         schedule: "Nighttime (approx 8:45 PM)",
         icon: "💡",
+        image:
+          "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=800&q=80",
       },
     ],
     hourlyPlan: [
@@ -1276,6 +1475,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 1,
             desc: "#1 Priority in the entire park. Breathtaking musical boat journey with stunning audio-animatronics.",
             land: "Fantasy Springs",
+            image:
+              "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
           {
@@ -1283,6 +1484,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 1,
             desc: "3D motion simulator soaring through Never Land with the Lost Boys to rescue John from Captain Hook.",
             land: "Fantasy Springs",
+            image:
+              "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "Over 102cm",
           },
           {
@@ -1290,6 +1493,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 2,
             desc: "Romantic boat ride drifting into the iconic floating lantern scene from Tangled.",
             land: "Fantasy Springs",
+            image:
+              "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
           {
@@ -1297,6 +1502,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 3,
             desc: "Whimsical family buggy spinner through Pixie Hollow seasons.",
             land: "Fantasy Springs",
+            image:
+              "https://images.unsplash.com/photo-1535572292557-e69509e8f5f6?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
         ],
@@ -1311,6 +1518,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 1,
             desc: "DisneySea's flagship thrill dark ride descending into Mount Prometheus before a high-speed launch.",
             land: "Mysterious Island",
+            image:
+              "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "Over 117cm",
             isHighFall: true,
           },
@@ -1319,6 +1528,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 1,
             desc: "Suspended submarine vehicle where you steer searchlights to spot deep-sea sea creatures.",
             land: "Mysterious Island",
+            image:
+              "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
           {
@@ -1326,6 +1537,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 1,
             desc: "Rough-terrain Jeep simulator through booby-trapped jungle ruins. Single Rider line recommended.",
             land: "Lost River Delta",
+            image:
+              "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "Over 117cm",
           },
         ],
@@ -1340,6 +1553,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 1,
             desc: "Gentle hang-glider theater simulator with realistic flight over world wonders with wind and scents.",
             land: "Mediterranean Harbor",
+            image:
+              "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "Over 102cm",
           },
           {
@@ -1347,6 +1562,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 1,
             desc: "Story-driven freefall drop tower inside the cursed Hotel Hightower. Random drop sequence.",
             land: "American Waterfront",
+            image:
+              "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "Over 102cm",
             isHighFall: true,
           },
@@ -1355,6 +1572,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 2,
             desc: "Authentic gondola cruise with singing gondoliers through the canals. Unbeatable at sunset.",
             land: "Mediterranean Harbor",
+            image:
+              "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
         ],
@@ -1369,6 +1588,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 1,
             desc: "Beloved dark boat ride with 100+ animatronics and Alan Menken's 'Compass of Your Heart' anthem.",
             land: "Arabian Coast",
+            image:
+              "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
           {
@@ -1376,6 +1597,8 @@ export const disneyGuides: DisneyParkGuide[] = [
             tier: 3,
             desc: "Fully indoor under-the-sea playground with spinners, slides, and kids rides. Great rain hideout.",
             land: "Mermaid Lagoon",
+            image:
+              "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
         ],
@@ -1387,12 +1610,16 @@ export const disneyGuides: DisneyParkGuide[] = [
         desc: "DisneySea's premier nighttime harbor show across Mediterranean Harbor with pyrotechnics, laser barges, and Disney heroes.",
         schedule: "Nighttime (approx 7:30 PM)",
         icon: "🌟",
+        image:
+          "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=800&q=80",
       },
       {
         name: "Sparkling Jubilee Celebration",
         desc: "25th-Anniversary harbor greeting with Mickey and friends in Jubilee Blue on decorated barges.",
         schedule: "Daytime (1–2 times daily)",
         icon: "💙",
+        image:
+          "https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=800&q=80",
       },
     ],
     hourlyPlan: [
@@ -1420,6 +1647,10 @@ export const disneyRestaurants: RestaurantItem[] = [
     signatureMenu: "Tempura set meal, Tonkatsu pork cutlet set, Miso soup",
     isPrioritySeating: true,
     icon: "🍱",
+    image:
+      "https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&w=800&q=80",
+    menuImage:
+      "https://images.unsplash.com/photo-1615361200141-f45040f367be?auto=format&fit=crop&w=800&q=80",
   },
   {
     name: "Blue Bayou Restaurant",
@@ -1427,9 +1658,13 @@ export const disneyRestaurants: RestaurantItem[] = [
     serviceType: "Table service",
     cuisine: "French-Creole Course Dining",
     desc: "Dine under a twilight sky with fireflies as Pirates of the Caribbean boats drift quietly past your table.",
-    signatureMenu: "Chef's course steak, Creole seafood, chocolate dessert",
+    signatureMenu: "Chef's course prime steak, Creole seafood gumbo, chocolate dessert",
     isPrioritySeating: true,
     icon: "🕯️",
+    image:
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
+    menuImage:
+      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
   },
   {
     name: "Hungry Bear Restaurant",
@@ -1437,9 +1672,13 @@ export const disneyRestaurants: RestaurantItem[] = [
     serviceType: "Counter service",
     cuisine: "Japanese Curry Rice",
     desc: "Spacious 690-seat dining hall with fast service and hearty portions. Great family value.",
-    signatureMenu: "Pork cutlet curry, adjustable spice curry rice (~¥900–1,200)",
+    signatureMenu: "Pork cutlet curry, chicken curry rice with steamed rice (~¥900–1,200)",
     isPrioritySeating: false,
     icon: "🍛",
+    image:
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
+    menuImage:
+      "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80",
   },
   {
     name: "Queen of Hearts Banquet Hall",
@@ -1450,6 +1689,10 @@ export const disneyRestaurants: RestaurantItem[] = [
     signatureMenu: "Heart-shaped hamburger steak, flank steak plate, unbirthday cake",
     isPrioritySeating: false,
     icon: "♥️",
+    image:
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=800&q=80",
+    menuImage:
+      "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80",
   },
   {
     name: "Tomorrowland Terrace",
@@ -1457,9 +1700,13 @@ export const disneyRestaurants: RestaurantItem[] = [
     serviceType: "Counter service",
     cuisine: "Burgers & Sandwiches",
     desc: "Huge 1,540-seat dining room with direct castle views and fast turnover.",
-    signatureMenu: "Baymax burger, fried chicken sandwich, french fries",
+    signatureMenu: "Baymax burger bun with fried chicken, seasoned french fries",
     isPrioritySeating: false,
     icon: "🍔",
+    image:
+      "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80",
+    menuImage:
+      "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80",
   },
   // DisneySea
   {
@@ -1468,9 +1715,13 @@ export const disneyRestaurants: RestaurantItem[] = [
     serviceType: "Table service",
     cuisine: "Fine Dining & Global Courses",
     desc: "Universally rated the finest dining experience in Tokyo Disney Resort, inside the Fortress gold dome.",
-    signatureMenu: "Magellan course (hors d'oeuvres, roast beef or fish, wine pairing)",
+    signatureMenu: "Magellan course (hors d'oeuvres, roast beef or fresh catch, wine pairing)",
     isPrioritySeating: true,
     icon: "🧭",
+    image:
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=800&q=80",
+    menuImage:
+      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
   },
   {
     name: "Ristorante di Canaletto",
@@ -1478,9 +1729,13 @@ export const disneyRestaurants: RestaurantItem[] = [
     serviceType: "Table service",
     cuisine: "Italian Pasta & Pizza",
     desc: "Waterfront dining along the Venetian canal as gondolas glide past.",
-    signatureMenu: "Handmade pasta courses, stone-oven pizza, tiramisu",
+    signatureMenu: "Stone-oven baked margherita pizza, seafood linguine, espresso tiramisu",
     isPrioritySeating: true,
     icon: "🍝",
+    image:
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
+    menuImage:
+      "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80",
   },
   {
     name: "Casbah Food Court",
@@ -1488,9 +1743,13 @@ export const disneyRestaurants: RestaurantItem[] = [
     serviceType: "Counter service",
     cuisine: "Authentic Indian Curry & Naan",
     desc: "Exotic marketplace dining room with rich curry aromas and generous family portions.",
-    signatureMenu: "Beef & chicken curry combos with fresh tandoori naan (~¥1,100)",
+    signatureMenu: "Beef & chicken curry combos served with fresh pillowy tandoori naan (~¥1,100)",
     isPrioritySeating: false,
     icon: "🍛",
+    image:
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
+    menuImage:
+      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=800&q=80",
   },
   {
     name: "The Snuggly Duckling",
@@ -1498,9 +1757,13 @@ export const disneyRestaurants: RestaurantItem[] = [
     serviceType: "Counter service",
     cuisine: "Gourmet Burgers (Tangled Themed)",
     desc: "Lively pub themed after the outlaws' hideout in Tangled with rich woodwork.",
-    signatureMenu: "Duckling dream burger, sweet ever-after dessert muffin",
+    signatureMenu: "Duckling dream cheeseburger, sweet ever-after dessert muffin",
     isPrioritySeating: false,
     icon: "🍺",
+    image:
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
+    menuImage:
+      "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80",
   },
   {
     name: "Royal Banquet of Arendelle",
@@ -1508,9 +1771,13 @@ export const disneyRestaurants: RestaurantItem[] = [
     serviceType: "Counter service",
     cuisine: "Nordic & Western Cuisine (Frozen Themed)",
     desc: "Dine inside Arendelle Castle among coronation portraits and royal tapestries.",
-    signatureMenu: "Arendelle royal set (beef stew / seafood in bread bowl, Olaf marshmallow)",
+    signatureMenu: "Arendelle royal set (beef stew in bread bowl, Olaf marshmallow sweet)",
     isPrioritySeating: false,
     icon: "👑",
+    image:
+      "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=800&q=80",
+    menuImage:
+      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
   },
 ];
 
@@ -1697,9 +1964,9 @@ export const transportRoutes: TransportRoute[] = [
       {
         step: 3,
         title: "Narita T2 Executive Lounge 2 (BDO JCB Platinum)",
-        desc: "Relax in Narita T2 Executive Lounge 2 before boarding gate opens.",
+        detail: "Relax in Narita T2 Executive Lounge 2 before boarding gate opens.",
         badges: ["Lounge 2", "BDO JCB Card"],
-      } as any,
+      },
     ],
     tips: "Leaving Asakusa by 8:30 AM ensures arrival around 9:45 AM, providing a generous 4-hour cushion for check-in, lounge access, and duty-free shopping.",
   },

@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { tripMeta, itineraryDays } from "../data/trip-config";
 import { useWeather } from "../hooks/useWeather";
 import { useFXRate } from "../hooks/useFXRate";
-import { CloudSun, ArrowRightLeft, MapPin, ExternalLink, Sparkles } from "lucide-react";
+import { CloudSun, ArrowRightLeft, MapPin, ExternalLink, Sparkles, ArrowRight } from "lucide-react";
 
 interface TodaySignalCardsProps {
   currentDayIndex: number;
@@ -52,16 +53,16 @@ export const TodaySignalCards: React.FC<TodaySignalCardsProps> = ({ currentDayIn
           </p>
         </div>
 
-        <button
-          onClick={onOpenItinerary}
+        <Link
+          href={`/itinerary#day-${currentDay.dayNumber}`}
           className="mt-auto inline-flex items-center gap-1.5 text-xs font-bold text-[#FF86A8] transition hover:text-white pt-2 border-t border-white/10"
         >
-          <span>View Day {currentDay.dayNumber} Timeline</span>
-          <span>→</span>
-        </button>
+          <span>Open Day {currentDay.dayNumber} Itinerary & Guide</span>
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
       </div>
 
-      {/* 2. TOKYO NOW (LIVE WEATHER VIA OPEN-METEO) */}
+      {/* 2. TOKYO NOW (LIVE WEATHER VIA OPEN-METEO -> LINKS TO /WEATHER) */}
       <div className="relative flex flex-col justify-between rounded-3xl border border-stone-200 bg-white p-6 shadow-md">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-black uppercase tracking-wider text-[#1F3A5F]">
@@ -87,7 +88,7 @@ export const TodaySignalCards: React.FC<TodaySignalCardsProps> = ({ currentDayIn
                 </span>
               </div>
               <p className="mt-1 text-xs font-semibold text-stone-700">
-                {weather.condition} · {weather.rainProbability}% rain chance
+                {weather.condition} · {weather.rainProbability}% rain
               </p>
             </>
           ) : (
@@ -98,9 +99,13 @@ export const TodaySignalCards: React.FC<TodaySignalCardsProps> = ({ currentDayIn
           )}
         </div>
 
-        <p className="mt-auto text-[11px] text-stone-500 border-t border-stone-100 pt-2">
-          Toggle Sun/Rain plan in itinerary as skies change.
-        </p>
+        <Link
+          href="/weather"
+          className="mt-auto inline-flex items-center justify-between text-xs font-bold text-[#1F3A5F] hover:text-[#FF5F93] border-t border-stone-100 pt-2 transition"
+        >
+          <span>7-Day & Hourly Forecast</span>
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
       </div>
 
       {/* 3. CURRENCY CONVERTER (PHP ⇄ JPY / LIVE FX) */}

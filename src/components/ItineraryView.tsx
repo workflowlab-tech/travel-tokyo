@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { itineraryDays } from "../data/trip-config";
-import { Sun, CloudRain, Utensils, Train, CheckCircle2, Clock } from "lucide-react";
+import { Sun, CloudRain, Utensils, Train, CheckCircle2, Clock, ArrowRight, Sparkles } from "lucide-react";
 
 interface ItineraryViewProps {
   selectedDayIndex: number;
@@ -56,6 +57,27 @@ export const ItineraryView: React.FC<ItineraryViewProps> = ({
             <span>☔ Rain Plan</span>
           </button>
         </div>
+      </div>
+
+      {/* PROMINENT DEDICATED ITINERARY PAGE BANNER */}
+      <div className="overflow-hidden rounded-3xl border border-stone-200 bg-gradient-to-r from-[#1F3A5F] to-[#132540] p-5 sm:p-6 text-white shadow-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-[#FF86A8]">
+            <Sparkles className="h-3.5 w-3.5 text-[#FFD66B]" />
+            <span>Full Destination Visual Guides & Disney Menus</span>
+          </div>
+          <h3 className="font-serif text-lg sm:text-xl font-bold text-white">
+            Explore photos, ride guides, dining menus & clickable transit.
+          </h3>
+        </div>
+
+        <Link
+          href={`/itinerary#day-${currentDay.dayNumber}`}
+          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#FF5F93] px-5 py-3 text-xs font-bold text-white shadow-md hover:bg-[#e84e80] transition active:scale-95 flex-shrink-0"
+        >
+          <span>Open Detailed Itinerary & Guide</span>
+          <ArrowRight className="h-4 w-4" />
+        </Link>
       </div>
 
       {/* Day Selector Tabs with Thumbnails */}
@@ -117,13 +139,21 @@ export const ItineraryView: React.FC<ItineraryViewProps> = ({
             </div>
           </div>
 
-          <div className="relative z-10 mt-8 pt-4 border-t border-white/20">
+          <div className="relative z-10 mt-8 pt-4 border-t border-white/20 flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-medium text-stone-200 drop-shadow">
               <CheckCircle2 className="h-4 w-4 text-[#FFD66B]" />
               <span>
-                {weatherMode === "sun" ? "☀️ Good Weather Strategy Active" : "☔ Rain Plan Active"}
+                {weatherMode === "sun" ? "☀️ Good Weather Strategy" : "☔ Rain Plan Active"}
               </span>
             </div>
+
+            <Link
+              href={`/itinerary#day-${currentDay.dayNumber}`}
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#FFD66B] hover:underline"
+            >
+              <span>Full Details</span>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
         </div>
 
@@ -131,9 +161,17 @@ export const ItineraryView: React.FC<ItineraryViewProps> = ({
         <div className="p-6 sm:p-8 lg:col-span-7 space-y-6">
           {/* Transit Route Note */}
           <div className="rounded-2xl border border-sky-200 bg-sky-50/80 p-4 shadow-sm">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-900">
-              <Train className="h-4 w-4 text-sky-600" />
-              <span>Transit & Route Guidance</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-900">
+                <Train className="h-4 w-4 text-sky-600" />
+                <span>Transit & Commute Route</span>
+              </div>
+              <Link
+                href={`/itinerary#day-${currentDay.dayNumber}`}
+                className="text-[11px] font-bold text-sky-700 hover:underline"
+              >
+                Directions & Fares →
+              </Link>
             </div>
             <p className="mt-1.5 text-xs text-sky-950 leading-relaxed font-medium">
               {currentDay.transitNote}
