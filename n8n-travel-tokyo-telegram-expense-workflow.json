@@ -1,0 +1,353 @@
+{
+  "name": "TravelTokyo - Actual Expense Tracking via Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0001",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        200,
+        300
+      ],
+      "webhookId": "travel-tokyo-telegram-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_BOT_CREDENTIALS_ID",
+          "name": "Telegram Bot Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ Boolean($json.message?.photo && $json.message?.photo.length > 0) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0002",
+      "name": "Has Receipt Photo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "fileId": "={{ $json.message.photo[$json.message.photo.length - 1].file_id }}",
+        "additionalFields": {}
+      },
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0003",
+      "name": "Get Telegram Photo File",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        200
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_BOT_CREDENTIALS_ID",
+          "name": "Telegram Bot Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.1
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are the TravelTokyo AI Expense Parser for a 7-day Tokyo trip.\nYour job is to extract confirmed PAID expenses from receipts, photos, or text messages.\n\nCRITICAL EXTRACTION RULES:\n1. Output strictly valid JSON matching this schema:\n{\n  \"is_valid_expense\": boolean,\n  \"title\": string (Merchant name and brief items purchased, e.g. \"Asakusa Menchi (2 Croquettes)\", \"7-Eleven Snacks\", \"Don Quijote Skincare\"),\n  \"amount\": number (Total in JPY integer),\n  \"currency\": \"JPY\",\n  \"category\": string (Must be ONE of: \"food\", \"transport\", \"shopping\", \"tickets\", \"hotel\", \"flights\", \"documents\", \"other\"),\n  \"paymentMethod\": string (Must be ONE of: \"Cash\", \"BDO JCB\", \"BDO Mastercard\", \"RCBC Visa\", \"GCash\", \"MariBank\", \"UnionBank Visa\", \"Other Card / Wallet\"),\n  \"date\": string (YYYY-MM-DD),\n  \"status\": \"paid\",\n  \"notes\": string (Breakdown of items, VAT, tax-free info, or store location),\n  \"needs_clarification\": boolean,\n  \"clarification_question\": string (if amount or essential details are illegible or missing)\n}\n\nCATEGORY MATCHING GUIDELINES:\n- \"food\": Meals, street food, snacks, melon pan, ramen, drinks, convenience store food\n- \"transport\": Train tickets, Suica/Pasmo reloads, buses, taxis\n- \"shopping\": Don Quijote, souvenirs, clothes, electronics, cosmetics, gachapon\n- \"tickets\": Park tickets, attractions, museum admissions, Studio Tour\n- \"hotel\": Accommodations & lodging amenities\n- \"flights\": Airfare fees or airport extras\n- \"documents\": Visas, travel insurance, photo printing\n- \"other\": Miscellaneous goods or emergency supplies\n\nPAYMENT METHOD INFERENCE:\n- If receipt shows \"現金\" / \"CASH\" -> \"Cash\"\n- If receipt shows \"JCB\" -> \"BDO JCB\"\n- If receipt shows \"Mastercard\" / \"MC\" -> \"BDO Mastercard\"\n- If receipt shows \"VISA\" -> \"RCBC Visa\"\n- Default to \"Cash\" if not identifiable from physical receipt, or ask if uncertain.\n\nNEVER fabricate or guess unreadable numbers. If total is cut off or illegible, set needs_clarification=true and formulate a polite clarification_question."
+            },
+            {
+              "role": "user",
+              "content": "={{ $node[\"Has Receipt Photo?\"].json.message.caption || $node[\"Has Receipt Photo?\"].json.message.text || \"Extract actual expense from this receipt photo.\" }}"
+            }
+          ]
+        },
+        "binaryData": true,
+        "binaryPropertyName": "data"
+      },
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0004",
+      "name": "AI Vision Receipt Parser",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        860,
+        200
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OPENAI_API_CREDENTIALS_ID",
+          "name": "OpenAI Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.1
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are the TravelTokyo AI Expense Parser for a 7-day Tokyo trip.\nYour job is to extract confirmed PAID expenses from text messages (e.g. \"Lunch ramen 1800 jpy cash\", \"suica reload 2000 bdo mastercard\", \"donki shopping 4500 rcbc\").\n\nCRITICAL EXTRACTION RULES:\n1. Output strictly valid JSON matching this schema:\n{\n  \"is_valid_expense\": boolean,\n  \"title\": string (Merchant name / item description),\n  \"amount\": number (Total in JPY integer),\n  \"currency\": \"JPY\",\n  \"category\": string (Must be ONE of: \"food\", \"transport\", \"shopping\", \"tickets\", \"hotel\", \"flights\", \"documents\", \"other\"),\n  \"paymentMethod\": string (Must be ONE of: \"Cash\", \"BDO JCB\", \"BDO Mastercard\", \"RCBC Visa\", \"GCash\", \"MariBank\", \"UnionBank Visa\", \"Other Card / Wallet\"),\n  \"date\": string (YYYY-MM-DD),\n  \"status\": \"paid\",\n  \"notes\": string,\n  \"needs_clarification\": boolean,\n  \"clarification_question\": string\n}\n\nPAYMENT METHOD MAPPING:\n- cash -> \"Cash\"\n- bdo jcb / jcb -> \"BDO JCB\"\n- bdo / mastercard / mc -> \"BDO Mastercard\"\n- rcbc / visa -> \"RCBC Visa\"\n- gcash -> \"GCash\"\n- maribank -> \"MariBank\"\n- unionbank -> \"UnionBank Visa\"\n- default: \"Cash\"\n\nIf amount is missing, set needs_clarification=true and ask for the Yen amount."
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.message.text }}"
+            }
+          ]
+        }
+      },
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0005",
+      "name": "AI Text Expense Parser",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        640,
+        400
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OPENAI_API_CREDENTIALS_ID",
+          "name": "OpenAI Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract AI JSON output from Vision or Text Parser\nconst rawOutput = $input.first().json.message?.content || $input.first().json.text || \"{}\";\n\nlet parsed = {};\ntry {\n  const cleanJson = rawOutput.replace(/```json/gi, '').replace(/```/g, '').trim();\n  parsed = JSON.parse(cleanJson);\n} catch (e) {\n  parsed = {\n    is_valid_expense: false,\n    needs_clarification: true,\n    clarification_question: \"Could not parse expense details. Please provide the merchant name and amount in JPY (e.g. 'Ramen 1200 JPY cash').\"\n  };\n}\n\n// Get chat info from trigger\nconst triggerData = $(\"Telegram Trigger\").first().json;\nconst chatId = triggerData.message?.chat?.id || triggerData.message?.from?.id;\nconst messageId = triggerData.message?.message_id;\n\n// Exchange rate: 1 PHP ≈ 2.70 JPY\nconst fxRate = 2.70;\nconst amountJPY = parseInt(parsed.amount, 10) || 0;\nconst amountPHP = Math.round(amountJPY / fxRate);\n\n// TravelTokyo Schema Compatible Expense Record\nconst expenseRecord = {\n  id: `paid-${Date.now()}`,\n  title: parsed.title || \"Tokyo Expense\",\n  amount: amountJPY,\n  currency: \"JPY\",\n  category: parsed.category || \"food\",\n  paymentMethod: parsed.paymentMethod || \"Cash\",\n  date: parsed.date || new Date().toISOString().split('T')[0],\n  status: \"paid\",\n  notes: parsed.notes || \"Logged via Telegram receipt bot\",\n  convertedAmountPHP: amountPHP,\n  chatId: chatId,\n  messageId: messageId,\n  needs_clarification: parsed.needs_clarification || false,\n  clarification_question: parsed.clarification_question || \"\"\n};\n\nreturn [ { json: expenseRecord } ];"
+      },
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0006",
+      "name": "Format TravelTokyo Expense",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.needs_clarification }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0007",
+      "name": "Needs Clarification?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "=❓ *Need Quick Clarification*\n\n{{ $json.clarification_question }}\n\n_Reply to this message with the missing amount or detail to record your expense._",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0008",
+      "name": "Send Clarification Request",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1560,
+        200
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_BOT_CREDENTIALS_ID",
+          "name": "Telegram Bot Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "=✅ *Expense Logged Successfully!*\n\n🍱 *Item:* {{ $json.title }}\n💴 *Amount:* ¥{{ $json.amount.toLocaleString() }} JPY (≈ ₱{{ $json.convertedAmountPHP.toLocaleString() }} PHP)\n🏷️ *Category:* #{{ $json.category.toUpperCase() }}\n💳 *Payment Method:* {{ $json.paymentMethod }}\n📅 *Date:* {{ $json.date }}\n📝 *Notes:* {{ $json.notes }}\n\n_This has been formatted for the TravelTokyo Actual / Paid Budget._",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "reply_markup": {
+            "inline_keyboard": [
+              [
+                {
+                  "text": "🌐 View TravelTokyo Budget",
+                  "url": "https://traveltokyo.workflowlab.site/budget"
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0009",
+      "name": "Send Expense Confirmation",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1560,
+        400
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_BOT_CREDENTIALS_ID",
+          "name": "Telegram Bot Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Has Receipt Photo?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Receipt Photo?": {
+      "main": [
+        [
+          {
+            "node": "Get Telegram Photo File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Text Expense Parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Telegram Photo File": {
+      "main": [
+        [
+          {
+            "node": "AI Vision Receipt Parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Vision Receipt Parser": {
+      "main": [
+        [
+          {
+            "node": "Format TravelTokyo Expense",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Text Expense Parser": {
+      "main": [
+        [
+          {
+            "node": "Format TravelTokyo Expense",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format TravelTokyo Expense": {
+      "main": [
+        [
+          {
+            "node": "Needs Clarification?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs Clarification?": {
+      "main": [
+        [
+          {
+            "node": "Send Clarification Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Expense Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "instanceId": "travel-tokyo-n8n-instance",
+    "templateCredsSetupCompleted": false
+  },
+  "pinData": {}
+}
