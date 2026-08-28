@@ -266,6 +266,40 @@ export default function BudgetPage() {
   const balanceCashOnHandJPY = totalCashWithdrawnJPY - actualSpentCashJPY;
   const balanceCashOnHandPHP = Math.round(balanceCashOnHandJPY / fxRate);
 
+  // Live Sync with /api/expenses (Telegram / n8n)
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<string | null>(null);
+
+  const syncExpensesFromAPI = async () => {
+    try {
+      setIsSyncing(true);
+      const res = await fetch("/api/expenses");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.success && Array.isArray(data.expenses) && data.expenses.length > 0) {
+        setPaidExpenses((prev) => {
+          const prevIds = new Set(prev.map((e) => e.id));
+          const newItems = data.expenses.filter((e: ExpenseRecord) => !prevIds.has(e.id));
+          if (newItems.length > 0) {
+            setSyncStatus(`Synced ${newItems.length} new expense(s) from Telegram`);
+            return [...newItems, ...prev];
+          }
+          return prev;
+        });
+      }
+    } catch (e) {
+      console.error("Failed to sync expenses from API:", e);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  React.useEffect(() => {
+    syncExpensesFromAPI();
+    const interval = setInterval(syncExpensesFromAPI, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Handlers
   const handleSaveBudgetConfig = () => {
     const pPHP = parseFloat(tempBudgetInputPHP.replace(/[^0-9.]/g, "")) || 150000;
@@ -461,6 +495,15 @@ export default function BudgetPage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={syncExpensesFromAPI}
+              disabled={isSyncing}
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-stone-200 hover:bg-white/20 hover:text-white transition disabled:opacity-50"
+              title="Sync latest expenses from Telegram bot"
+            >
+              <Sparkles className={`h-3 w-3 text-[#FFD66B] ${isSyncing ? "animate-spin" : ""}`} />
+              <span>{isSyncing ? "Syncing..." : "Sync Telegram"}</span>
+            </button>
             <span className="rounded-full bg-white/10 px-3 py-1 font-mono text-xs font-bold text-[#FFD66B] border border-white/20">
               1 ₱ ≈ {fxRate.toFixed(2)} ¥
             </span>

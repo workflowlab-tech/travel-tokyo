@@ -201,7 +201,7 @@ export const itineraryDays: ItineraryDay[] = [
     area: "Narita Airport → Hanakawado Asakusa",
     icon: "⛩️",
     image:
-      "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "NAIA T3 Lounge (UnionBank Miles+ Visa) → Flight to Narita (arr 11:35 AM) → Keisei Access Express to Asakusa Station (~60–80 min direct, ¥1,300–1,350) → Hotel Plus Hostel Asakusa 2",
     transitSummary: {
@@ -754,7 +754,7 @@ export const itineraryDays: ItineraryDay[] = [
     area: "Electric Town (Chiyoda City)",
     icon: "🕹️",
     image:
-      "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1554797589-7241bb691973?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "Asakusa → Akihabara: Tsukuba Express direct (~15 min, ¥150) · exit at Electric Town Exit",
     transitSummary: {
@@ -789,7 +789,7 @@ export const itineraryDays: ItineraryDay[] = [
         icon: "🛍️",
         badges: ["Indoor Shopping"],
         image:
-          "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1554797589-7241bb691973?auto=format&fit=crop&w=800&q=80",
       },
       {
         time: "14:00",
@@ -957,7 +957,7 @@ export const placeGuides: PlaceGuide[] = [
     district: "Asakusa, Taito City",
     tagline: "Tokyo's oldest temple, giant red lanterns, and historic market stalls.",
     image:
-      "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=1200&q=80",
     recommendedDuration: "2 to 3 hours",
     whatYoullSee: [
       "Kaminarimon (Thunder Gate) with iconic 700kg red chochin lantern",
@@ -1213,7 +1213,7 @@ export const placeGuides: PlaceGuide[] = [
     district: "Chiyoda City",
     tagline: "The world's capital of anime, gaming, electronics, and retro arcades.",
     image:
-      "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1554797589-7241bb691973?auto=format&fit=crop&w=1200&q=80",
     recommendedDuration: "4 to 5 hours",
     whatYoullSee: [
       "Radio Kaikan: 10 vertical floors of figures, cards, and hobby collectibles",
@@ -2236,7 +2236,7 @@ export const souvenirDistricts: SouvenirDistrict[] = [
     dayRef: "Day 6",
     icon: "🕹️",
     image:
-      "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1554797589-7241bb691973?auto=format&fit=crop&w=800&q=80",
     shops: [
       {
         name: "Radio Kaikan & Animate",

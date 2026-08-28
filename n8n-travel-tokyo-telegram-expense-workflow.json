@@ -79,7 +79,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Convert binary image buffer to clean Base64 for Gemini Vision\nconst binaryData = await this.helpers.getBinaryDataBuffer(0, 'data');\nconst base64Image = binaryData.toString('base64');\n\nconst triggerNode = $('Has Receipt Photo?').first().json;\nconst userCaption = triggerNode.message?.caption || '';\n\nconst prompt = `You are the TravelTokyo AI Expense Parser for a 7-day Tokyo trip.\\nAnalyze this image and user caption: '${userCaption}'.\\n\\nTASK 1: Determine if this is an actual monetary receipt / paid transaction OR a non-expense item (scenery photo, selfie, general chat, travel document without price).\\nTASK 2: If it is an expense, extract all transaction details.\\n\\nOutput strictly valid JSON matching this schema:\\n{\\n  \"is_expense\": boolean,\\n  \"non_expense_reason\": string (e.g. 'Scenery photo', 'Selfie', 'No price on photo'),\\n  \"title\": string (Merchant name / item description, e.g. '7-Eleven Asakusa Snacks', 'Ichiran Ramen', 'Tokyo Disney Popcorn'),\\n  \"amount\": number (Total in JPY integer, e.g. 1800),\\n  \"currency\": \"JPY\",\\n  \"category\": string (Must be ONE of: 'food', 'transport', 'shopping', 'tickets', 'hotel', 'flights', 'documents', 'other'),\\n  \"paymentMethod\": string (Must be ONE of: 'Cash', 'BDO JCB', 'BDO Mastercard', 'RCBC Visa', 'GCash', 'MariBank', 'UnionBank Visa', 'Other Card / Wallet'),\\n  \"date\": string (YYYY-MM-DD format),\\n  \"status\": \"paid\",\\n  \"notes\": string,\\n  \"needs_clarification\": boolean,\\n  \"clarification_question\": string\\n}\\n\\nPayment Methods:\\n- '現金' or cash -> 'Cash'\\n- 'JCB' -> 'BDO JCB'\\n- 'Mastercard' or 'MC' -> 'BDO Mastercard'\\n- 'VISA' -> 'RCBC Visa'\\n- Default to 'Cash' if unstated.\\n\\nNever fabricate unreadable totals. If amount is cut off or illegible, set needs_clarification=true and formulate a clarification_question.`;\n\nconst payload = {\n  contents: [\n    {\n      parts: [\n        { text: prompt },\n        {\n          inlineData: {\n            mimeType: 'image/jpeg',\n            data: base64Image\n          }\n        }\n      ]\n    }\n  ],\n  generationConfig: {\n    temperature: 0.1,\n    responseMimeType: 'application/json'\n  }\n};\n\nreturn [{ json: { geminiPayload: payload } }];"
+        "jsCode": "// Convert binary image buffer to clean Base64 for Gemini Vision\nconst binaryData = await this.helpers.getBinaryDataBuffer(0, 'data');\nconst base64Image = binaryData.toString('base64');\n\nconst triggerNode = $('Has Receipt Photo?').first().json;\nconst userCaption = triggerNode.message?.caption || '';\n\nconst prompt = `You are the TravelTokyo AI Expense Parser for a 7-day Tokyo trip.\\nAnalyze this image and user caption: '${userCaption}'.\\n\\nTASK 1: Determine if this is an actual monetary receipt / paid transaction OR a non-expense item (scenery photo, selfie, general chat, travel document without price).\\nTASK 2: If it is an expense, extract all transaction details.\\n\\nOutput strictly valid JSON matching this schema:\\n{\\n  \"is_expense\": boolean,\\n  \"non_expense_reason\": string (e.g. 'Scenery photo', 'Selfie', 'No price on photo'),\\n  \"title\": string (Merchant name / item description, e.g. '7-Eleven Asakusa Snacks', 'Ichiran Ramen', 'Tokyo Disney Popcorn'),\\n  \"amount\": number (Total in JPY integer, e.g. 1800),\\n  \"currency\": \"JPY\",\\n  \"category\": string (Must be ONE of: 'food', 'transport', 'shopping', 'tickets', 'hotel', 'flights', 'documents', 'other'),\\n  \"paymentMethod\": string (Must be ONE of: 'Cash', 'BDO JCB', 'BDO Mastercard', 'RCBC Visa', 'GCash', 'MariBank', 'UnionBank Visa', 'Other Card / Wallet'),\\n  \"date\": string (YYYY-MM-DD format),\\n  \"status\": \"paid\",\\n  \"notes\": string,\\n  \"needs_clarification\": boolean,\\n  \"clarification_question\": string\\n}\\n\\nPayment Methods:\\n- '\u73fe\u91d1' or cash -> 'Cash'\\n- 'JCB' -> 'BDO JCB'\\n- 'Mastercard' or 'MC' -> 'BDO Mastercard'\\n- 'VISA' -> 'RCBC Visa'\\n- Default to 'Cash' if unstated.\\n\\nNever fabricate unreadable totals. If amount is cut off or illegible, set needs_clarification=true and formulate a clarification_question.`;\n\nconst payload = {\n  contents: [\n    {\n      parts: [\n        { text: prompt },\n        {\n          inlineData: {\n            mimeType: 'image/jpeg',\n            data: base64Image\n          }\n        }\n      ]\n    }\n  ],\n  generationConfig: {\n    temperature: 0.1,\n    responseMimeType: 'application/json'\n  }\n};\n\nreturn [{ json: { geminiPayload: payload } }];"
       },
       "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0004",
       "name": "Prepare Gemini Vision Payload",
@@ -294,14 +294,14 @@
     {
       "parameters": {
         "chatId": "={{ $json.chatId }}",
-        "text": "=✅ *Expense Logged via Gemini AI!*\n\n🍱 *Item:* {{ $json.title }}\n💴 *Amount:* ¥{{ $json.amount.toLocaleString() }} JPY (≈ ₱{{ $json.convertedAmountPHP.toLocaleString() }} PHP)\n🏷️ *Category:* #{{ $json.category.toUpperCase() }}\n💳 *Payment Method:* {{ $json.paymentMethod }}\n📅 *Date:* {{ $json.date }}\n📝 *Notes:* {{ $json.notes }}\n\n_Auto-added to TravelTokyo Paid Budget._",
+        "text": "=\u2705 *Expense Logged via Gemini AI!*\n\n\ud83c\udf71 *Item:* {{ $json.title }}\n\ud83d\udcb4 *Amount:* \u00a5{{ $json.amount.toLocaleString() }} JPY (\u2248 \u20b1{{ $json.convertedAmountPHP.toLocaleString() }} PHP)\n\ud83c\udff7\ufe0f *Category:* #{{ $json.category.toUpperCase() }}\n\ud83d\udcb3 *Payment Method:* {{ $json.paymentMethod }}\n\ud83d\udcc5 *Date:* {{ $json.date }}\n\ud83d\udcdd *Notes:* {{ $json.notes }}\n\n_Auto-added to TravelTokyo Paid Budget._",
         "additionalFields": {
           "parse_mode": "Markdown",
           "reply_markup": {
             "inline_keyboard": [
               [
                 {
-                  "text": "🌐 View Budget Tracker",
+                  "text": "\ud83c\udf10 View Budget Tracker",
                   "url": "https://traveltokyo.workflowlab.site/budget"
                 }
               ]
@@ -314,7 +314,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1780,
+        1980,
         140
       ],
       "credentials": {
@@ -327,7 +327,7 @@
     {
       "parameters": {
         "chatId": "={{ $json.chatId }}",
-        "text": "=⚠️ *Duplicate Expense Detected*\n\nThis transaction (*{{ $json.title }}* for *¥{{ $json.amount.toLocaleString() }} JPY* on {{ $json.date }}) was already recorded recently.\n\n_Skipped to prevent double-counting in your budget._",
+        "text": "=\u26a0\ufe0f *Duplicate Expense Detected*\n\nThis transaction (*{{ $json.title }}* for *\u00a5{{ $json.amount.toLocaleString() }} JPY* on {{ $json.date }}) was already recorded recently.\n\n_Skipped to prevent double-counting in your budget._",
         "additionalFields": {
           "parse_mode": "Markdown"
         }
@@ -350,7 +350,7 @@
     {
       "parameters": {
         "chatId": "={{ $json.chatId }}",
-        "text": "=❓ *Need Quick Clarification*\n\n{{ $json.clarification_question }}\n\n_Reply with the missing amount to record this expense._",
+        "text": "=\u2753 *Need Quick Clarification*\n\n{{ $json.clarification_question }}\n\n_Reply with the missing amount to record this expense._",
         "additionalFields": {
           "parse_mode": "Markdown"
         }
@@ -373,7 +373,7 @@
     {
       "parameters": {
         "chatId": "={{ $json.chatId }}",
-        "text": "=📸 *Photo / Message Received*\n\nNo receipt or monetary expense detected ({{ $json.reason }}).\n\n_Your budget balance remains unchanged._",
+        "text": "=\ud83d\udcf8 *Photo / Message Received*\n\nNo receipt or monetary expense detected ({{ $json.reason }}).\n\n_Your budget balance remains unchanged._",
         "additionalFields": {
           "parse_mode": "Markdown"
         }
@@ -392,6 +392,39 @@
           "name": "Telegram Bot Account"
         }
       }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://traveltokyo.workflowlab.site/api/expenses",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"id\": \"{{ .id }}\",\n  \"title\": \"{{ .title }}\",\n  \"amount\": {{ .amount }},\n  \"category\": \"{{ .category }}\",\n  \"paymentMethod\": \"{{ .paymentMethod }}\",\n  \"date\": \"{{ .date }}\",\n  \"notes\": \"{{ .notes }}\",\n  \"convertedAmountPHP\": {{ .convertedAmountPHP }}\n}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0014",
+      "name": "Post to TravelTokyo Website",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1740,
+        140
+      ]
     }
   ],
   "connections": {
@@ -494,7 +527,7 @@
       "main": [
         [
           {
-            "node": "Send Confirmation",
+            "node": "Post to TravelTokyo Website",
             "type": "main",
             "index": 0
           }
@@ -516,6 +549,17 @@
         [
           {
             "node": "Send Non-Expense Notice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to TravelTokyo Website": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation",
             "type": "main",
             "index": 0
           }
