@@ -183,6 +183,22 @@ export const TripTools: React.FC = () => {
   // =========================================================================
   // 2. Travel Documents (Passports & Visas) Privacy State
   // =========================================================================
+  const DOCUMENTS_PIN = "0408";
+  const [documentsUnlocked, setDocumentsUnlocked] = useState(false);
+  const [pinInput, setPinInput] = useState("");
+  const [pinError, setPinError] = useState(false);
+
+  const handleUnlockDocuments = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pinInput === DOCUMENTS_PIN) {
+      setDocumentsUnlocked(true);
+      setPinError(false);
+      setPinInput("");
+    } else {
+      setPinError(true);
+    }
+  };
+
   const [revealedDocs, setRevealedDocs] = useState<Record<string, boolean>>({});
 
   const toggleReveal = (travelerId: string) => {
@@ -523,18 +539,66 @@ export const TripTools: React.FC = () => {
         </div>
       )}
 
-      {/* 2. TRAVEL DOCUMENTS FOLDER (PASSPORTS, VISAS & INSURANCE WITH PRIVACY TOGGLE) */}
-      {toolTab === "documents" && (
+      {/* 2. TRAVEL DOCUMENTS FOLDER (PASSPORTS, VISAS & INSURANCE, PIN + BLUR PROTECTED) */}
+      {toolTab === "documents" && !documentsUnlocked && (
+        <div className="rounded-3xl border border-indigo-200 bg-indigo-50/80 p-8 text-center space-y-4 max-w-sm mx-auto">
+          <div className="mx-auto h-12 w-12 rounded-2xl bg-[#1F3A5F] text-white flex items-center justify-center">
+            <Lock className="h-6 w-6 text-[#FFD66B]" />
+          </div>
+          <div>
+            <p className="font-serif text-lg font-bold text-stone-900">Enter PIN to Open Vault</p>
+            <p className="mt-1 text-xs text-indigo-900">
+              Passports, visas, and travel documents are PIN-protected. Enter the 4-digit PIN to continue.
+            </p>
+          </div>
+          <form onSubmit={handleUnlockDocuments} className="space-y-2">
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              value={pinInput}
+              onChange={(e) => {
+                setPinInput(e.target.value.replace(/[^0-9]/g, ""));
+                setPinError(false);
+              }}
+              placeholder="••••"
+              autoFocus
+              className={`w-full rounded-xl border p-3 text-center text-lg font-bold tracking-[0.5em] outline-none ${
+                pinError
+                  ? "border-red-400 bg-red-50 text-red-900 focus:border-red-500"
+                  : "border-stone-300 bg-white text-stone-900 focus:border-[#1F3A5F]"
+              }`}
+            />
+            {pinError && (
+              <p className="text-xs font-bold text-red-600">Incorrect PIN. Try again.</p>
+            )}
+            <button
+              type="submit"
+              className="w-full rounded-xl bg-[#1F3A5F] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#132540] transition"
+            >
+              Unlock Documents Vault
+            </button>
+          </form>
+        </div>
+      )}
+
+      {toolTab === "documents" && documentsUnlocked && (
         <div className="space-y-6">
           {/* Privacy Notice Banner */}
           <div className="rounded-3xl border border-indigo-200 bg-indigo-50/80 p-5 text-xs text-indigo-950 leading-relaxed flex items-start gap-3">
             <Lock className="h-5 w-5 text-indigo-700 flex-shrink-0 mt-0.5" />
-            <div>
+            <div className="flex-1">
               <p className="font-bold text-sm">Protected Travel Documents Vault</p>
               <p className="mt-0.5 text-indigo-800">
-                Passports and Japan Visas are blurred by default on screen so you can safely use your phone in public. Tap <b>&quot;Reveal Document&quot;</b> on any traveler to display their passport and visa image at airport check-in, immigration, or hotel reception. (No password required).
+                Passports and Japan Visas are PIN-protected and blurred by default on screen so you can safely use your phone in public. Tap <b>&quot;Reveal Document&quot;</b> on any traveler to display their passport and visa image at airport check-in, immigration, or hotel reception.
               </p>
             </div>
+            <button
+              onClick={() => setDocumentsUnlocked(false)}
+              className="flex-shrink-0 rounded-lg bg-white px-2.5 py-1.5 text-[10px] font-bold text-indigo-800 border border-indigo-200 hover:bg-indigo-100 transition"
+            >
+              Lock Vault
+            </button>
           </div>
 
           {/* Passenger Passports & Visas Cards Grid */}
