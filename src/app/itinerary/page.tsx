@@ -10,6 +10,7 @@ import {
   disneyRestaurants,
   transportRoutes,
 } from "../../data/trip-config";
+import { Navigation as GlobalNavigation } from "../../components/Navigation";
 import { useFXRate } from "../../hooks/useFXRate";
 import { TransportRoute, TransitClickRef } from "../../types/trip";
 import {
@@ -25,7 +26,7 @@ import {
   ChevronDown,
   ChevronUp,
   X,
-  Navigation,
+  Navigation as NavigationIcon,
   Utensils,
   Sparkles,
   CheckCircle2,
@@ -89,39 +90,8 @@ export default function DetailedItineraryPage() {
 
   return (
     <div className="min-h-screen bg-[#FBF8F0] text-[#2A2620] pb-28 selection:bg-[#FF5F93] selection:text-white">
-      {/* Top Sticky Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-stone-200/80 bg-[#1F3A5F]/95 text-white backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold text-stone-200 hover:bg-white/20 hover:text-white transition"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Overview</span>
-            </Link>
-            <h1 className="font-serif text-lg sm:text-xl font-bold tracking-wider">
-              Detailed Itinerary & Destination Guide
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Link
-              href="/weather"
-              className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-[#FFD66B] hover:bg-white/20 transition flex items-center gap-1"
-            >
-              <Sun className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Live Weather</span>
-            </Link>
-            <Link
-              href="/budget"
-              className="rounded-full bg-[#FF5F93] px-3.5 py-1 text-xs font-bold text-white shadow-sm hover:bg-[#e84e80] transition"
-            >
-              Budget
-            </Link>
-          </div>
-        </div>
-      </header>
+      {/* Universal Navigation Header & Persistent Mobile Thumb Dock */}
+      <GlobalNavigation currentRoute="itinerary" />
 
       {/* Main Content Container */}
       <main className="mx-auto max-w-6xl px-4 sm:px-6 py-8 space-y-12">
@@ -286,7 +256,7 @@ export default function DetailedItineraryPage() {
                         }
                         className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-bold text-[#1F3A5F] shadow-sm border border-stone-200 hover:bg-stone-100 transition self-start sm:self-auto"
                       >
-                        <Navigation className="h-3.5 w-3.5 text-[#FF5F93]" />
+                        <NavigationIcon className="h-3.5 w-3.5 text-[#FF5F93]" />
                         <span>View Transit Directions</span>
                       </button>
                     </div>
@@ -704,7 +674,9 @@ export default function DetailedItineraryPage() {
 
               {/* 1-Tap Google Maps Link */}
               <a
-                href={`https://www.google.com/maps/dir/?api=1&origin=Hotel+Plus+Hostel+TOKYO+ASAKUSA+2&destination=${encodeURIComponent(
+                href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+                  tripMeta.homeBase.name
+                )}&destination=${encodeURIComponent(
                   activeTransitRef?.mapQuery || activeTransitRoute?.title || "Tokyo"
                 )}&travelmode=transit`}
                 target="_blank"

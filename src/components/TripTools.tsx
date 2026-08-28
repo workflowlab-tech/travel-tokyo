@@ -44,7 +44,7 @@ export const TripTools: React.FC = () => {
   const fxRate = liveFxRate || 2.70;
 
   // Load summary stats for Budget banner
-  const [paidExpenses] = useLocalStorage<ExpenseRecord[]>("travel_tokyo_paid_expenses_v2", []);
+  const [paidExpenses] = useLocalStorage<ExpenseRecord[]>("travel_tokyo_paid_expenses_v3", []);
   const [plannedBudgetPHP] = useLocalStorage<number>(
     "travel_tokyo_budget_php",
     tripMeta.defaultCurrencies.plannedBudgetPHP || 150000
@@ -63,21 +63,19 @@ export const TripTools: React.FC = () => {
   const defaultBookings: BookingDocument[] = [
     {
       id: "booking-hotel-agoda-1759447607",
-      title: "Hotel Plus Hostel TOKYO ASAKUSA 2 (Agoda Confirmation)",
+      title: "Hotel Plus Hostel TOKYO ASAKUSA 2 (Confirmed Reservation)",
       type: "hotel",
       confirmationCode: "1759447607",
-      fileData: "/documents/hotel/agoda_hotel_confirmation_1759447607.pdf",
-      fileName: "agoda_hotel_confirmation_1759447607.pdf",
       notes: "1-7-10 Hanakawado, Taito-ku · 2 Double Rooms · 6 Nights (Sep 1–7)",
-      amount: "¥89,525 JPY (≈ ₱33,157 PHP) · Pay Later (Card ending 0006)",
+      amount: "¥89,525 JPY (Confirmed)",
       dateAdded: "2026-09-01",
     },
     {
       id: "booking-flight-mnl-nrt",
-      title: "Flights: Manila (MNL) ⇄ Tokyo Narita (NRT)",
+      title: "International Roundtrip Flight Confirmation (5 Travelers)",
       type: "flight",
-      confirmationCode: "WETQNY / WC2HXE / MH1ZRC / NLNDWD",
-      notes: "Outbound Sep 1 (06:10–11:35) · Inbound Sep 7 (13:45–17:40) · 5 Passengers",
+      confirmationCode: "TK2026-FLIGHT",
+      notes: "Outbound Sep 1 · Inbound Sep 7 · 5 Passengers Confirmed",
       amount: "Booked & Paid",
       dateAdded: "2026-09-01",
     },
@@ -95,7 +93,7 @@ export const TripTools: React.FC = () => {
       title: "Tokyo Disney Resort Park Tickets (Disneyland & DisneySea)",
       type: "ticket",
       confirmationCode: "TDR-APP-PASSPORT",
-      notes: "Tokyo Disneyland (Sep 2) & Tokyo DisneySea (Sep 4) · Available in Official Disney App",
+      notes: "Tokyo Disneyland (Sep 2) & Tokyo DisneySea (Sep 4) · Available in Official App",
       amount: "Booked & Paid",
       dateAdded: "2026-09-02",
     },

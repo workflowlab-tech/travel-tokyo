@@ -53,12 +53,30 @@ export interface TravelerDocument {
   visaExpiry?: string;
 }
 
+export interface EmergencyPhrase {
+  jp: string;
+  en: string;
+  romaji?: string;
+  category?: "police" | "medical" | "directions" | "general";
+}
+
+export interface EmergencyPlaybook {
+  id: string;
+  title: string;
+  icon: string;
+  priority: "high" | "medium";
+  description: string;
+  steps: string[];
+  helplines?: { label: string; number: string }[];
+}
+
 export interface EmergencyContact {
   label: string;
   number: string;
   japaneseLabel: string;
   desc: string;
   isDialable: boolean;
+  hours?: string;
 }
 
 export interface TripMeta {
@@ -86,15 +104,21 @@ export interface TripMeta {
   };
   travelers: TravelerDocument[];
   emergencyContacts: EmergencyContact[];
+  emergencyPhrases?: EmergencyPhrase[];
+  emergencyPlaybooks?: EmergencyPlaybook[];
   defaultCurrencies: {
-    homeCurrency: string; // e.g. "PHP"
+    homeCurrency: string; // e.g. "USD", "PHP", "EUR", "GBP"
     destCurrency: string; // e.g. "JPY"
-    homeSymbol: string;
-    destSymbol: string;
+    homeSymbol: string; // e.g. "$", "₱", "€", "£"
+    destSymbol: string; // e.g. "¥"
     defaultConvertAmount: number;
-    plannedBudgetPHP: number;
-    plannedBudgetJPY: number;
-    initialCashJPY: number;
+    plannedBudgetHome: number;
+    plannedBudgetDest?: number;
+    initialCashDest: number;
+    // Legacy compatibility fields
+    plannedBudgetPHP?: number;
+    plannedBudgetJPY?: number;
+    initialCashJPY?: number;
   };
 }
 
@@ -115,6 +139,7 @@ export interface TimelineEvent {
   badges?: string[];
   image?: string;
   transit?: TransitClickRef;
+  ticketRefId?: string;
 }
 
 export interface ItineraryDay {
@@ -227,8 +252,8 @@ export interface RestaurantItem {
   isRestricted?: boolean;
   restrictedNote?: string;
   icon: string;
-  image: string; // Restaurant atmosphere
-  menuImage: string; // Signature menu/food photo
+  image: string;
+  menuImage: string;
 }
 
 export interface TransportRoute {
@@ -258,7 +283,7 @@ export interface PackingItemPreset {
 }
 
 export interface EtiquetteRule {
-  category: "trains" | "dining" | "temples" | "bath" | "disney";
+  category: "trains" | "dining" | "temples" | "bath" | "disney" | "general";
   type: "do" | "dont";
   title: string;
   desc: string;
@@ -278,13 +303,11 @@ export interface SouvenirDistrict {
 
 export type PaymentMethod =
   | "Cash"
-  | "BDO JCB"
-  | "BDO Mastercard"
-  | "RCBC Visa"
-  | "GCash"
-  | "MariBank"
-  | "UnionBank Visa"
-  | "Other Card / Wallet";
+  | "Primary Visa / Mastercard"
+  | "Backup Travel Card"
+  | "Apple Pay / Digital IC"
+  | "Digital Wallet"
+  | string;
 
 export type ExpenseCategory =
   | "hotel"
@@ -299,13 +322,14 @@ export type ExpenseCategory =
 export interface ExpenseRecord {
   id: string;
   title: string;
-  amount: number; // JPY
+  amount: number; // Destination Currency (e.g. JPY)
   currency: string;
   category: ExpenseCategory;
   paymentMethod: PaymentMethod;
   date: string;
   status: "paid" | "planned";
   notes?: string;
+  convertedAmountHome?: number;
   convertedAmountPHP?: number;
 }
 

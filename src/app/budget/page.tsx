@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { tripMeta } from "../../data/trip-config";
+import { Navigation } from "../../components/Navigation";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { useFXRate } from "../../hooks/useFXRate";
 import { ExpenseRecord, ExpenseCategory, PaymentMethod } from "../../types/trip";
@@ -32,6 +33,7 @@ import {
   Minus,
   Equal,
   Landmark,
+  ShieldCheck,
 } from "lucide-react";
 
 interface CashWithdrawalRecord {
@@ -43,13 +45,18 @@ interface CashWithdrawalRecord {
 }
 
 export default function BudgetPage() {
+  const homeCurrency = tripMeta.defaultCurrencies.homeCurrency || "PHP";
+  const destCurrency = tripMeta.defaultCurrencies.destCurrency || "JPY";
+  const homeSymbol = tripMeta.defaultCurrencies.homeSymbol || "₱";
+  const destSymbol = tripMeta.defaultCurrencies.destSymbol || "¥";
+
   const { rate: liveFxRate, isLoading: fxLoading } = useFXRate(
-    tripMeta.defaultCurrencies.homeCurrency,
-    tripMeta.defaultCurrencies.destCurrency
+    homeCurrency,
+    destCurrency
   );
   const fxRate = liveFxRate || 2.70;
 
-  // 1. Overall Planned Budget (in PHP & JPY)
+  // 1. Overall Planned Budget
   const [plannedBudgetPHP, setPlannedBudgetPHP] = useLocalStorage<number>(
     "travel_tokyo_budget_php",
     tripMeta.defaultCurrencies.plannedBudgetPHP || 150000
@@ -75,25 +82,25 @@ export default function BudgetPage() {
   const defaultPaidExpenses: ExpenseRecord[] = [
     {
       id: "paid-hotel-1759447607",
-      title: "Hotel Plus Hostel TOKYO ASAKUSA 2 (Agoda Booking #1759447607)",
+      title: "Hotel Plus Hostel TOKYO ASAKUSA 2 (Confirmed Booking)",
       amount: 89525,
       currency: "JPY",
       category: "hotel",
-      paymentMethod: "RCBC Visa",
+      paymentMethod: "Primary Travel Card (Visa)",
       date: "2026-09-01",
       status: "paid",
       notes: "1-7-10 Hanakawado · 2 Double Rooms · 6 Nights (Sep 1–7)",
     },
     {
       id: "paid-flights-mnl-nrt",
-      title: "Airfare: Manila (MNL) ⇄ Tokyo Narita (NRT) for 5 Pax",
+      title: "Roundtrip International Airfare (5 Travelers)",
       amount: 66190,
       currency: "JPY",
       category: "flights",
-      paymentMethod: "RCBC Visa",
+      paymentMethod: "Primary Travel Card (Visa)",
       date: "2025-10-07",
       status: "paid",
-      notes: "Cebu Pacific 5 Pax: ₱4,902.99 x 3 + ₱9,805.98 = Total ₱24,514.95 PHP · PNRs: WETQNY, WC2HXE, MH1ZRC, NLNDWD",
+      notes: "5 Passengers Confirmed · Roundtrip Flights (Booking Ref: TK2026-FLIGHT)",
     },
     {
       id: "paid-hp-studio-tickets",
@@ -101,7 +108,7 @@ export default function BudgetPage() {
       amount: 32500,
       currency: "JPY",
       category: "tickets",
-      paymentMethod: "BDO JCB",
+      paymentMethod: "Backup Travel Card (Mastercard)",
       date: "2026-09-03",
       status: "paid",
       notes: "Sep 3 · 1:00 PM Entry · Toshimaen",
@@ -112,21 +119,21 @@ export default function BudgetPage() {
       amount: 84000,
       currency: "JPY",
       category: "tickets",
-      paymentMethod: "BDO Mastercard",
+      paymentMethod: "Backup Travel Card (Mastercard)",
       date: "2026-09-02",
       status: "paid",
       notes: "Disneyland Sep 2 & DisneySea Sep 4 (Official App)",
     },
     {
       id: "paid-vfs-visa-fees",
-      title: "VFS Global Japan Visa Application Fees (5 Applicants)",
+      title: "Consular Visa Processing & Document Fees (5 Applicants)",
       amount: 10800,
       currency: "JPY",
       category: "documents",
-      paymentMethod: "GCash",
+      paymentMethod: "Digital Wallet",
       date: "2026-07-04",
       status: "paid",
-      notes: "₱800 x 5 pax = ₱4,000 PHP · Reference #1151572948",
+      notes: "Visa Application Processing Fees (5 Pax)",
     },
   ];
 
@@ -139,55 +146,55 @@ export default function BudgetPage() {
   const defaultPlannedExpenses: ExpenseRecord[] = [
     {
       id: "plan-food-7days",
-      title: "Food & Snacks Daily Allowance (7 Days x 5 Pax)",
+      title: "Food & Dining Daily Allowance (7 Days x 5 Pax)",
       amount: 120000,
       currency: "JPY",
       category: "food",
       paymentMethod: "Cash",
       date: "2026-09-01",
       status: "planned",
-      notes: "Ramen, Asakusa Menchi, conveyer sushi, melon pan, convenience stores",
+      notes: "Ramen, Asakusa Menchi, sushi, melon pan, street snacks",
     },
     {
       id: "plan-train-suica",
-      title: "Tokyo Metro, Ginza Line & Keisei Train Fares",
+      title: "Subway, Metro & Regional Train Fares",
       amount: 25000,
       currency: "JPY",
       category: "transport",
-      paymentMethod: "BDO Mastercard",
+      paymentMethod: "Apple Pay / Digital IC",
       date: "2026-09-01",
       status: "planned",
       notes: "Digital Suica / PASMO top-ups for 5 travelers",
     },
     {
       id: "plan-shopping-donki",
-      title: "Don Quijote, Skytree & Souvenirs Shopping",
+      title: "Shopping, Souvenirs & Tax-Free Gifts",
       amount: 40000,
       currency: "JPY",
       category: "shopping",
-      paymentMethod: "BDO JCB",
+      paymentMethod: "Primary Travel Card (Visa)",
       date: "2026-09-05",
       status: "planned",
-      notes: "Tax-free snacks, skincare, character merch, Tokyo Banana",
+      notes: "Tax-free snacks, skincare, character merch, souvenirs",
     },
     {
       id: "plan-disney-snacks",
-      title: "Disney Park Snacks, Popcorn Buckets & Drinks",
+      title: "Park Treats, Snacks & Popcorn Buckets",
       amount: 15000,
       currency: "JPY",
       category: "food",
       paymentMethod: "Cash",
       date: "2026-09-02",
       status: "planned",
-      notes: "Mickey ice cream, churros, flavored popcorn across 2 park days",
+      notes: "Theme park snacks & refreshments across 2 park days",
     },
     {
       id: "plan-emergency-taxi",
-      title: "Emergency Buffer / Taxi Reserve",
+      title: "Emergency Contingency & Taxi Buffer",
       amount: 10000,
       currency: "JPY",
       category: "other",
-      paymentMethod: "MariBank",
+      paymentMethod: "Backup Travel Card (Mastercard)",
       date: "2026-09-07",
       status: "planned",
       notes: "Late night transfers or weather contingency fund",
@@ -212,19 +219,17 @@ export default function BudgetPage() {
 
   // ATM Withdrawal Form State
   const [withdrawalAmountJPY, setWithdrawalAmountJPY] = useState("");
-  const [withdrawalLocation, setWithdrawalLocation] = useState("7-Eleven Bank ATM (Asakusa)");
-  const [withdrawalCard, setWithdrawalCard] = useState("BDO Mastercard");
+  const [withdrawalLocation, setWithdrawalLocation] = useState("ATM (Asakusa)");
+  const [withdrawalCard, setWithdrawalCard] = useState("Primary Travel Card (Visa)");
   const [withdrawalDate, setWithdrawalDate] = useState(new Date().toISOString().split("T")[0]);
 
   // Payment Method Options
   const paymentMethods: PaymentMethod[] = [
     "Cash",
-    "BDO JCB",
-    "BDO Mastercard",
-    "RCBC Visa",
-    "GCash",
-    "MariBank",
-    "UnionBank Visa",
+    "Primary Travel Card (Visa)",
+    "Backup Travel Card (Mastercard)",
+    "Apple Pay / Digital IC",
+    "Digital Wallet",
     "Other Card / Wallet",
   ];
 
@@ -493,43 +498,13 @@ export default function BudgetPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBF8F0] text-[#2A2620] pb-24 selection:bg-[#FF5F93] selection:text-white">
-      {/* Top Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-stone-200/80 bg-[#1F3A5F]/95 text-white backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold text-stone-200 hover:bg-white/20 hover:text-white transition"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Trip</span>
-            </Link>
-            <h1 className="font-serif text-lg sm:text-xl font-bold tracking-wider">
-              Budget & Expenses Planner
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={syncExpensesFromAPI}
-              disabled={isSyncing}
-              className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-stone-200 hover:bg-white/20 hover:text-white transition disabled:opacity-50"
-              title="Sync latest expenses from Telegram bot"
-            >
-              <Sparkles className={`h-3 w-3 text-[#FFD66B] ${isSyncing ? "animate-spin" : ""}`} />
-              <span>{isSyncing ? "Syncing..." : "Sync Telegram"}</span>
-            </button>
-            <span className="rounded-full bg-white/10 px-3 py-1 font-mono text-xs font-bold text-[#FFD66B] border border-white/20">
-              1 ₱ ≈ {fxRate.toFixed(2)} ¥
-            </span>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#FBF8F0] text-[#2A2620] pb-28 selection:bg-[#FF5F93] selection:text-white">
+      {/* Universal Navigation Header & Persistent Mobile Thumb Dock */}
+      <Navigation currentRoute="budget" />
 
       <main className="mx-auto max-w-6xl px-4 sm:px-6 py-8 space-y-10">
         {/* ========================================================================= */}
-        {/* TOP SUMMARY CARDS (Structure: Planned PHP/JPY | Actual Spent | Remaining) */}
+        {/* TOP SUMMARY CARDS (Structure: Target | Paid | Committed | Projected Available) */}
         {/* ========================================================================= */}
         <section className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-stone-200 pb-3">
@@ -538,21 +513,33 @@ export default function BudgetPage() {
                 Trip Financial Overview
               </span>
               <h2 className="font-serif text-2xl font-bold text-stone-900 sm:text-3xl">
-                Track every Yen & Peso with calm clarity.
+                Dual-Currency Trip Budget & Ledger
               </h2>
             </div>
 
-            <button
-              onClick={() => {
-                setIsEditingBudget(!isEditingBudget);
-                setTempBudgetInputPHP(String(plannedBudgetPHP));
-                setTempCashInputJPY(String(initialCashJPY));
-              }}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-bold text-[#1F3A5F] shadow-sm border border-stone-200 hover:bg-stone-50 self-start sm:self-auto transition"
-            >
-              <Edit2 className="h-3.5 w-3.5" />
-              <span>{isEditingBudget ? "Close Editor" : "Edit Planned Target"}</span>
-            </button>
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <button
+                onClick={syncExpensesFromAPI}
+                disabled={isSyncing}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-white border border-stone-200 px-3.5 py-2 text-xs font-bold text-stone-700 hover:bg-stone-50 shadow-sm transition disabled:opacity-50"
+                title="Sync latest expenses from webhook"
+              >
+                <Sparkles className={`h-3.5 w-3.5 text-[#FF86A8] ${isSyncing ? "animate-spin" : ""}`} />
+                <span>{isSyncing ? "Syncing..." : "Sync Webhook"}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsEditingBudget(!isEditingBudget);
+                  setTempBudgetInputPHP(String(plannedBudgetPHP));
+                  setTempCashInputJPY(String(initialCashJPY));
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#1F3A5F] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#132540] transition"
+              >
+                <Edit2 className="h-3.5 w-3.5" />
+                <span>{isEditingBudget ? "Close Editor" : "Edit Targets"}</span>
+              </button>
+            </div>
           </div>
 
           {/* Budget Edit Drawer */}
@@ -564,7 +551,7 @@ export default function BudgetPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-bold text-stone-700">
-                    Total Planned Trip Budget (PHP ₱)
+                    Total Planned Trip Budget ({homeCurrency} {homeSymbol})
                   </label>
                   <input
                     type="text"
@@ -575,13 +562,13 @@ export default function BudgetPage() {
                     className="mt-1 w-full rounded-xl border border-stone-300 p-3 text-sm font-bold outline-none focus:border-[#1F3A5F]"
                   />
                   <p className="mt-1 text-[11px] text-stone-500">
-                    Converts automatically to ≈ ¥{Math.round((parseFloat(tempBudgetInputPHP) || 0) * fxRate).toLocaleString()} JPY
+                    Converts automatically to ≈ {destSymbol}{Math.round((parseFloat(tempBudgetInputPHP) || 0) * fxRate).toLocaleString()} {destCurrency}
                   </p>
                 </div>
 
                 <div>
                   <label className="text-xs font-bold text-stone-700">
-                    Initial Physical Cash Brought (JPY ¥)
+                    Initial Physical Cash Brought ({destCurrency} {destSymbol})
                   </label>
                   <input
                     type="text"
@@ -592,7 +579,7 @@ export default function BudgetPage() {
                     className="mt-1 w-full rounded-xl border border-stone-300 p-3 text-sm font-bold outline-none focus:border-[#1F3A5F]"
                   />
                   <p className="mt-1 text-[11px] text-stone-500">
-                    Physical bills & coins exchanged before departure (e.g. ¥100,000)
+                    Physical cash bills exchanged before departure (e.g. {destSymbol}100,000)
                   </p>
                 </div>
               </div>
@@ -614,104 +601,129 @@ export default function BudgetPage() {
             </div>
           )}
 
-          {/* 3 Main Highlight Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* 1. Planned Budget */}
-            <div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-md flex flex-col justify-between space-y-3">
+          {/* 4 Main Highlight Cards: Planned | Paid | Committed | Projected Balance */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* 1. Planned Target Budget */}
+            <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-md flex flex-col justify-between space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-black uppercase tracking-wider text-stone-500">
-                  Planned Budget
+                  Target Budget
                 </span>
                 <span className="rounded-md bg-stone-100 px-2 py-0.5 font-mono text-[10px] font-bold text-stone-700">
-                  Target
+                  Planned
                 </span>
               </div>
 
               <div>
-                <div className="font-serif text-3xl sm:text-4xl font-extrabold text-stone-900">
-                  ₱ {plannedBudgetPHP.toLocaleString()}
+                <div className="font-serif text-2xl sm:text-3xl font-extrabold text-stone-900">
+                  {homeSymbol} {plannedBudgetPHP.toLocaleString()}
                 </div>
-                <div className="mt-1 font-mono text-sm font-bold text-[#1F3A5F]">
-                  ≈ ¥ {plannedBudgetJPY.toLocaleString()} JPY
+                <div className="mt-0.5 font-mono text-xs font-bold text-[#1F3A5F]">
+                  ≈ {destSymbol} {plannedBudgetJPY.toLocaleString()} {destCurrency}
                 </div>
               </div>
 
-              <p className="text-xs text-stone-500 pt-2 border-t border-stone-100">
-                Total overall trip fund set for all 5 travelers.
+              <p className="text-[11px] text-stone-500 pt-2 border-t border-stone-100 font-medium">
+                Overall trip target for all travelers.
               </p>
             </div>
 
             {/* 2. Actual Spent (Fixed / Paid) */}
-            <div className="rounded-3xl border border-amber-200 bg-[#FBF0DC]/80 p-6 shadow-md flex flex-col justify-between space-y-3">
+            <div className="rounded-3xl border border-amber-200 bg-[#FBF0DC]/80 p-5 shadow-md flex flex-col justify-between space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-black uppercase tracking-wider text-[#C1802E]">
                   Actual Spent (Paid)
                 </span>
                 <span className="rounded-full bg-amber-200 px-2.5 py-0.5 font-mono text-[10px] font-bold text-[#8B5E14]">
-                  {paidExpenses.length} Fixed Paid
+                  {paidExpenses.length} Paid
                 </span>
               </div>
 
               <div>
-                <div className="font-serif text-3xl sm:text-4xl font-extrabold text-stone-900">
-                  ¥ {actualSpentJPY.toLocaleString()}
+                <div className="font-serif text-2xl sm:text-3xl font-extrabold text-stone-900">
+                  {destSymbol} {actualSpentJPY.toLocaleString()}
                 </div>
-                <div className="mt-1 font-mono text-sm font-bold text-[#8B5E14]">
-                  ≈ ₱ {actualSpentPHP.toLocaleString()} PHP
+                <div className="mt-0.5 font-mono text-xs font-bold text-[#8B5E14]">
+                  ≈ {homeSymbol} {actualSpentPHP.toLocaleString()} {homeCurrency}
                 </div>
               </div>
 
-              <p className="text-xs text-stone-600 font-medium pt-2 border-t border-amber-200/60">
-                Total confirmed expenses already paid or booked.
+              <p className="text-[11px] text-stone-600 font-medium pt-2 border-t border-amber-200/60">
+                Confirmed transactions already settled.
               </p>
             </div>
 
-            {/* 3. Remaining Balance */}
+            {/* 3. Committed Future Spend */}
+            <div className="rounded-3xl border border-blue-200 bg-blue-50/70 p-5 shadow-md flex flex-col justify-between space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-wider text-blue-900">
+                  Committed Spend
+                </span>
+                <span className="rounded-full bg-blue-200 px-2.5 py-0.5 font-mono text-[10px] font-bold text-blue-900">
+                  {plannedExpenses.length} Planned
+                </span>
+              </div>
+
+              <div>
+                <div className="font-serif text-2xl sm:text-3xl font-extrabold text-blue-950">
+                  {destSymbol} {expectedFutureSpendJPY.toLocaleString()}
+                </div>
+                <div className="mt-0.5 font-mono text-xs font-bold text-blue-800">
+                  ≈ {homeSymbol} {expectedFutureSpendPHP.toLocaleString()} {homeCurrency}
+                </div>
+              </div>
+
+              <p className="text-[11px] text-blue-800 font-medium pt-2 border-t border-blue-200">
+                Planned future allowances & buffer.
+              </p>
+            </div>
+
+            {/* 4. Projected Available Balance (Planned - Paid - Committed) */}
             <div
-              className={`rounded-3xl border p-6 shadow-md flex flex-col justify-between space-y-3 ${
-                remainingBalanceJPY >= 0
-                  ? "border-emerald-200 bg-emerald-50/70"
-                  : "border-red-200 bg-red-50/70"
+              className={`rounded-3xl border p-5 shadow-md flex flex-col justify-between space-y-2 ${
+                projectedRemainingJPY >= 0
+                  ? "border-emerald-200 bg-emerald-50/80"
+                  : "border-red-200 bg-red-50/80"
               }`}
             >
               <div className="flex items-center justify-between">
                 <span
                   className={`text-[11px] font-black uppercase tracking-wider ${
-                    remainingBalanceJPY >= 0 ? "text-emerald-800" : "text-red-800"
+                    projectedRemainingJPY >= 0 ? "text-emerald-800" : "text-red-800"
                   }`}
                 >
-                  Remaining Balance
+                  Available Balance
                 </span>
                 <TrendingUp
-                  className={`h-4 w-4 ${remainingBalanceJPY >= 0 ? "text-emerald-600" : "text-red-600"}`}
+                  className={`h-4 w-4 ${projectedRemainingJPY >= 0 ? "text-emerald-600" : "text-red-600"}`}
                 />
               </div>
 
               <div>
                 <div
-                  className={`font-serif text-3xl sm:text-4xl font-extrabold ${
-                    remainingBalanceJPY >= 0 ? "text-emerald-950" : "text-red-950"
+                  className={`font-serif text-2xl sm:text-3xl font-extrabold ${
+                    projectedRemainingJPY >= 0 ? "text-emerald-950" : "text-red-950"
                   }`}
                 >
-                  ¥ {remainingBalanceJPY.toLocaleString()}
+                  {destSymbol} {projectedRemainingJPY.toLocaleString()}
                 </div>
                 <div
-                  className={`mt-1 font-mono text-sm font-bold ${
-                    remainingBalanceJPY >= 0 ? "text-emerald-800" : "text-red-800"
+                  className={`mt-0.5 font-mono text-xs font-bold ${
+                    projectedRemainingJPY >= 0 ? "text-emerald-800" : "text-red-800"
                   }`}
                 >
-                  ≈ ₱ {remainingBalancePHP.toLocaleString()} PHP
+                  ≈ {homeSymbol} {projectedRemainingPHP.toLocaleString()} {homeCurrency}
                 </div>
               </div>
 
               <p
-                className={`text-xs font-medium pt-2 border-t ${
-                  remainingBalanceJPY >= 0
+                className={`text-[11px] font-medium pt-2 border-t ${
+                  projectedRemainingJPY >= 0
                     ? "text-emerald-800 border-emerald-200"
                     : "text-red-800 border-red-200"
                 }`}
               >
-                Planned Budget minus Actual Paid.
+                Projected remainder after commitments.
               </p>
             </div>
           </div>
@@ -757,13 +769,13 @@ export default function BudgetPage() {
                 1. Total Amount Withdrawn
               </span>
               <div className="font-serif text-2xl sm:text-3xl font-extrabold text-stone-900">
-                ¥ {totalCashWithdrawnJPY.toLocaleString()}
+                {destSymbol} {totalCashWithdrawnJPY.toLocaleString()}
               </div>
               <div className="font-mono text-xs font-bold text-stone-600">
-                ≈ ₱ {totalCashWithdrawnPHP.toLocaleString()} PHP
+                ≈ {homeSymbol} {totalCashWithdrawnPHP.toLocaleString()} {homeCurrency}
               </div>
               <p className="text-[11px] text-stone-500 pt-2 border-t border-amber-200/50">
-                Initial: ¥{initialCashJPY.toLocaleString()} {cashWithdrawals.length > 0 ? `+ ${cashWithdrawals.length} ATM withdrawals` : ""}
+                Initial: {destSymbol}{initialCashJPY.toLocaleString()} {cashWithdrawals.length > 0 ? `+ ${cashWithdrawals.length} ATM withdrawals` : ""}
               </p>
             </div>
 
@@ -778,10 +790,10 @@ export default function BudgetPage() {
                 2. Less: Actual Spent Cash
               </span>
               <div className="font-serif text-2xl sm:text-3xl font-extrabold text-rose-950">
-                ¥ {actualSpentCashJPY.toLocaleString()}
+                {destSymbol} {actualSpentCashJPY.toLocaleString()}
               </div>
               <div className="font-mono text-xs font-bold text-rose-800">
-                ≈ ₱ {actualSpentCashPHP.toLocaleString()} PHP
+                ≈ {homeSymbol} {actualSpentCashPHP.toLocaleString()} {homeCurrency}
               </div>
               <p className="text-[11px] text-rose-700 pt-2 border-t border-rose-200/50">
                 {cashPaidExpenses.length} cash expenses recorded
@@ -808,14 +820,14 @@ export default function BudgetPage() {
                 </span>
               </span>
               <div className="font-serif text-2xl sm:text-3xl font-extrabold text-emerald-950">
-                ¥ {balanceCashOnHandJPY.toLocaleString()}
+                {destSymbol} {balanceCashOnHandJPY.toLocaleString()}
               </div>
               <div className="font-mono text-xs font-bold text-emerald-800">
-                ≈ ₱ {balanceCashOnHandPHP.toLocaleString()} PHP
+                ≈ {homeSymbol} {balanceCashOnHandPHP.toLocaleString()} {homeCurrency}
               </div>
               <p className="text-[11px] text-emerald-700 pt-2 border-t border-emerald-200/60 font-medium">
                 {balanceCashOnHandJPY < 10000
-                  ? "⚠️ Low Cash Warning: Consider visiting 7-Eleven ATM"
+                  ? "⚠️ Low Cash Warning: Consider visiting an ATM"
                   : "✓ Safe Cash Cushion on hand"}
               </p>
             </div>
@@ -829,7 +841,7 @@ export default function BudgetPage() {
                 {sortedCashWithdrawals.map((w) => (
                   <div key={w.id} className="py-2 flex items-center justify-between text-xs">
                     <div>
-                      <span className="font-bold text-stone-900">¥{w.amountJPY.toLocaleString()} JPY</span>
+                      <span className="font-bold text-stone-900">{destSymbol}{w.amountJPY.toLocaleString()} {destCurrency}</span>
                       <span className="text-stone-500 ml-2 font-mono">({w.date})</span>
                       <p className="text-[11px] text-stone-600">{w.location} · {w.cardUsed}</p>
                     </div>
@@ -897,7 +909,7 @@ export default function BudgetPage() {
                 Section Total
               </div>
               <div className="font-serif text-lg font-extrabold text-[#1F3A5F]">
-                ¥ {actualSpentJPY.toLocaleString()} <span className="text-xs font-normal text-stone-500 font-mono">≈ ₱ {actualSpentPHP.toLocaleString()}</span>
+                {destSymbol} {actualSpentJPY.toLocaleString()} <span className="text-xs font-normal text-stone-500 font-mono">≈ {homeSymbol} {actualSpentPHP.toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -954,10 +966,10 @@ export default function BudgetPage() {
                     <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-3 sm:pt-0 border-stone-100">
                       <div className="text-left sm:text-right">
                         <div className="font-serif text-xl font-bold text-stone-900">
-                          ¥ {item.amount.toLocaleString()}
+                          {destSymbol} {item.amount.toLocaleString()}
                         </div>
                         <div className="text-xs text-stone-500 font-mono">
-                          ≈ ₱ {phpValue.toLocaleString()} PHP
+                          ≈ {homeSymbol} {phpValue.toLocaleString()} {homeCurrency}
                         </div>
                       </div>
 
@@ -1009,7 +1021,7 @@ export default function BudgetPage() {
                 Planned Future Total
               </div>
               <div className="font-serif text-lg font-extrabold text-[#FF5F93]">
-                ¥ {expectedFutureSpendJPY.toLocaleString()} <span className="text-xs font-normal text-stone-500 font-mono">≈ ₱ {expectedFutureSpendPHP.toLocaleString()}</span>
+                {destSymbol} {expectedFutureSpendJPY.toLocaleString()} <span className="text-xs font-normal text-stone-500 font-mono">≈ {homeSymbol} {expectedFutureSpendPHP.toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -1062,10 +1074,10 @@ export default function BudgetPage() {
                     <div className="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-3 sm:pt-0 border-stone-100">
                       <div className="text-left sm:text-right">
                         <div className="font-serif text-xl font-bold text-stone-900">
-                          ¥ {item.amount.toLocaleString()}
+                          {destSymbol} {item.amount.toLocaleString()}
                         </div>
                         <div className="text-xs text-stone-500 font-mono">
-                          ≈ ₱ {phpValue.toLocaleString()} PHP
+                          ≈ {homeSymbol} {phpValue.toLocaleString()} {homeCurrency}
                         </div>
                       </div>
 
@@ -1135,7 +1147,7 @@ export default function BudgetPage() {
                   type="text"
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
-                  placeholder="e.g. Asakusa Menchi snacks, Keisei train tickets, Disney popcorn"
+                  placeholder="e.g. Asakusa Menchi snacks, train tickets, souvenirs"
                   className="mt-1 w-full rounded-xl border border-stone-300 p-3 text-xs font-semibold outline-none focus:border-[#1F3A5F]"
                   required
                 />
@@ -1144,7 +1156,7 @@ export default function BudgetPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-stone-700">
-                    Amount in ¥ JPY
+                    Amount in {destSymbol} {destCurrency}
                   </label>
                   <input
                     type="text"
@@ -1156,7 +1168,7 @@ export default function BudgetPage() {
                     required
                   />
                   <p className="mt-1 text-[10px] text-stone-500 font-mono">
-                    ≈ ₱ {Math.round((parseFloat(formAmountJPY) || 0) / fxRate).toLocaleString()} PHP
+                    ≈ {homeSymbol} {Math.round((parseFloat(formAmountJPY) || 0) / fxRate).toLocaleString()} {homeCurrency}
                   </p>
                 </div>
 
@@ -1230,7 +1242,7 @@ export default function BudgetPage() {
                   type="text"
                   value={formNotes}
                   onChange={(e) => setFormNotes(e.target.value)}
-                  placeholder="e.g. Paid at counter, includes 5 pax, bought at Donki"
+                  placeholder="e.g. Paid at counter, includes 5 pax"
                   className="mt-1 w-full rounded-xl border border-stone-300 p-2.5 text-xs font-medium outline-none focus:border-[#1F3A5F]"
                 />
               </div>
@@ -1278,12 +1290,12 @@ export default function BudgetPage() {
 
             <form onSubmit={handleSaveWithdrawal} className="space-y-4">
               <p className="text-xs text-stone-600 leading-relaxed">
-                Record physical cash withdrawn from 7-Eleven or Japan Post ATMs. This increases your <b>Total Amount Withdrawn</b> and recalculates your <b>Balance On-Hand</b>.
+                Record physical cash withdrawn from ATMs. This increases your <b>Total Amount Withdrawn</b> and recalculates your <b>Balance On-Hand</b>.
               </p>
 
               <div>
                 <label className="text-xs font-bold text-stone-700">
-                  Withdrawal Amount (¥ JPY)
+                  Withdrawal Amount ({destSymbol} {destCurrency})
                 </label>
                 <input
                   type="text"
@@ -1295,7 +1307,7 @@ export default function BudgetPage() {
                   required
                 />
                 <p className="mt-1 text-[10px] text-stone-500 font-mono">
-                  ≈ ₱ {Math.round((parseFloat(withdrawalAmountJPY) || 0) / fxRate).toLocaleString()} PHP
+                  ≈ {homeSymbol} {Math.round((parseFloat(withdrawalAmountJPY) || 0) / fxRate).toLocaleString()} {homeCurrency}
                 </p>
               </div>
 
@@ -1308,7 +1320,7 @@ export default function BudgetPage() {
                     type="text"
                     value={withdrawalLocation}
                     onChange={(e) => setWithdrawalLocation(e.target.value)}
-                    placeholder="e.g. 7-Eleven Asakusa"
+                    placeholder="e.g. 7-Eleven ATM"
                     className="mt-1 w-full rounded-xl border border-stone-300 p-2.5 text-xs font-medium outline-none focus:border-[#1F3A5F]"
                     required
                   />
@@ -1323,10 +1335,9 @@ export default function BudgetPage() {
                     onChange={(e) => setWithdrawalCard(e.target.value)}
                     className="mt-1 w-full rounded-xl border border-stone-300 p-2.5 text-xs font-medium outline-none focus:border-[#1F3A5F] bg-white"
                   >
-                    <option value="BDO Mastercard">BDO Mastercard</option>
-                    <option value="GCash Card">GCash Card</option>
-                    <option value="MariBank Debit">MariBank Debit</option>
-                    <option value="RCBC Visa">RCBC Visa</option>
+                    <option value="Primary Travel Card (Visa)">Primary Travel Card (Visa)</option>
+                    <option value="Backup Travel Card (Mastercard)">Backup Travel Card (Mastercard)</option>
+                    <option value="Digital Travel Card">Digital Travel Card</option>
                     <option value="Other Bank Card">Other Bank Card</option>
                   </select>
                 </div>

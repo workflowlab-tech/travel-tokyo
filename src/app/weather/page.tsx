@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { tripMeta, itineraryDays } from "../../data/trip-config";
+import { Navigation } from "../../components/Navigation";
 import { useWeather, DailyForecast } from "../../hooks/useWeather";
 import {
   CloudSun,
@@ -32,40 +33,18 @@ export default function WeatherPage() {
   const relatedItineraryDay = itineraryDays[selectedDayIndex] || itineraryDays[0];
 
   return (
-    <div className="min-h-screen bg-[#FBF8F0] text-[#2A2620] pb-24 selection:bg-[#FF5F93] selection:text-white">
-      {/* Top Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-stone-200/80 bg-[#1F3A5F]/95 text-white backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold text-stone-200 hover:bg-white/20 hover:text-white transition"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Trip</span>
-            </Link>
-            <h1 className="font-serif text-lg sm:text-xl font-bold tracking-wider">
-              Tokyo Weather Forecast & Hourly Signals
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="rounded-full bg-amber-400/20 px-3 py-1 font-mono text-xs font-bold text-[#FFD66B] border border-amber-400/30 flex items-center gap-1">
-              <CloudSun className="h-3.5 w-3.5" />
-              <span>Open-Meteo Live</span>
-            </span>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#FBF8F0] text-[#2A2620] pb-28 selection:bg-[#FF5F93] selection:text-white">
+      {/* Universal Navigation Header & Persistent Mobile Thumb Dock */}
+      <Navigation currentRoute="weather" />
 
       <main className="mx-auto max-w-6xl px-4 sm:px-6 py-8 space-y-10">
         {/* Section 1 Header */}
         <div className="border-b border-stone-200 pb-3">
           <span className="text-xs font-black uppercase tracking-widest text-[#FF5F93]">
-            7-Day Trip Forecast · Sep 1–7, 2026
+            {tripMeta.destination} Trip Forecast · {tripMeta.startDate} – {tripMeta.endDate}
           </span>
           <h2 className="font-serif text-2xl font-bold text-stone-900 sm:text-3xl">
-            Complete Trip Duration Weather Overview
+            Trip Duration Weather & Hourly Signals
           </h2>
           <p className="mt-1 text-xs text-stone-500">
             Click any day below to view its detailed hourly temperature curve, rain risk, and clothing advice.

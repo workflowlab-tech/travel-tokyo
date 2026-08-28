@@ -14,11 +14,11 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"today" | "itinerary" | "guides" | "tools" | "emergency">("today");
   const [currentDayIndex, setCurrentDayIndex] = useState<number>(0);
 
-  // Automatically determine if today falls within trip dates (Sept 1–7, 2026)
+  // Automatically determine if today falls within trip dates
   useEffect(() => {
     try {
       const now = new Date();
-      const tripStart = new Date("2026-09-01T00:00:00+09:00");
+      const tripStart = new Date(`${tripMeta.startDate}T00:00:00+09:00`);
       const diffDays = Math.floor((now.getTime() - tripStart.getTime()) / (1000 * 60 * 60 * 24));
       if (diffDays >= 0 && diffDays < itineraryDays.length) {
         setCurrentDayIndex(diffDays);
@@ -39,16 +39,16 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#FBF8F0] text-[#2A2620] selection:bg-[#FF5F93] selection:text-white pb-24 md:pb-12">
       {/* Navigation Header & Mobile Thumb Dock */}
-      <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Navigation activeTab={activeTab} setActiveTab={setActiveTab} currentRoute="home" />
 
-      {/* Hero Section with Real Tokyo Photography & Editorial Magazine Scrim */}
+      {/* Hero Section with Real Destination Photography & Editorial Magazine Scrim */}
       <section className="relative overflow-hidden bg-[#132540] text-white">
-        {/* Real High-Resolution Destination Background Image */}
+        {/* Destination Background Image */}
         <div className="absolute inset-0 z-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={tripMeta.heroImage}
-            alt="Tokyo Skyline at Twilight"
+            alt={`${tripMeta.destination} Hero`}
             className="h-full w-full object-cover object-center opacity-40 filter brightness-90 transition-transform duration-1000 hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#132540] via-[#132540]/60 to-transparent" />
@@ -61,12 +61,12 @@ export default function Home() {
             {/* Top Eyebrow Tag */}
             <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#FF86A8] backdrop-blur-md shadow-sm">
               <Sparkles className="h-3.5 w-3.5" />
-              <span>Tokyo Travel Companion · {tripMeta.dateDisplay}</span>
+              <span>{tripMeta.destination} Travel Companion · {tripMeta.dateDisplay}</span>
             </div>
 
             {/* Editorial Title */}
             <h1 className="font-serif text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] text-white drop-shadow-md">
-              Tokyo, <br />
+              {tripMeta.destination.split(",")[0]}, <br />
               <em className="text-[#FF86A8] not-italic font-normal">ready when you are.</em>
             </h1>
 
@@ -205,7 +205,7 @@ export default function Home() {
             {tripMeta.destination} · {tripMeta.dateDisplay}
           </p>
           <p className="text-[11px] text-stone-400 font-mono">
-            Clean Data-Driven Architecture · Device-Local & Offline Capable
+            100% Private On-Device Travel Companion · Designed for Calm Travel
           </p>
         </div>
       </footer>
