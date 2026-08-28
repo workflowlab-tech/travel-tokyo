@@ -29,7 +29,18 @@ import {
   X,
   Sparkles,
   ArrowRightLeft,
+  Minus,
+  Equal,
+  Landmark,
 } from "lucide-react";
+
+interface CashWithdrawalRecord {
+  id: string;
+  date: string;
+  amountJPY: number;
+  location: string;
+  cardUsed: string;
+}
 
 export default function BudgetPage() {
   const { rate: liveFxRate, isLoading: fxLoading } = useFXRate(
@@ -46,6 +57,12 @@ export default function BudgetPage() {
   const [initialCashJPY, setInitialCashJPY] = useLocalStorage<number>(
     "travel_tokyo_initial_cash_jpy",
     tripMeta.defaultCurrencies.initialCashJPY || 100000
+  );
+
+  // ATM Cash Withdrawals Log
+  const [cashWithdrawals, setCashWithdrawals] = useLocalStorage<CashWithdrawalRecord[]>(
+    "travel_tokyo_cash_withdrawals_v1",
+    []
   );
 
   const [isEditingBudget, setIsEditingBudget] = useState(false);
@@ -183,7 +200,7 @@ export default function BudgetPage() {
   );
 
   // Form State
-  const [modalType, setModalType] = useState<"addPaid" | "addPlanned" | "edit" | "markPaid" | null>(null);
+  const [modalType, setModalType] = useState<"addPaid" | "addPlanned" | "edit" | "markPaid" | "addWithdrawal" | null>(null);
   const [activeEditingItem, setActiveEditingItem] = useState<ExpenseRecord | null>(null);
 
   const [formTitle, setFormTitle] = useState("");
@@ -192,6 +209,12 @@ export default function BudgetPage() {
   const [formPaymentMethod, setFormPaymentMethod] = useState<PaymentMethod>("Cash");
   const [formDate, setFormDate] = useState(new Date().toISOString().split("T")[0]);
   const [formNotes, setFormNotes] = useState("");
+
+  // ATM Withdrawal Form State
+  const [withdrawalAmountJPY, setWithdrawalAmountJPY] = useState("");
+  const [withdrawalLocation, setWithdrawalLocation] = useState("7-Eleven Bank ATM (Asakusa)");
+  const [withdrawalCard, setWithdrawalCard] = useState("BDO Mastercard");
+  const [withdrawalDate, setWithdrawalDate] = useState(new Date().toISOString().split("T")[0]);
 
   // Payment Method Options
   const paymentMethods: PaymentMethod[] = [
@@ -229,11 +252,19 @@ export default function BudgetPage() {
   const projectedRemainingJPY = remainingBalanceJPY - expectedFutureSpendJPY;
   const projectedRemainingPHP = Math.round(projectedRemainingJPY / fxRate);
 
-  // Cash-specific Calculations
-  const cashSpentJPY = paidExpenses
-    .filter((e) => e.paymentMethod === "Cash")
-    .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-  const remainingCashOnHandJPY = initialCashJPY - cashSpentJPY;
+  // =========================================================================
+  // PHYSICAL CASH FORMULA: Total Amount Withdrawn − Actual Spent Cash = Balance On-Hand
+  // =========================================================================
+  const additionalWithdrawalsJPY = cashWithdrawals.reduce((sum, w) => sum + (Number(w.amountJPY) || 0), 0);
+  const totalCashWithdrawnJPY = initialCashJPY + additionalWithdrawalsJPY;
+  const totalCashWithdrawnPHP = Math.round(totalCashWithdrawnJPY / fxRate);
+
+  const cashPaidExpenses = paidExpenses.filter((e) => e.paymentMethod === "Cash");
+  const actualSpentCashJPY = cashPaidExpenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  const actualSpentCashPHP = Math.round(actualSpentCashJPY / fxRate);
+
+  const balanceCashOnHandJPY = totalCashWithdrawnJPY - actualSpentCashJPY;
+  const balanceCashOnHandPHP = Math.round(balanceCashOnHandJPY / fxRate);
 
   // Handlers
   const handleSaveBudgetConfig = () => {
@@ -249,9 +280,27 @@ export default function BudgetPage() {
     setFormTitle("");
     setFormAmountJPY("");
     setFormCategory("food");
-    setFormPaymentMethod("Cash");
+    setFormPaymentMethod(type === "addPaid" ? "Cash" : "Cash");
     setFormDate(new Date().toISOString().split("T")[0]);
     setFormNotes("");
+  };
+
+  const openQuickCashModal = () => {
+    setModalType("addPaid");
+    setFormTitle("");
+    setFormAmountJPY("");
+    setFormCategory("food");
+    setFormPaymentMethod("Cash");
+    setFormDate(new Date().toISOString().split("T")[0]);
+    setFormNotes("Paid via physical cash");
+  };
+
+  const openAddWithdrawalModal = () => {
+    setModalType("addWithdrawal");
+    setWithdrawalAmountJPY("20000");
+    setWithdrawalLocation("7-Eleven Bank ATM (Asakusa)");
+    setWithdrawalCard("BDO Mastercard");
+    setWithdrawalDate(new Date().toISOString().split("T")[0]);
   };
 
   const openEditModal = (item: ExpenseRecord) => {
@@ -364,6 +413,27 @@ export default function BudgetPage() {
     setActiveEditingItem(null);
   };
 
+  const handleSaveWithdrawal = (e: React.FormEvent) => {
+    e.preventDefault();
+    const amountNum = parseFloat(withdrawalAmountJPY.replace(/[^0-9.]/g, "")) || 0;
+    if (amountNum <= 0) return;
+
+    const newWithdrawal: CashWithdrawalRecord = {
+      id: "atm-" + Date.now(),
+      date: withdrawalDate,
+      amountJPY: amountNum,
+      location: withdrawalLocation.trim(),
+      cardUsed: withdrawalCard,
+    };
+
+    setCashWithdrawals([newWithdrawal, ...cashWithdrawals]);
+    setModalType(null);
+  };
+
+  const handleDeleteWithdrawal = (id: string) => {
+    setCashWithdrawals(cashWithdrawals.filter((w) => w.id !== id));
+  };
+
   const handleDeletePaid = (id: string) => {
     setPaidExpenses(paidExpenses.filter((item) => item.id !== id));
   };
@@ -430,7 +500,7 @@ export default function BudgetPage() {
           {isEditingBudget && (
             <div className="rounded-3xl border border-[#1F3A5F]/20 bg-white p-6 shadow-lg space-y-4">
               <h3 className="font-serif text-base font-bold text-[#1F3A5F]">
-                Configure Target Budgets
+                Configure Target Budgets & Initial Cash
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -452,7 +522,7 @@ export default function BudgetPage() {
 
                 <div>
                   <label className="text-xs font-bold text-stone-700">
-                    Initial Physical Cash on Hand (JPY ¥)
+                    Initial Physical Cash Brought (JPY ¥)
                   </label>
                   <input
                     type="text"
@@ -463,7 +533,7 @@ export default function BudgetPage() {
                     className="mt-1 w-full rounded-xl border border-stone-300 p-3 text-sm font-bold outline-none focus:border-[#1F3A5F]"
                   />
                   <p className="mt-1 text-[11px] text-stone-500">
-                    Physical bills & coins exchanged before departure
+                    Physical bills & coins exchanged before departure (e.g. ¥100,000)
                   </p>
                 </div>
               </div>
@@ -586,52 +656,142 @@ export default function BudgetPage() {
               </p>
             </div>
           </div>
+        </section>
 
-          {/* Secondary Stats Row: Cash on Hand & Projected Future Balance */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-            {/* Cash on Hand Card */}
-            <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm flex items-center justify-between">
-              <div>
-                <span className="text-[11px] font-black uppercase tracking-wider text-stone-500 flex items-center gap-1.5">
-                  <Banknote className="h-4 w-4 text-[#C1802E]" /> Physical Cash on Hand (JPY)
-                </span>
-                <div className="font-serif text-2xl font-bold text-stone-900 mt-1">
-                  ¥ {remainingCashOnHandJPY.toLocaleString()} JPY
-                </div>
-                <p className="text-[11px] text-stone-500 mt-0.5">
-                  Initial ¥{initialCashJPY.toLocaleString()} − Cash spent ¥{cashSpentJPY.toLocaleString()}
-                </p>
-              </div>
-              <span className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-bold text-[#8B5E14] border border-amber-200">
-                Cash Reserve
+        {/* ========================================================================= */}
+        {/* DEDICATED PHYSICAL CASH FLOW SECTION: Withdrawn - Spent = Balance On-Hand */}
+        {/* ========================================================================= */}
+        <section className="rounded-3xl border border-stone-200 bg-white p-6 sm:p-8 shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-stone-100 pb-4">
+            <div>
+              <span className="text-xs font-black uppercase tracking-widest text-[#C1802E] flex items-center gap-1.5">
+                <Banknote className="h-4 w-4 text-[#C1802E]" /> Physical Cash Management
               </span>
+              <h3 className="font-serif text-xl sm:text-2xl font-bold text-stone-900 mt-1">
+                Cash Withdrawn − Actual Spent Cash = Balance On-Hand
+              </h3>
             </div>
 
-            {/* Projected Remaining After Planned Unpaid Spend */}
-            <div className="rounded-3xl border border-sky-200 bg-sky-50/70 p-5 shadow-sm flex items-center justify-between">
-              <div>
-                <span className="text-[11px] font-black uppercase tracking-wider text-sky-900 flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 text-sky-600" /> Projected Final Balance (After Planned Spend)
-                </span>
-                <div className="font-serif text-2xl font-bold text-sky-950 mt-1">
-                  ¥ {projectedRemainingJPY.toLocaleString()} JPY
-                </div>
-                <p className="text-[11px] text-sky-800 font-medium mt-0.5">
-                  ≈ ₱ {projectedRemainingPHP.toLocaleString()} PHP (after ¥{expectedFutureSpendJPY.toLocaleString()} planned)
-                </p>
-              </div>
-              <span className="rounded-xl bg-white px-3 py-2 text-xs font-bold text-sky-900 border border-sky-200 shadow-sm">
-                Projected
-              </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={openAddWithdrawalModal}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-stone-100 px-3.5 py-2 text-xs font-bold text-stone-700 hover:bg-stone-200 transition"
+              >
+                <Landmark className="h-3.5 w-3.5 text-[#1F3A5F]" />
+                <span>+ Log ATM Withdrawal</span>
+              </button>
+              <button
+                onClick={openQuickCashModal}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#C1802E] px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#a66c23] transition"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>+ Quick Cash Spend</span>
+              </button>
             </div>
           </div>
+
+          {/* The 3-Step Cash Flow Equation Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-11 gap-3 items-center">
+            {/* 1. Total Cash Withdrawn */}
+            <div className="md:col-span-3 rounded-2xl border border-amber-200 bg-[#FBF0DC]/70 p-5 space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#8B5E14]">
+                1. Total Amount Withdrawn
+              </span>
+              <div className="font-serif text-2xl sm:text-3xl font-extrabold text-stone-900">
+                ¥ {totalCashWithdrawnJPY.toLocaleString()}
+              </div>
+              <div className="font-mono text-xs font-bold text-stone-600">
+                ≈ ₱ {totalCashWithdrawnPHP.toLocaleString()} PHP
+              </div>
+              <p className="text-[11px] text-stone-500 pt-2 border-t border-amber-200/50">
+                Initial: ¥{initialCashJPY.toLocaleString()} {cashWithdrawals.length > 0 ? `+ ${cashWithdrawals.length} ATM withdrawals` : ""}
+              </p>
+            </div>
+
+            {/* Minus Sign */}
+            <div className="hidden md:flex md:col-span-1 justify-center text-stone-400">
+              <Minus className="h-6 w-6" />
+            </div>
+
+            {/* 2. Less: Actual Spent Cash */}
+            <div className="md:col-span-3 rounded-2xl border border-rose-200 bg-rose-50/70 p-5 space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-rose-800">
+                2. Less: Actual Spent Cash
+              </span>
+              <div className="font-serif text-2xl sm:text-3xl font-extrabold text-rose-950">
+                ¥ {actualSpentCashJPY.toLocaleString()}
+              </div>
+              <div className="font-mono text-xs font-bold text-rose-800">
+                ≈ ₱ {actualSpentCashPHP.toLocaleString()} PHP
+              </div>
+              <p className="text-[11px] text-rose-700 pt-2 border-t border-rose-200/50">
+                {cashPaidExpenses.length} cash expenses recorded
+              </p>
+            </div>
+
+            {/* Equals Sign */}
+            <div className="hidden md:flex md:col-span-1 justify-center text-stone-400">
+              <Equal className="h-6 w-6" />
+            </div>
+
+            {/* 3. Equals: Balance Cash On-Hand */}
+            <div
+              className={`md:col-span-3 rounded-2xl border p-5 space-y-1 shadow-sm ${
+                balanceCashOnHandJPY >= 10000
+                  ? "border-emerald-300 bg-emerald-50 text-emerald-950"
+                  : "border-amber-300 bg-amber-50 text-amber-950"
+              }`}
+            >
+              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 flex items-center justify-between">
+                <span>3. Balance Cash On-Hand</span>
+                <span className="rounded bg-emerald-200/80 px-1.5 py-0.5 text-[9px] font-bold text-emerald-900">
+                  Wallet
+                </span>
+              </span>
+              <div className="font-serif text-2xl sm:text-3xl font-extrabold text-emerald-950">
+                ¥ {balanceCashOnHandJPY.toLocaleString()}
+              </div>
+              <div className="font-mono text-xs font-bold text-emerald-800">
+                ≈ ₱ {balanceCashOnHandPHP.toLocaleString()} PHP
+              </div>
+              <p className="text-[11px] text-emerald-700 pt-2 border-t border-emerald-200/60 font-medium">
+                {balanceCashOnHandJPY < 10000
+                  ? "⚠️ Low Cash Warning: Consider visiting 7-Eleven ATM"
+                  : "✓ Safe Cash Cushion on hand"}
+              </p>
+            </div>
+          </div>
+
+          {/* ATM Withdrawal History (if any) */}
+          {cashWithdrawals.length > 0 && (
+            <div className="rounded-2xl border border-stone-200 bg-stone-50/80 p-4 space-y-2">
+              <span className="text-xs font-bold text-stone-900">Recent ATM Cash Inflows</span>
+              <div className="divide-y divide-stone-200">
+                {cashWithdrawals.map((w) => (
+                  <div key={w.id} className="py-2 flex items-center justify-between text-xs">
+                    <div>
+                      <span className="font-bold text-stone-900">¥{w.amountJPY.toLocaleString()} JPY</span>
+                      <span className="text-stone-500 ml-2 font-mono">({w.date})</span>
+                      <p className="text-[11px] text-stone-600">{w.location} · {w.cardUsed}</p>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteWithdrawal(w.id)}
+                      className="text-stone-400 hover:text-red-600 p-1"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Action Header Buttons */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-stone-200">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-stone-200">
           <div className="flex items-center gap-2">
             <span className="text-xs font-black uppercase tracking-widest text-stone-500">
-              Quick Actions
+              Expense Operations
             </span>
           </div>
 
@@ -648,36 +808,46 @@ export default function BudgetPage() {
               onClick={() => openAddModal("addPlanned")}
               className="inline-flex items-center gap-2 rounded-xl bg-[#FF5F93] px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#e84e80] transition active:scale-95"
             >
-              <Plus className="h-4 w-4 text-white" />
+              <Plus className="h-4 w-4" />
               <span>+ Add Planned Expense</span>
             </button>
           </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* SECTION 1 — FIXED / ACTUAL BUDGET (CONFIRMED & PAID) */}
+        {/* SECTION 1 — FIXED / ACTUAL BUDGET (Confirmed & Paid Expenses) */}
         {/* ========================================================================= */}
         <section className="space-y-4">
-          <div className="flex items-center justify-between border-b border-stone-200 pb-2">
-            <div className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full bg-emerald-500" />
-              <h3 className="font-serif text-xl font-bold text-stone-900">
-                Section 1 — Fixed / Actual Budget ({paidExpenses.length} Paid Items)
-              </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-stone-200 pb-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="rounded-md bg-[#1F3A5F] px-2.5 py-1 text-xs font-black tracking-widest text-white shadow-sm">
+                  SECTION 1
+                </span>
+                <h3 className="font-serif text-xl font-bold text-stone-900 sm:text-2xl">
+                  Fixed / Actual Budget (Paid & Confirmed)
+                </h3>
+              </div>
+              <p className="mt-1 text-xs text-stone-600 leading-relaxed font-medium">
+                Confirmed transactions that are already paid (Flights, Hotel, Park Tickets, Visas, Receipts).
+              </p>
             </div>
-            <span className="font-mono text-xs font-bold text-stone-700">
-              Total Paid: ¥{actualSpentJPY.toLocaleString()}
-            </span>
+
+            <div className="text-left sm:text-right">
+              <div className="text-[11px] font-black uppercase text-stone-500">
+                Section Total
+              </div>
+              <div className="font-serif text-lg font-extrabold text-[#1F3A5F]">
+                ¥ {actualSpentJPY.toLocaleString()} <span className="text-xs font-normal text-stone-500 font-mono">≈ ₱ {actualSpentPHP.toLocaleString()}</span>
+              </div>
+            </div>
           </div>
 
-          <p className="text-xs text-stone-500">
-            Confirmed costs that are already paid or booked (Hotel, flights, attraction passes, visas).
-          </p>
-
-          <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-md divide-y divide-stone-100">
+          {/* Paid Expenses List */}
+          <div className="divide-y divide-stone-200 rounded-3xl border border-stone-200 bg-white shadow-md overflow-hidden">
             {paidExpenses.length === 0 ? (
               <div className="p-8 text-center text-xs text-stone-500">
-                No paid expenses recorded. Click &quot;+ Add Paid Expense&quot; above to log one.
+                No paid expenses yet. Click &quot;+ Add Paid Expense&quot; above to log your first transaction.
               </div>
             ) : (
               paidExpenses.map((item) => {
@@ -685,20 +855,28 @@ export default function BudgetPage() {
                 return (
                   <div
                     key={item.id}
-                    className="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-stone-50 transition"
+                    className="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-stone-50/80 transition"
                   >
-                    <div className="space-y-1 max-w-xl">
+                    <div className="space-y-1.5 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                          <Check className="h-3 w-3" /> Paid
+                        <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-900 border border-emerald-200 flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3" /> Paid
                         </span>
-                        <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-[10px] font-semibold text-stone-700">
-                          {item.category.toUpperCase()}
+
+                        <span className="rounded-md bg-stone-100 px-2 py-0.5 text-[10px] font-bold text-stone-700 border border-stone-200">
+                          #{item.category.toUpperCase()}
                         </span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-[10px] font-bold text-indigo-700 border border-indigo-200">
-                          <CreditCard className="h-3 w-3" /> {item.paymentMethod}
+
+                        <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-[#8B5E14] border border-amber-200 flex items-center gap-1">
+                          {item.paymentMethod === "Cash" ? (
+                            <Banknote className="h-3 w-3" />
+                          ) : (
+                            <CreditCard className="h-3 w-3" />
+                          )}
+                          <span>{item.paymentMethod}</span>
                         </span>
-                        <span className="text-[10px] font-mono text-stone-400">
+
+                        <span className="text-[11px] font-mono text-stone-400">
                           {item.date}
                         </span>
                       </div>
@@ -728,14 +906,14 @@ export default function BudgetPage() {
                         <button
                           onClick={() => openEditModal(item)}
                           className="p-2 rounded-lg text-stone-400 hover:text-[#1F3A5F] hover:bg-stone-100 transition"
-                          aria-label="Edit paid item"
+                          aria-label="Edit item"
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDeletePaid(item.id)}
                           className="p-2 rounded-lg text-stone-400 hover:text-red-600 hover:bg-stone-100 transition"
-                          aria-label="Delete paid item"
+                          aria-label="Delete item"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -749,29 +927,39 @@ export default function BudgetPage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* SECTION 2 — PLANNED / EXPECTED BUDGET (UNPAID / ESTIMATED) */}
+        {/* SECTION 2 — PLANNED / EXPECTED BUDGET (Unpaid Estimates) */}
         {/* ========================================================================= */}
         <section className="space-y-4">
-          <div className="flex items-center justify-between border-b border-stone-200 pb-2">
-            <div className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full bg-amber-500" />
-              <h3 className="font-serif text-xl font-bold text-stone-900">
-                Section 2 — Planned / Expected Budget ({plannedExpenses.length} Planned Items)
-              </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-stone-200 pb-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="rounded-md bg-[#FF5F93] px-2.5 py-1 text-xs font-black tracking-widest text-white shadow-sm">
+                  SECTION 2
+                </span>
+                <h3 className="font-serif text-xl font-bold text-stone-900 sm:text-2xl">
+                  Planned / Expected Budget (Not Yet Paid)
+                </h3>
+              </div>
+              <p className="mt-1 text-xs text-stone-600 leading-relaxed font-medium">
+                Upcoming planned allowances (Food daily, Train fares, Donki shopping, Souvenirs, Taxi buffer).
+              </p>
             </div>
-            <span className="font-mono text-xs font-bold text-amber-900">
-              Total Planned: ¥{expectedFutureSpendJPY.toLocaleString()}
-            </span>
+
+            <div className="text-left sm:text-right">
+              <div className="text-[11px] font-black uppercase text-stone-500">
+                Planned Future Total
+              </div>
+              <div className="font-serif text-lg font-extrabold text-[#FF5F93]">
+                ¥ {expectedFutureSpendJPY.toLocaleString()} <span className="text-xs font-normal text-stone-500 font-mono">≈ ₱ {expectedFutureSpendPHP.toLocaleString()}</span>
+              </div>
+            </div>
           </div>
 
-          <p className="text-xs text-stone-500">
-            Estimated on-the-ground spending (Meals, Suica trains, Disney popcorn, shopping, Grab/taxi). Tap <b>&quot;Mark as Paid&quot;</b> when purchased to move directly into Section 1.
-          </p>
-
-          <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-md divide-y divide-stone-100">
+          {/* Planned Expenses List */}
+          <div className="divide-y divide-stone-200 rounded-3xl border border-stone-200 bg-white shadow-md overflow-hidden">
             {plannedExpenses.length === 0 ? (
               <div className="p-8 text-center text-xs text-stone-500">
-                No planned items remaining! All expenses are marked as paid.
+                All planned expenses have been marked as paid or none entered. Click &quot;+ Add Planned Expense&quot; above.
               </div>
             ) : (
               plannedExpenses.map((item) => {
@@ -779,18 +967,25 @@ export default function BudgetPage() {
                 return (
                   <div
                     key={item.id}
-                    className="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-stone-50 transition"
+                    className="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-stone-50/80 transition"
                   >
-                    <div className="space-y-1 max-w-xl">
+                    <div className="space-y-1.5 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-800 border border-amber-200 flex items-center gap-1">
-                          <Clock className="h-3 w-3" /> Planned / Unpaid
+                        <span className="rounded-md bg-stone-100 px-2 py-0.5 text-[10px] font-bold text-stone-700 border border-stone-200">
+                          #{item.category.toUpperCase()}
                         </span>
-                        <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-[10px] font-semibold text-stone-700">
-                          {item.category.toUpperCase()}
+
+                        <span className="rounded-md bg-stone-100 px-2 py-0.5 text-[10px] font-bold text-stone-600 border border-stone-200 flex items-center gap-1">
+                          {item.paymentMethod === "Cash" ? (
+                            <Banknote className="h-3 w-3" />
+                          ) : (
+                            <CreditCard className="h-3 w-3" />
+                          )}
+                          <span>Intended: {item.paymentMethod}</span>
                         </span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2.5 py-0.5 text-[10px] font-medium text-stone-700 border border-stone-200">
-                          Intended: {item.paymentMethod}
+
+                        <span className="text-[11px] font-mono text-stone-400">
+                          Estimated for {item.date}
                         </span>
                       </div>
 
@@ -851,7 +1046,7 @@ export default function BudgetPage() {
       {/* ========================================================================= */}
       {/* MODAL: ADD / EDIT / MARK AS PAID */}
       {/* ========================================================================= */}
-      {modalType && (
+      {modalType && modalType !== "addWithdrawal" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-lg overflow-hidden rounded-3xl bg-white p-6 shadow-2xl border border-stone-200 space-y-5 animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
@@ -994,6 +1189,116 @@ export default function BudgetPage() {
                   className="rounded-xl bg-[#1F3A5F] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#132540] transition"
                 >
                   {modalType === "markPaid" ? "Confirm & Mark Paid" : "Save Record"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: LOG ATM CASH WITHDRAWAL */}
+      {/* ========================================================================= */}
+      {modalType === "addWithdrawal" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg overflow-hidden rounded-3xl bg-white p-6 shadow-2xl border border-stone-200 space-y-5 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Landmark className="h-5 w-5 text-[#1F3A5F]" />
+                <h3 className="font-serif text-lg font-bold text-stone-900">
+                  Log ATM Cash Withdrawal
+                </h3>
+              </div>
+              <button
+                onClick={() => setModalType(null)}
+                className="p-1 rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveWithdrawal} className="space-y-4">
+              <p className="text-xs text-stone-600 leading-relaxed">
+                Record physical cash withdrawn from 7-Eleven or Japan Post ATMs. This increases your <b>Total Amount Withdrawn</b> and recalculates your <b>Balance On-Hand</b>.
+              </p>
+
+              <div>
+                <label className="text-xs font-bold text-stone-700">
+                  Withdrawal Amount (¥ JPY)
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={withdrawalAmountJPY}
+                  onChange={(e) => setWithdrawalAmountJPY(e.target.value.replace(/[^0-9.]/g, ""))}
+                  placeholder="20000"
+                  className="mt-1 w-full rounded-xl border border-stone-300 p-3 text-sm font-bold outline-none focus:border-[#1F3A5F]"
+                  required
+                />
+                <p className="mt-1 text-[10px] text-stone-500 font-mono">
+                  ≈ ₱ {Math.round((parseFloat(withdrawalAmountJPY) || 0) / fxRate).toLocaleString()} PHP
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-stone-700">
+                    ATM Location
+                  </label>
+                  <input
+                    type="text"
+                    value={withdrawalLocation}
+                    onChange={(e) => setWithdrawalLocation(e.target.value)}
+                    placeholder="e.g. 7-Eleven Asakusa"
+                    className="mt-1 w-full rounded-xl border border-stone-300 p-2.5 text-xs font-medium outline-none focus:border-[#1F3A5F]"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-stone-700">
+                    Debit / ATM Card Used
+                  </label>
+                  <select
+                    value={withdrawalCard}
+                    onChange={(e) => setWithdrawalCard(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-stone-300 p-2.5 text-xs font-medium outline-none focus:border-[#1F3A5F] bg-white"
+                  >
+                    <option value="BDO Mastercard">BDO Mastercard</option>
+                    <option value="GCash Card">GCash Card</option>
+                    <option value="MariBank Debit">MariBank Debit</option>
+                    <option value="RCBC Visa">RCBC Visa</option>
+                    <option value="Other Bank Card">Other Bank Card</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-stone-700">
+                  Withdrawal Date
+                </label>
+                <input
+                  type="date"
+                  value={withdrawalDate}
+                  onChange={(e) => setWithdrawalDate(e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-stone-300 p-2.5 text-xs font-semibold outline-none focus:border-[#1F3A5F]"
+                  required
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100">
+                <button
+                  type="button"
+                  onClick={() => setModalType(null)}
+                  className="rounded-xl px-4 py-2.5 text-xs font-bold text-stone-600 hover:bg-stone-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-xl bg-[#1F3A5F] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#132540] transition"
+                >
+                  Confirm Withdrawal
                 </button>
               </div>
             </form>

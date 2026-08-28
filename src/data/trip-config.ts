@@ -201,7 +201,7 @@ export const itineraryDays: ItineraryDay[] = [
     area: "Narita Airport → Hanakawado Asakusa",
     icon: "⛩️",
     image:
-      "https://images.unsplash.com/photo-1583084332453-83802d149087?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=1200&q=80",
     transitNote:
       "NAIA T3 Lounge (UnionBank Miles+ Visa) → Flight to Narita (arr 11:35 AM) → Keisei Access Express to Asakusa Station (~60–80 min direct, ¥1,300–1,350) → Hotel Plus Hostel Asakusa 2",
     transitSummary: {
@@ -252,7 +252,7 @@ export const itineraryDays: ItineraryDay[] = [
         icon: "⛩️",
         badges: ["Free", "Outdoor"],
         image:
-          "https://images.unsplash.com/photo-1583084332453-83802d149087?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=800&q=80",
         transit: {
           routeId: "asakusa-local",
           title: "Walk to Sensō-ji & Kaminarimon",
@@ -772,7 +772,7 @@ export const itineraryDays: ItineraryDay[] = [
         icon: "⛩️",
         badges: ["Free", "Calm Start"],
         image:
-          "https://images.unsplash.com/photo-1583084332453-83802d149087?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=800&q=80",
         transit: {
           routeId: "hotel-akihabara",
           title: "Tsukuba Express to Akihabara",
@@ -957,7 +957,7 @@ export const placeGuides: PlaceGuide[] = [
     district: "Asakusa, Taito City",
     tagline: "Tokyo's oldest temple, giant red lanterns, and historic market stalls.",
     image:
-      "https://images.unsplash.com/photo-1583084332453-83802d149087?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=1200&q=80",
     recommendedDuration: "2 to 3 hours",
     whatYoullSee: [
       "Kaminarimon (Thunder Gate) with iconic 700kg red chochin lantern",
@@ -1290,7 +1290,7 @@ export const disneyGuides: DisneyParkGuide[] = [
             desc: "Tokyo-exclusive trackless ride bouncing unpredictably through the Hundred Acre Wood. Pure magic.",
             land: "Fantasyland",
             image:
-              "https://images.unsplash.com/photo-1535572292557-e69509e8f5f6?auto=format&fit=crop&w=800&q=80",
+              "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
           {
@@ -1299,7 +1299,7 @@ export const disneyGuides: DisneyParkGuide[] = [
             desc: "Spooky atmospheric dark ride in an air-conditioned doom buggy. Mild scares, no big drops.",
             land: "Fantasyland",
             image:
-              "https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=800&q=80",
+              "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
           {
@@ -1503,7 +1503,7 @@ export const disneyGuides: DisneyParkGuide[] = [
             desc: "Whimsical family buggy spinner through Pixie Hollow seasons.",
             land: "Fantasy Springs",
             image:
-              "https://images.unsplash.com/photo-1535572292557-e69509e8f5f6?auto=format&fit=crop&w=800&q=80",
+              "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80",
             heightRequirement: "No height limit",
           },
         ],
@@ -2179,7 +2179,7 @@ export const souvenirDistricts: SouvenirDistrict[] = [
     dayRef: "Day 1",
     icon: "⛩️",
     image:
-      "https://images.unsplash.com/photo-1583084332453-83802d149087?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=800&q=80",
     shops: [
       {
         name: "Nakamise Shopping Street",
