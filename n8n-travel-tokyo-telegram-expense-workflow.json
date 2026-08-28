@@ -1,5 +1,5 @@
 {
-  "name": "TravelTokyo - AI Expense Tracking via Telegram (Google Gemini)",
+  "name": "TravelTokyo - AI Expense Tracking via Telegram (Google Gemini Fixed)",
   "nodes": [
     {
       "parameters": {
@@ -13,7 +13,7 @@
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.1,
       "position": [
-        200,
+        180,
         300
       ],
       "webhookId": "travel-tokyo-gemini-telegram-webhook",
@@ -51,7 +51,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        420,
+        400,
         300
       ]
     },
@@ -63,12 +63,12 @@
         "additionalFields": {}
       },
       "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0003",
-      "name": "Get Telegram Photo File",
+      "name": "Download Telegram Photo",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        640,
-        200
+        620,
+        180
       ],
       "credentials": {
         "telegramApi": {
@@ -79,38 +79,16 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"You are the TravelTokyo AI Expense Parser for a Tokyo trip.\\nAnalyze this image and any caption: '\" + ($node[\"Has Receipt Photo?\"].json.message.caption || \"\") + \"'.\\n\\nTASK 1: Determine if this is an actual monetary receipt / paid transaction or a non-expense item (scenery photo, selfie, general chat, boarding pass without price).\\nTASK 2: If it is an expense, extract all transaction details.\\n\\nOutput strictly valid JSON:\\n{\\n  \\\"is_expense\\\": boolean,\\n  \\\"non_expense_reason\\\": string (if not an expense, e.g. 'Scenery photo', 'Chat message'),\\n  \\\"is_duplicate_risk\\\": false,\\n  \\\"title\\\": string (Merchant/store name + items, e.g. '7-Eleven Asakusa Snacks', 'Ichiran Ramen'),\\n  \\\"amount\\\": number (Total in JPY integer, e.g. 1800),\\n  \\\"currency\\\": \\\"JPY\\\",\\n  \\\"category\\\": string (Must be ONE of: 'food', 'transport', 'shopping', 'tickets', 'hotel', 'flights', 'documents', 'other'),\\n  \\\"paymentMethod\\\": string (Must be ONE of: 'Cash', 'BDO JCB', 'BDO Mastercard', 'RCBC Visa', 'GCash', 'MariBank', 'UnionBank Visa', 'Other Card / Wallet'),\\n  \\\"date\\\": string (YYYY-MM-DD format),\\n  \\\"status\\\": \\\"paid\\\",\\n  \\\"notes\\\": string,\\n  \\\"needs_clarification\\\": boolean,\\n  \\\"clarification_question\\\": string\\n}\\n\\nPayment Methods:\\n- '現金' or cash -> 'Cash'\\n- 'JCB' -> 'BDO JCB'\\n- 'Mastercard' or 'MC' -> 'BDO Mastercard'\\n- 'VISA' -> 'RCBC Visa'\\n- Default to 'Cash' if unstated.\\n\\nNever fabricate unreadable totals. If amount is cut off or illegible, set needs_clarification=true and ask for the Yen amount.\"\n        },\n        {\n          \"inline_data\": {\n            \"mime_type\": \"image/jpeg\",\n            \"data\": \"={{ $binary.data.data }}\"\n          }\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"temperature\": 0.1,\n    \"response_mime_type\": \"application/json\"\n  }\n}",
-        "options": {}
+        "jsCode": "// Convert binary image buffer to clean Base64 for Gemini Vision\nconst binaryData = await this.helpers.getBinaryDataBuffer(0, 'data');\nconst base64Image = binaryData.toString('base64');\n\nconst triggerNode = $('Has Receipt Photo?').first().json;\nconst userCaption = triggerNode.message?.caption || '';\n\nconst prompt = `You are the TravelTokyo AI Expense Parser for a 7-day Tokyo trip.\\nAnalyze this image and user caption: '${userCaption}'.\\n\\nTASK 1: Determine if this is an actual monetary receipt / paid transaction OR a non-expense item (scenery photo, selfie, general chat, travel document without price).\\nTASK 2: If it is an expense, extract all transaction details.\\n\\nOutput strictly valid JSON matching this schema:\\n{\\n  \"is_expense\": boolean,\\n  \"non_expense_reason\": string (e.g. 'Scenery photo', 'Selfie', 'No price on photo'),\\n  \"title\": string (Merchant name / item description, e.g. '7-Eleven Asakusa Snacks', 'Ichiran Ramen', 'Tokyo Disney Popcorn'),\\n  \"amount\": number (Total in JPY integer, e.g. 1800),\\n  \"currency\": \"JPY\",\\n  \"category\": string (Must be ONE of: 'food', 'transport', 'shopping', 'tickets', 'hotel', 'flights', 'documents', 'other'),\\n  \"paymentMethod\": string (Must be ONE of: 'Cash', 'BDO JCB', 'BDO Mastercard', 'RCBC Visa', 'GCash', 'MariBank', 'UnionBank Visa', 'Other Card / Wallet'),\\n  \"date\": string (YYYY-MM-DD format),\\n  \"status\": \"paid\",\\n  \"notes\": string,\\n  \"needs_clarification\": boolean,\\n  \"clarification_question\": string\\n}\\n\\nPayment Methods:\\n- '現金' or cash -> 'Cash'\\n- 'JCB' -> 'BDO JCB'\\n- 'Mastercard' or 'MC' -> 'BDO Mastercard'\\n- 'VISA' -> 'RCBC Visa'\\n- Default to 'Cash' if unstated.\\n\\nNever fabricate unreadable totals. If amount is cut off or illegible, set needs_clarification=true and formulate a clarification_question.`;\n\nconst payload = {\n  contents: [\n    {\n      parts: [\n        { text: prompt },\n        {\n          inlineData: {\n            mimeType: 'image/jpeg',\n            data: base64Image\n          }\n        }\n      ]\n    }\n  ],\n  generationConfig: {\n    temperature: 0.1,\n    responseMimeType: 'application/json'\n  }\n};\n\nreturn [{ json: { geminiPayload: payload } }];"
       },
       "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0004",
-      "name": "Gemini Vision Receipt Parser",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Prepare Gemini Vision Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        880,
-        200
-      ],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "GEMINI_API_KEY_CREDENTIALS_ID",
-          "name": "Google Gemini API Key (x-goog-api-key)"
-        }
-      }
+        840,
+        180
+      ]
     },
     {
       "parameters": {
@@ -129,15 +107,63 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"You are the TravelTokyo AI Expense Parser for a Tokyo trip.\\nAnalyze this text message: '\" + $json.message.text + \"'.\\n\\nTASK 1: Determine if this is a real paid expense transaction (e.g. 'Ramen 1500 jpy cash', 'suica reload 2000 bdo') OR a non-expense message (e.g. 'Good morning', 'We arrived in Asakusa', 'Where is the station?').\\nTASK 2: If it is an expense, extract all details.\\n\\nOutput strictly valid JSON:\\n{\\n  \\\"is_expense\\\": boolean,\\n  \\\"non_expense_reason\\\": string (if not an expense),\\n  \\\"title\\\": string (Merchant name / item description),\\n  \\\"amount\\\": number (Total in JPY integer),\\n  \\\"currency\\\": \\\"JPY\\\",\\n  \\\"category\\\": string (Must be ONE of: 'food', 'transport', 'shopping', 'tickets', 'hotel', 'flights', 'documents', 'other'),\\n  \\\"paymentMethod\\\": string (Must be ONE of: 'Cash', 'BDO JCB', 'BDO Mastercard', 'RCBC Visa', 'GCash', 'MariBank', 'UnionBank Visa', 'Other Card / Wallet'),\\n  \\\"date\\\": string (YYYY-MM-DD format),\\n  \\\"status\\\": \\\"paid\\\",\\n  \\\"notes\\\": string,\\n  \\\"needs_clarification\\\": boolean,\\n  \\\"clarification_question\\\": string\\n}\\n\\nPayment Methods:\\n- cash -> 'Cash'\\n- bdo jcb / jcb -> 'BDO JCB'\\n- bdo / mastercard -> 'BDO Mastercard'\\n- rcbc / visa -> 'RCBC Visa'\\n- gcash -> 'GCash'\\n- maribank -> 'MariBank'\\n- unionbank -> 'UnionBank Visa'\\n- default: 'Cash'\\n\\nIf this is a non-expense conversational message, set is_expense=false.\"\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"temperature\": 0.1,\n    \"response_mime_type\": \"application/json\"\n  }\n}",
+        "jsonBody": "={{ JSON.stringify($json.geminiPayload) }}",
         "options": {}
       },
       "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0005",
-      "name": "Gemini Text Expense Parser",
+      "name": "Gemini Vision API",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        640,
+        1060,
+        180
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "GEMINI_API_KEY_CREDENTIALS_ID",
+          "name": "Google Gemini API Key (x-goog-api-key)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare text payload for Gemini Text Parser\nconst userText = $json.message?.text || '';\n\nconst prompt = `You are the TravelTokyo AI Expense Parser for a 7-day Tokyo trip.\\nAnalyze this text message: '${userText}'.\\n\\nTASK 1: Determine if this is a real paid expense transaction (e.g. 'Ramen 1500 jpy cash', 'suica reload 2000 bdo', 'donki shopping 4500 rcbc') OR a non-expense conversational message (e.g. 'Good morning', 'We arrived at Asakusa', 'Where is the station?').\\nTASK 2: If it is an expense, extract all details.\\n\\nOutput strictly valid JSON matching this schema:\\n{\\n  \"is_expense\": boolean,\\n  \"non_expense_reason\": string (if not an expense),\\n  \"title\": string (Merchant name / item description),\\n  \"amount\": number (Total in JPY integer),\\n  \"currency\": \"JPY\",\\n  \"category\": string (Must be ONE of: 'food', 'transport', 'shopping', 'tickets', 'hotel', 'flights', 'documents', 'other'),\\n  \"paymentMethod\": string (Must be ONE of: 'Cash', 'BDO JCB', 'BDO Mastercard', 'RCBC Visa', 'GCash', 'MariBank', 'UnionBank Visa', 'Other Card / Wallet'),\\n  \"date\": string (YYYY-MM-DD format),\\n  \"status\": \"paid\",\\n  \"notes\": string,\\n  \"needs_clarification\": boolean,\\n  \"clarification_question\": string\\n}\\n\\nPayment Methods:\\n- cash -> 'Cash'\\n- bdo jcb / jcb -> 'BDO JCB'\\n- bdo / mastercard -> 'BDO Mastercard'\\n- rcbc / visa -> 'RCBC Visa'\\n- gcash -> 'GCash'\\n- maribank -> 'MariBank'\\n- unionbank -> 'UnionBank Visa'\\n- default: 'Cash'\\n\\nIf this is a non-expense conversational message, set is_expense=false.`;\n\nconst payload = {\n  contents: [\n    {\n      parts: [\n        { text: prompt }\n      ]\n    }\n  ],\n  generationConfig: {\n    temperature: 0.1,\n    responseMimeType: 'application/json'\n  }\n};\n\nreturn [{ json: { geminiPayload: payload } }];"
+      },
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0006",
+      "name": "Prepare Gemini Text Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        620,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.geminiPayload) }}",
+        "options": {}
+      },
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0007",
+      "name": "Gemini Text API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        840,
         420
       ],
       "credentials": {
@@ -149,14 +175,14 @@
     },
     {
       "parameters": {
-        "jsCode": "// 1. Parse Gemini JSON Output\nlet rawText = \"{}\";\nconst geminiRes = $input.first().json;\n\nif (geminiRes.candidates && geminiRes.candidates[0]?.content?.parts[0]?.text) {\n  rawText = geminiRes.candidates[0].content.parts[0].text;\n} else if (geminiRes.text) {\n  rawText = geminiRes.text;\n}\n\nlet parsed = {};\ntry {\n  const cleanJson = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();\n  parsed = JSON.parse(cleanJson);\n} catch (e) {\n  parsed = {\n    is_expense: false,\n    non_expense_reason: \"Could not parse message format.\"\n  };\n}\n\n// 2. Extract Trigger Data for Chat & Duplication Tracking\nconst triggerData = $(\"Telegram Trigger\").first().json;\nconst chatId = triggerData.message?.chat?.id || triggerData.message?.from?.id;\nconst messageId = triggerData.message?.message_id;\nconst senderName = triggerData.message?.from?.first_name || \"Traveler\";\n\n// 3. Non-Expense Check\nif (parsed.is_expense === false) {\n  return [{\n    json: {\n      type: \"non_expense\",\n      chatId: chatId,\n      messageId: messageId,\n      reason: parsed.non_expense_reason || \"Non-expense message or scenery photo.\",\n      senderName: senderName\n    }\n  }];\n}\n\n// 4. Duplicate Detection (In-Memory Fingerprint Check)\nconst fxRate = 2.70;\nconst amountJPY = parseInt(parsed.amount, 10) || 0;\nconst amountPHP = Math.round(amountJPY / fxRate);\nconst transactionDate = parsed.date || new Date().toISOString().split('T')[0];\nconst title = (parsed.title || \"Tokyo Expense\").trim();\n\n// Generate unique transaction fingerprint (e.g. \"7-eleven_1800_2026-09-01\")\nconst fingerprint = `${title.toLowerCase().replace(/[^a-z0-9]/g, '')}_${amountJPY}_${transactionDate}`;\n\n// Static workflow storage for last 50 processed fingerprints\nconst staticData = $getWorkflowStaticData('global');\nstaticData.processedFingerprints = staticData.processedFingerprints || [];\n\nif (amountJPY > 0 && staticData.processedFingerprints.includes(fingerprint)) {\n  return [{\n    json: {\n      type: \"duplicate\",\n      chatId: chatId,\n      messageId: messageId,\n      title: title,\n      amount: amountJPY,\n      date: transactionDate,\n      senderName: senderName\n    }\n  }];\n}\n\n// Register fingerprint\nif (amountJPY > 0) {\n  staticData.processedFingerprints.push(fingerprint);\n  if (staticData.processedFingerprints.length > 50) {\n    staticData.processedFingerprints.shift();\n  }\n}\n\n// 5. Clarification Check\nif (parsed.needs_clarification || amountJPY <= 0) {\n  return [{\n    json: {\n      type: \"clarification\",\n      chatId: chatId,\n      messageId: messageId,\n      clarification_question: parsed.clarification_question || `Found receipt for \"${title}\" but the total Yen amount is missing or unclear. How much was the total in JPY?`,\n      senderName: senderName\n    }\n  }];\n}\n\n// 6. Valid TravelTokyo Expense Record\nconst expenseRecord = {\n  type: \"valid_expense\",\n  id: `paid-${Date.now()}`,\n  title: title,\n  amount: amountJPY,\n  currency: \"JPY\",\n  category: parsed.category || \"food\",\n  paymentMethod: parsed.paymentMethod || \"Cash\",\n  date: transactionDate,\n  status: \"paid\",\n  notes: parsed.notes || \"Logged via Gemini Telegram receipt bot\",\n  convertedAmountPHP: amountPHP,\n  chatId: chatId,\n  messageId: messageId,\n  senderName: senderName\n};\n\nreturn [ { json: expenseRecord } ];"
+        "jsCode": "// 1. Extract JSON from Gemini Response\nlet rawText = \"{}\";\nconst res = $input.first().json;\n\nif (res.candidates && res.candidates[0]?.content?.parts[0]?.text) {\n  rawText = res.candidates[0].content.parts[0].text;\n} else if (res.text) {\n  rawText = res.text;\n}\n\nlet parsed = {};\ntry {\n  const clean = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();\n  parsed = JSON.parse(clean);\n} catch (e) {\n  parsed = {\n    is_expense: false,\n    non_expense_reason: \"Could not parse AI output format.\"\n  };\n}\n\n// 2. Chat Info\nconst triggerData = $(\"Telegram Trigger\").first().json;\nconst chatId = triggerData.message?.chat?.id || triggerData.message?.from?.id;\nconst messageId = triggerData.message?.message_id;\nconst senderName = triggerData.message?.from?.first_name || \"Traveler\";\n\n// 3. Non-Expense Filtering\nif (parsed.is_expense === false) {\n  return [{\n    json: {\n      type: \"non_expense\",\n      chatId: chatId,\n      messageId: messageId,\n      reason: parsed.non_expense_reason || \"Non-expense message or photo.\",\n      senderName: senderName\n    }\n  }];\n}\n\n// 4. Duplicate Detection (In-Memory Fingerprint)\nconst fxRate = 2.70;\nconst amountJPY = parseInt(parsed.amount, 10) || 0;\nconst amountPHP = Math.round(amountJPY / fxRate);\nconst transactionDate = parsed.date || new Date().toISOString().split('T')[0];\nconst title = (parsed.title || \"Tokyo Expense\").trim();\n\nconst fingerprint = `${title.toLowerCase().replace(/[^a-z0-9]/g, '')}_${amountJPY}_${transactionDate}`;\n\nconst staticData = $getWorkflowStaticData('global');\nstaticData.processedFingerprints = staticData.processedFingerprints || [];\n\nif (amountJPY > 0 && staticData.processedFingerprints.includes(fingerprint)) {\n  return [{\n    json: {\n      type: \"duplicate\",\n      chatId: chatId,\n      messageId: messageId,\n      title: title,\n      amount: amountJPY,\n      date: transactionDate,\n      senderName: senderName\n    }\n  }];\n}\n\n// Register fingerprint (keep last 50 entries)\nif (amountJPY > 0) {\n  staticData.processedFingerprints.push(fingerprint);\n  if (staticData.processedFingerprints.length > 50) {\n    staticData.processedFingerprints.shift();\n  }\n}\n\n// 5. Clarification Handling\nif (parsed.needs_clarification || amountJPY <= 0) {\n  return [{\n    json: {\n      type: \"clarification\",\n      chatId: chatId,\n      messageId: messageId,\n      clarification_question: parsed.clarification_question || `Found receipt for \"${title}\" but the total Yen amount is missing or unclear. How much was the total in JPY?`,\n      senderName: senderName\n    }\n  }];\n}\n\n// 6. Valid TravelTokyo Expense Record\nconst expenseRecord = {\n  type: \"valid_expense\",\n  id: `paid-${Date.now()}`,\n  title: title,\n  amount: amountJPY,\n  currency: \"JPY\",\n  category: parsed.category || \"food\",\n  paymentMethod: parsed.paymentMethod || \"Cash\",\n  date: transactionDate,\n  status: \"paid\",\n  notes: parsed.notes || \"Logged via Gemini Telegram receipt bot\",\n  convertedAmountPHP: amountPHP,\n  chatId: chatId,\n  messageId: messageId,\n  senderName: senderName\n};\n\nreturn [ { json: expenseRecord } ];"
       },
-      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0006",
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0008",
       "name": "Process, Deduplicate & Format",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1120,
+        1300,
         300
       ]
     },
@@ -256,12 +282,12 @@
         },
         "options": {}
       },
-      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0007",
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0009",
       "name": "Route Event Type",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
       "position": [
-        1360,
+        1520,
         300
       ]
     },
@@ -283,12 +309,12 @@
           }
         }
       },
-      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0008",
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0010",
       "name": "Send Confirmation",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1640,
+        1780,
         140
       ],
       "credentials": {
@@ -306,12 +332,12 @@
           "parse_mode": "Markdown"
         }
       },
-      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0009",
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0011",
       "name": "Send Duplicate Alert",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1640,
+        1780,
         280
       ],
       "credentials": {
@@ -329,12 +355,12 @@
           "parse_mode": "Markdown"
         }
       },
-      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0010",
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0012",
       "name": "Send Clarification Request",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1640,
+        1780,
         420
       ],
       "credentials": {
@@ -352,12 +378,12 @@
           "parse_mode": "Markdown"
         }
       },
-      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0011",
+      "id": "1e1b8b80-6b6a-4d2a-9e12-8e6f1a8c0013",
       "name": "Send Non-Expense Notice",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1640,
+        1780,
         560
       ],
       "credentials": {
@@ -384,32 +410,43 @@
       "main": [
         [
           {
-            "node": "Get Telegram Photo File",
+            "node": "Download Telegram Photo",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Gemini Text Expense Parser",
+            "node": "Prepare Gemini Text Payload",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Get Telegram Photo File": {
+    "Download Telegram Photo": {
       "main": [
         [
           {
-            "node": "Gemini Vision Receipt Parser",
+            "node": "Prepare Gemini Vision Payload",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Gemini Vision Receipt Parser": {
+    "Prepare Gemini Vision Payload": {
+      "main": [
+        [
+          {
+            "node": "Gemini Vision API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Vision API": {
       "main": [
         [
           {
@@ -420,7 +457,18 @@
         ]
       ]
     },
-    "Gemini Text Expense Parser": {
+    "Prepare Gemini Text Payload": {
+      "main": [
+        [
+          {
+            "node": "Gemini Text API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Text API": {
       "main": [
         [
           {
@@ -480,7 +528,7 @@
   },
   "staticData": null,
   "meta": {
-    "instanceId": "travel-tokyo-gemini-n8n-instance",
+    "instanceId": "travel-tokyo-gemini-n8n-instance-v2",
     "templateCredsSetupCompleted": false
   },
   "pinData": {}
