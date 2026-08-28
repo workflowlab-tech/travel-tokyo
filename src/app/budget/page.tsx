@@ -87,13 +87,13 @@ export default function BudgetPage() {
     {
       id: "paid-flights-mnl-nrt",
       title: "Airfare: Manila (MNL) ⇄ Tokyo Narita (NRT) for 5 Pax",
-      amount: 168750,
+      amount: 66190,
       currency: "JPY",
       category: "flights",
       paymentMethod: "RCBC Visa",
-      date: "2026-09-01",
+      date: "2025-10-07",
       status: "paid",
-      notes: "PNRs: WETQNY, WC2HXE, MH1ZRC, NLNDWD (≈ ₱62,500 PHP)",
+      notes: "Cebu Pacific 5 Pax: ₱4,902.99 x 3 + ₱9,805.98 = Total ₱24,514.95 PHP · PNRs: WETQNY, WC2HXE, MH1ZRC, NLNDWD",
     },
     {
       id: "paid-hp-studio-tickets",
@@ -131,7 +131,7 @@ export default function BudgetPage() {
   ];
 
   const [paidExpenses, setPaidExpenses] = useLocalStorage<ExpenseRecord[]>(
-    "travel_tokyo_paid_expenses_v2",
+    "travel_tokyo_paid_expenses_v3",
     defaultPaidExpenses
   );
 
