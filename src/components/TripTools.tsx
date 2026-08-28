@@ -105,7 +105,16 @@ export const TripTools: React.FC = () => {
     async function loadDocs() {
       try {
         const stored = await getAllDocuments();
-        if (stored.length === 0) {
+        const alreadySeeded =
+          typeof window !== "undefined" &&
+          window.localStorage.getItem("travel_tokyo_bookings_seeded") === "true";
+
+        if (stored.length === 0 && !alreadySeeded) {
+          // First-ever visit: write the starter bookings into IndexedDB for real
+          // (previously they only ever lived in memory, so "deleting" one just
+          // hid it until the next reload silently brought it back).
+          await Promise.all(defaultBookings.map((doc) => saveDocToIDB(doc)));
+          window.localStorage.setItem("travel_tokyo_bookings_seeded", "true");
           setDocuments(defaultBookings);
         } else {
           setDocuments(stored);
