@@ -468,7 +468,7 @@ export default function BudgetPage() {
         status: "paid",
         notes: formNotes.trim() || undefined,
       };
-      setPaidExpenses([newPaid, ...paidExpenses]);
+      setPaidExpenses((prev) => [newPaid, ...prev]);
     } else if (modalType === "addPlanned") {
       const newPlanned: ExpenseRecord = {
         id: "plan-" + Date.now(),
@@ -481,11 +481,11 @@ export default function BudgetPage() {
         status: "planned",
         notes: formNotes.trim() || undefined,
       };
-      setPlannedExpenses([newPlanned, ...plannedExpenses]);
+      setPlannedExpenses((prev) => [newPlanned, ...prev]);
     } else if (modalType === "edit" && activeEditingItem) {
       if (activeEditingItem.status === "paid") {
-        setPaidExpenses(
-          paidExpenses.map((item) =>
+        setPaidExpenses((prev) =>
+          prev.map((item) =>
             item.id === activeEditingItem.id
               ? {
                   ...item,
@@ -501,8 +501,8 @@ export default function BudgetPage() {
           )
         );
       } else {
-        setPlannedExpenses(
-          plannedExpenses.map((item) =>
+        setPlannedExpenses((prev) =>
+          prev.map((item) =>
             item.id === activeEditingItem.id
               ? {
                   ...item,
@@ -520,7 +520,7 @@ export default function BudgetPage() {
       }
     } else if (modalType === "markPaid" && activeEditingItem) {
       // 1. Remove from planned
-      setPlannedExpenses(plannedExpenses.filter((item) => item.id !== activeEditingItem.id));
+      setPlannedExpenses((prev) => prev.filter((item) => item.id !== activeEditingItem.id));
       // 2. Add to paid with confirmed details
       const movedPaid: ExpenseRecord = {
         id: "paid-" + Date.now(),
@@ -533,7 +533,7 @@ export default function BudgetPage() {
         status: "paid",
         notes: formNotes.trim() || undefined,
       };
-      setPaidExpenses([movedPaid, ...paidExpenses]);
+      setPaidExpenses((prev) => [movedPaid, ...prev]);
     }
 
     setModalType(null);
@@ -553,20 +553,20 @@ export default function BudgetPage() {
       cardUsed: withdrawalCard,
     };
 
-    setCashWithdrawals([newWithdrawal, ...cashWithdrawals]);
+    setCashWithdrawals((prev) => [newWithdrawal, ...prev]);
     setModalType(null);
   };
 
   const handleDeleteWithdrawal = (id: string) => {
-    setCashWithdrawals(cashWithdrawals.filter((w) => w.id !== id));
+    setCashWithdrawals((prev) => prev.filter((w) => w.id !== id));
   };
 
   const handleDeletePaid = (id: string) => {
-    setPaidExpenses(paidExpenses.filter((item) => item.id !== id));
+    setPaidExpenses((prev) => prev.filter((item) => item.id !== id));
   };
 
   const handleDeletePlanned = (id: string) => {
-    setPlannedExpenses(plannedExpenses.filter((item) => item.id !== id));
+    setPlannedExpenses((prev) => prev.filter((item) => item.id !== id));
   };
 
   return (

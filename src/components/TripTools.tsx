@@ -275,7 +275,7 @@ export const TripTools: React.FC = () => {
   const handleAddCustomPacking = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCustomItem.trim()) return;
-    setCustomItems([...customItems, newCustomItem.trim()]);
+    setCustomItems((prev) => [...prev, newCustomItem.trim()]);
     setNewCustomItem("");
   };
 
