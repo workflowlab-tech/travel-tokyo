@@ -713,10 +713,10 @@ export default function BudgetPage() {
 
               <div>
                 <div className="font-serif text-2xl sm:text-3xl font-extrabold text-stone-900">
-                  {destSymbol} {actualSpentJPY.toLocaleString()}
+                  {homeSymbol} {actualSpentPHP.toLocaleString()}
                 </div>
                 <div className="mt-0.5 font-mono text-xs font-bold text-[#8B5E14]">
-                  ≈ {homeSymbol} {actualSpentPHP.toLocaleString()} {homeCurrency}
+                  ≈ {destSymbol} {actualSpentJPY.toLocaleString()} {destCurrency}
                 </div>
               </div>
 
@@ -738,10 +738,10 @@ export default function BudgetPage() {
 
               <div>
                 <div className="font-serif text-2xl sm:text-3xl font-extrabold text-blue-950">
-                  {destSymbol} {expectedFutureSpendJPY.toLocaleString()}
+                  {homeSymbol} {expectedFutureSpendPHP.toLocaleString()}
                 </div>
                 <div className="mt-0.5 font-mono text-xs font-bold text-blue-800">
-                  ≈ {homeSymbol} {expectedFutureSpendPHP.toLocaleString()} {homeCurrency}
+                  ≈ {destSymbol} {expectedFutureSpendJPY.toLocaleString()} {destCurrency}
                 </div>
               </div>
 
@@ -777,14 +777,14 @@ export default function BudgetPage() {
                     projectedRemainingJPY >= 0 ? "text-emerald-950" : "text-red-950"
                   }`}
                 >
-                  {destSymbol} {projectedRemainingJPY.toLocaleString()}
+                  {homeSymbol} {projectedRemainingPHP.toLocaleString()}
                 </div>
                 <div
                   className={`mt-0.5 font-mono text-xs font-bold ${
                     projectedRemainingJPY >= 0 ? "text-emerald-800" : "text-red-800"
                   }`}
                 >
-                  ≈ {homeSymbol} {projectedRemainingPHP.toLocaleString()} {homeCurrency}
+                  ≈ {destSymbol} {projectedRemainingJPY.toLocaleString()} {destCurrency}
                 </div>
               </div>
 
