@@ -243,12 +243,15 @@ export const tripMeta: TripMeta = {
       steps: [
         "1. Visit the nearest Koban (Police Box) and file a Lost Property Report (遺失届 - Ishitsu-todoke).",
         "2. Obtain your official 'Certificate of Loss' (遺失届出証明書) with case number from the officer.",
-        "3. Locate your country's Embassy or Consulate in Tokyo (Minato-ku / Chiyoda-ku area).",
+        "3. Go to the Philippine Embassy, Tokyo: 5-15-5 Roppongi, Minato-ku, Tokyo 106-8537. Consular Section open 9:00 AM–5:00 PM weekdays.",
         "4. Bring your Certificate of Loss, 2 passport photos, and digital backup copies (from this app's Vault) to apply for an Emergency Travel Document.",
+        "5. Outside embassy hours, call the After-Hours Emergency Hotline for Filipino nationals below.",
       ],
       helplines: [
         { label: "Police Emergency", number: "110" },
         { label: "JNTO Visitor Line", number: "050-3816-2787" },
+        { label: "PH Embassy Tokyo", number: "03-5562-1600" },
+        { label: "PH Embassy After-Hours", number: "080-4928-7979" },
       ],
     },
     {
@@ -259,9 +262,16 @@ export const tripMeta: TripMeta = {
       description: "Stop unauthorized charges and secure continuous access to funds.",
       steps: [
         "1. Open your banking mobile app immediately and freeze / lock the affected card.",
-        "2. Call your card issuer's 24/7 International Collect Hotline to permanently block the compromised card.",
-        "3. Switch to your designated backup travel card or use Apple Pay / Google Wallet digital IC card (Suica/PASMO).",
-        "4. If all cards are unavailable, use physical cash on-hand or arrange Western Union emergency pickup.",
+        "2. Call your card issuer's 24/7 hotline below to permanently block the compromised card.",
+        "3. For GCash: freeze/recover via the in-app 'Gigi' chat assistant, not by phone — it needs your GCash-registered number.",
+        "4. Switch to your designated backup travel card or use Apple Pay / Google Wallet digital IC card (Suica/PASMO).",
+        "5. If all cards are unavailable, use physical cash on-hand or arrange Western Union emergency pickup.",
+      ],
+      helplines: [
+        { label: "RCBC 24/7 Care", number: "02-8877-7222" },
+        { label: "RCBC Intl Toll-Free", number: "+800-8888-7222" },
+        { label: "BDO 24/7 Care", number: "02-8888-0000" },
+        { label: "UnionBank 24/7 Care", number: "02-8841-8600" },
       ],
     },
     {
