@@ -250,6 +250,13 @@ export default function BudgetPage() {
 
   const [formTitle, setFormTitle] = useState("");
   const [formAmountJPY, setFormAmountJPY] = useState("");
+  // Which currency the amount above is actually being typed in. Some things
+  // (VFS, Klook, most bookings) are genuinely charged in PHP before the trip —
+  // forcing those into JPY-primary entry meant the PHP figure shown was never
+  // what was actually paid, just today's exchange rate applied to a converted
+  // number. Whichever currency is selected here is stored as the real, locked
+  // figure; the other side is still shown but is a converted estimate.
+  const [formCurrency, setFormCurrency] = useState<"JPY" | "PHP">("JPY");
   const [formCategory, setFormCategory] = useState<ExpenseCategory>("food");
   const [formPaymentMethod, setFormPaymentMethod] = useState<PaymentMethod>("Cash");
   const [formDate, setFormDate] = useState(new Date().toISOString().split("T")[0]);
@@ -374,6 +381,7 @@ export default function BudgetPage() {
     setModalType(type);
     setFormTitle("");
     setFormAmountJPY("");
+    setFormCurrency("JPY");
     setFormCategory("food");
     setFormPaymentMethod(type === "addPaid" ? "Cash" : "Cash");
     setFormDate(new Date().toISOString().split("T")[0]);
@@ -384,6 +392,7 @@ export default function BudgetPage() {
     setModalType("addPaid");
     setFormTitle("");
     setFormAmountJPY("");
+    setFormCurrency("JPY");
     setFormCategory("food");
     setFormPaymentMethod("Cash");
     setFormDate(new Date().toISOString().split("T")[0]);
@@ -402,7 +411,13 @@ export default function BudgetPage() {
     setActiveEditingItem(item);
     setModalType("edit");
     setFormTitle(item.title);
-    setFormAmountJPY(String(item.amount));
+    if (item.currency === "PHP" && item.convertedAmountPHP) {
+      setFormCurrency("PHP");
+      setFormAmountJPY(String(item.convertedAmountPHP));
+    } else {
+      setFormCurrency("JPY");
+      setFormAmountJPY(String(item.amount));
+    }
     setFormCategory(item.category);
     setFormPaymentMethod(item.paymentMethod);
     setFormDate(item.date);
@@ -413,7 +428,13 @@ export default function BudgetPage() {
     setActiveEditingItem(item);
     setModalType("markPaid");
     setFormTitle(item.title);
-    setFormAmountJPY(String(item.amount));
+    if (item.currency === "PHP" && item.convertedAmountPHP) {
+      setFormCurrency("PHP");
+      setFormAmountJPY(String(item.convertedAmountPHP));
+    } else {
+      setFormCurrency("JPY");
+      setFormAmountJPY(String(item.amount));
+    }
     setFormCategory(item.category);
     setFormPaymentMethod(item.paymentMethod);
     setFormDate(new Date().toISOString().split("T")[0]);
@@ -424,14 +445,23 @@ export default function BudgetPage() {
     e.preventDefault();
     if (!formTitle.trim() || !formAmountJPY) return;
 
-    const amountNum = parseFloat(formAmountJPY.replace(/[^0-9.]/g, "")) || 0;
+    const enteredNum = parseFloat(formAmountJPY.replace(/[^0-9.]/g, "")) || 0;
+    // `amount` stays the canonical JPY figure everywhere (every total on this
+    // page sums it as JPY) — but when the entry was actually made in PHP, we
+    // also lock the real PHP figure in convertedAmountPHP so the display for
+    // that record never has to re-derive PHP from a since-moved exchange rate.
+    const amountNum = formCurrency === "PHP" ? Math.round(enteredNum * fxRate) : enteredNum;
+    const currencyMeta =
+      formCurrency === "PHP"
+        ? { currency: "PHP", convertedAmountPHP: enteredNum }
+        : { currency: "JPY", convertedAmountPHP: undefined };
 
     if (modalType === "addPaid") {
       const newPaid: ExpenseRecord = {
         id: "paid-" + Date.now(),
         title: formTitle.trim(),
         amount: amountNum,
-        currency: "JPY",
+        ...currencyMeta,
         category: formCategory,
         paymentMethod: formPaymentMethod,
         date: formDate,
@@ -444,7 +474,7 @@ export default function BudgetPage() {
         id: "plan-" + Date.now(),
         title: formTitle.trim(),
         amount: amountNum,
-        currency: "JPY",
+        ...currencyMeta,
         category: formCategory,
         paymentMethod: formPaymentMethod,
         date: formDate,
@@ -461,6 +491,7 @@ export default function BudgetPage() {
                   ...item,
                   title: formTitle.trim(),
                   amount: amountNum,
+                  ...currencyMeta,
                   category: formCategory,
                   paymentMethod: formPaymentMethod,
                   date: formDate,
@@ -477,6 +508,7 @@ export default function BudgetPage() {
                   ...item,
                   title: formTitle.trim(),
                   amount: amountNum,
+                  ...currencyMeta,
                   category: formCategory,
                   paymentMethod: formPaymentMethod,
                   date: formDate,
@@ -494,7 +526,7 @@ export default function BudgetPage() {
         id: "paid-" + Date.now(),
         title: formTitle.trim(),
         amount: amountNum,
-        currency: "JPY",
+        ...currencyMeta,
         category: formCategory,
         paymentMethod: formPaymentMethod,
         date: formDate,
@@ -962,7 +994,8 @@ export default function BudgetPage() {
               </div>
             ) : (
               sortedPaidExpenses.map((item) => {
-                const phpValue = Math.round(item.amount / fxRate);
+                const isPHPNative = item.currency === "PHP" && item.convertedAmountPHP !== undefined;
+                const phpValue = isPHPNative ? item.convertedAmountPHP! : Math.round(item.amount / fxRate);
                 return (
                   <div
                     key={item.id}
@@ -1005,12 +1038,25 @@ export default function BudgetPage() {
 
                     <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-3 sm:pt-0 border-stone-100">
                       <div className="text-left sm:text-right">
-                        <div className="font-serif text-xl font-bold text-stone-900">
-                          {destSymbol} {item.amount.toLocaleString()}
-                        </div>
-                        <div className="text-xs text-stone-500 font-mono">
-                          ≈ {homeSymbol} {phpValue.toLocaleString()} {homeCurrency}
-                        </div>
+                        {isPHPNative ? (
+                          <>
+                            <div className="font-serif text-xl font-bold text-stone-900">
+                              {homeSymbol} {phpValue.toLocaleString()}
+                            </div>
+                            <div className="text-xs text-stone-500 font-mono">
+                              ≈ {destSymbol} {item.amount.toLocaleString()} {destCurrency}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="font-serif text-xl font-bold text-stone-900">
+                              {destSymbol} {item.amount.toLocaleString()}
+                            </div>
+                            <div className="text-xs text-stone-500 font-mono">
+                              ≈ {homeSymbol} {phpValue.toLocaleString()} {homeCurrency}
+                            </div>
+                          </>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-1">
@@ -1074,7 +1120,8 @@ export default function BudgetPage() {
               </div>
             ) : (
               sortedPlannedExpenses.map((item) => {
-                const phpValue = Math.round(item.amount / fxRate);
+                const isPHPNative = item.currency === "PHP" && item.convertedAmountPHP !== undefined;
+                const phpValue = isPHPNative ? item.convertedAmountPHP! : Math.round(item.amount / fxRate);
                 return (
                   <div
                     key={item.id}
@@ -1113,12 +1160,25 @@ export default function BudgetPage() {
 
                     <div className="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-3 sm:pt-0 border-stone-100">
                       <div className="text-left sm:text-right">
-                        <div className="font-serif text-xl font-bold text-stone-900">
-                          {destSymbol} {item.amount.toLocaleString()}
-                        </div>
-                        <div className="text-xs text-stone-500 font-mono">
-                          ≈ {homeSymbol} {phpValue.toLocaleString()} {homeCurrency}
-                        </div>
+                        {isPHPNative ? (
+                          <>
+                            <div className="font-serif text-xl font-bold text-stone-900">
+                              {homeSymbol} {phpValue.toLocaleString()}
+                            </div>
+                            <div className="text-xs text-stone-500 font-mono">
+                              ≈ {destSymbol} {item.amount.toLocaleString()} {destCurrency}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="font-serif text-xl font-bold text-stone-900">
+                              {destSymbol} {item.amount.toLocaleString()}
+                            </div>
+                            <div className="text-xs text-stone-500 font-mono">
+                              ≈ {homeSymbol} {phpValue.toLocaleString()} {homeCurrency}
+                            </div>
+                          </>
+                        )}
                       </div>
 
                       <button
@@ -1195,20 +1255,47 @@ export default function BudgetPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-stone-700">
-                    Amount in {destSymbol} {destCurrency}
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-stone-700">
+                      Amount paid in {formCurrency === "PHP" ? `${homeSymbol} ${homeCurrency}` : `${destSymbol} ${destCurrency}`}
+                    </label>
+                    <div className="flex rounded-lg border border-stone-300 overflow-hidden text-[10px] font-bold">
+                      <button
+                        type="button"
+                        onClick={() => setFormCurrency("JPY")}
+                        className={`px-2 py-1 transition ${
+                          formCurrency === "JPY" ? "bg-[#1F3A5F] text-white" : "bg-white text-stone-600 hover:bg-stone-50"
+                        }`}
+                      >
+                        ¥ JPY
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFormCurrency("PHP")}
+                        className={`px-2 py-1 transition ${
+                          formCurrency === "PHP" ? "bg-[#1F3A5F] text-white" : "bg-white text-stone-600 hover:bg-stone-50"
+                        }`}
+                      >
+                        ₱ PHP
+                      </button>
+                    </div>
+                  </div>
                   <input
                     type="text"
                     inputMode="numeric"
                     value={formAmountJPY}
                     onChange={(e) => setFormAmountJPY(e.target.value.replace(/[^0-9.]/g, ""))}
-                    placeholder="5000"
+                    placeholder={formCurrency === "PHP" ? "1000" : "5000"}
                     className="mt-1 w-full rounded-xl border border-stone-300 p-3 text-sm font-bold outline-none focus:border-[#1F3A5F]"
                     required
                   />
                   <p className="mt-1 text-[10px] text-stone-500 font-mono">
-                    ≈ {homeSymbol} {Math.round((parseFloat(formAmountJPY) || 0) / fxRate).toLocaleString()} {homeCurrency}
+                    {formCurrency === "PHP"
+                      ? `≈ ${destSymbol} ${Math.round((parseFloat(formAmountJPY) || 0) * fxRate).toLocaleString()} ${destCurrency}`
+                      : `≈ ${homeSymbol} ${Math.round((parseFloat(formAmountJPY) || 0) / fxRate).toLocaleString()} ${homeCurrency}`}
+                  </p>
+                  <p className="mt-0.5 text-[10px] text-stone-400">
+                    Pick whichever currency you were actually charged in — that figure is saved exactly; the other side is a converted estimate.
                   </p>
                 </div>
 
