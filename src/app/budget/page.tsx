@@ -142,7 +142,7 @@ export default function BudgetPage() {
       paymentMethod: "BDO Mastercard",
       date: "2026-09-02",
       status: "planned",
-      notes: "Not booked yet. Plan: Disneyland Sep 2 & DisneySea Sep 4 (Official App).",
+      notes: "Not booked yet. Plan: DisneySea Sep 2 & Disneyland Sep 4 (Official App).",
     },
     {
       id: "plan-food-7days",
@@ -164,7 +164,7 @@ export default function BudgetPage() {
       paymentMethod: "BDO Mastercard",
       date: "2026-09-01",
       status: "planned",
-      notes: "Digital Suica / PASMO top-ups for 5 travelers",
+      notes: "Physical Suica / PASMO IC card purchase & top-ups for 5 travelers (bought at Narita on arrival, no deposit for tourist cards)",
     },
     {
       id: "plan-shopping-donki",
@@ -201,7 +201,7 @@ export default function BudgetPage() {
     },
   ];
 
-  const [plannedExpenses, setPlannedExpenses] = useLocalStorage<ExpenseRecord[]>(
+  const [plannedExpenses, setPlannedExpenses, plannedExpensesLoaded] = useLocalStorage<ExpenseRecord[]>(
     "travel_tokyo_planned_expenses_v2",
     defaultPlannedExpenses
   );
@@ -243,6 +243,63 @@ export default function BudgetPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paidExpensesLoaded, paidExpenses]);
+
+  // One-time correction: the train fares planned expense assumed Digital
+  // Suica/PASMO (mobile wallet, no purchase fee) — the traveler decided to
+  // buy physical IC cards at Narita instead, so patch the note on an
+  // already-saved copy of that one record, once, without touching anything
+  // edited by hand since. Same idiom as the correction above.
+  React.useEffect(() => {
+    if (!plannedExpensesLoaded) return;
+
+    const alreadyCorrected =
+      typeof window !== "undefined" &&
+      window.localStorage.getItem("travel_tokyo_suica_note_corrected_v1") === "true";
+    if (alreadyCorrected) return;
+
+    const staleNote = "Digital Suica / PASMO top-ups for 5 travelers";
+    setPlannedExpenses((prev) =>
+      prev.map((e) =>
+        e.id === "plan-train-suica" && e.notes === staleNote
+          ? {
+              ...e,
+              notes:
+                "Physical Suica / PASMO IC card purchase & top-ups for 5 travelers (bought at Narita on arrival, no deposit for tourist cards)",
+            }
+          : e
+      )
+    );
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("travel_tokyo_suica_note_corrected_v1", "true");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plannedExpensesLoaded]);
+
+  // One-time correction: the two Disney park days were swapped (DisneySea is
+  // now Day 2, Disneyland is now Day 4). Patches an already-saved copy of the
+  // Disney tickets planned expense note to match, once, without touching
+  // anything edited by hand since.
+  React.useEffect(() => {
+    if (!plannedExpensesLoaded) return;
+
+    const alreadyCorrected =
+      typeof window !== "undefined" &&
+      window.localStorage.getItem("travel_tokyo_disney_days_note_corrected_v1") === "true";
+    if (alreadyCorrected) return;
+
+    const staleNote = "Not booked yet. Plan: Disneyland Sep 2 & DisneySea Sep 4 (Official App).";
+    setPlannedExpenses((prev) =>
+      prev.map((e) =>
+        e.id === "plan-disney-passports" && e.notes === staleNote
+          ? { ...e, notes: "Not booked yet. Plan: DisneySea Sep 2 & Disneyland Sep 4 (Official App)." }
+          : e
+      )
+    );
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("travel_tokyo_disney_days_note_corrected_v1", "true");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plannedExpensesLoaded]);
 
   // Form State
   const [modalType, setModalType] = useState<"addPaid" | "addPlanned" | "edit" | "markPaid" | "addWithdrawal" | null>(null);

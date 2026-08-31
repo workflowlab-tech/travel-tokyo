@@ -444,222 +444,6 @@ export const itineraryDays: ItineraryDay[] = [
     date: "WED · SEP 2",
     shortDate: "Sep 2",
     fullDateString: "2026-09-02",
-    title: "Tokyo Disneyland Full Day",
-    area: "Disney Resort (Maihama)",
-    icon: "🏰",
-    image:
-      "/images/destinations/day2-disneyland.jpg",
-    transitNote:
-      "Asakusa → Maihama: Ginza Line to Kanda → JR to Tokyo → JR Keiyo Line (~50–55 min total, allow 10 min inside Tokyo Station)",
-    transitSummary: {
-      from: "Hotel Plus Hostel Asakusa 2",
-      to: "Tokyo Disneyland (Maihama Station)",
-      time: "50–55 min",
-      fare: "≈ ¥410–470",
-      routeTitle: "Ginza Line → JR Line → JR Keiyo Line to Maihama",
-    },
-    sunPlan: [
-      {
-        time: "08:00",
-        title: "Rope Drop — Beauty and the Beast",
-        desc: "Head straight to Fantasyland for Enchanted Tale of Beauty and the Beast, followed by Pooh's Hunny Hunt.",
-        icon: "🎡",
-        badges: ["Booked & paid", "Tier 1"],
-        image:
-          "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
-        transit: {
-          routeId: "hotel-disney",
-          title: "Asakusa to Maihama (Disneyland)",
-          travelTime: "50–55 min",
-          fare: "¥410–470",
-          stepSummary: "Ginza Line (Asakusa → Kanda) → JR Yamanote (Kanda → Tokyo) → JR Keiyo Line (Tokyo → Maihama).",
-          mapQuery: "Asakusa+to+Maihama+Station",
-        },
-      },
-      {
-        time: "09:40",
-        title: "Tomorrowland & Westernland Thrills",
-        desc: "Monsters, Inc. Ride & Go Seek! followed by Big Thunder Mountain and Splash Mountain.",
-        icon: "🚀",
-        badges: ["Tier 1 Must-Ride"],
-        image:
-          "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80",
-      },
-      {
-        time: "13:00",
-        title: "Midday Heat & A/C Recovery",
-        desc: "Indoor rides (Haunted Mansion, Pirates of the Caribbean) or seated lunch at Hungry Bear / Plaza Pavilion.",
-        icon: "🧊",
-        badges: ["Indoor Break"],
-        image:
-          "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80",
-      },
-      {
-        time: "17:00",
-        title: "Parade & Evening Spectaculars",
-        desc: "Catch Disney Harmony in Color parade, followed by Reach for the Stars castle show & Dreamlights electrical parade.",
-        icon: "🎆",
-        badges: ["Parade / Shows"],
-        image:
-          "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
-      },
-    ],
-    rainPlan: [
-      {
-        time: "08:00",
-        title: "Disneyland Rain-Ready Rope Drop",
-        desc: "Wear light ponchos. Disneyland operates rain or shine; outdoor wait times drop substantially in light rain.",
-        icon: "🎡",
-        badges: ["Booked & paid", "Ponchos on"],
-      },
-      {
-        time: "10:30",
-        title: "Indoor Dark Ride Marathon",
-        desc: "Beauty and the Beast, Pooh's Hunny Hunt, Monsters Inc., Haunted Mansion, and Star Tours are all 100% indoors.",
-        icon: "🏰",
-        badges: ["100% Indoor"],
-      },
-      {
-        time: "14:00",
-        title: "Ikspiari Mall (Severe Weather Backup)",
-        desc: "If heavy downpours hit, step across to Ikspiari next to Maihama Station for covered food court & shops.",
-        icon: "🛍️",
-        badges: ["Backup Option"],
-      },
-      {
-        time: "18:00",
-        title: "Covered Night Entertainment",
-        desc: "World Bazaar and covered arcades keep shopping and character moments completely dry.",
-        icon: "✨",
-        badges: ["Dry Route"],
-      },
-    ],
-    foodQuest:
-      "Character popcorn buckets, Mickey churros, Hungry Bear pork cutlet curry, or sit-down meals at Ikspiari (~¥900+).",
-    weatherAdvice: {
-      sun: "Midday sun is intense in Westernland. Take seated breaks inside Country Bear Theater or Western River Railroad.",
-      rain: "Most headliners are indoors. Keep your poncho accessible and confirm show modifications on the Tokyo Disney app.",
-    },
-  },
-  {
-    dayNumber: "03",
-    date: "THU · SEP 3",
-    shortDate: "Sep 3",
-    fullDateString: "2026-09-03",
-    title: "Warner Bros. Harry Potter Studio Tour",
-    area: "Asakusa → Toshimaen",
-    icon: "🪄",
-    image:
-      "https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=1200&q=80",
-    transitNote:
-      "Eat lunch before leaving · Asakusa/Kuramae to Toshimaen on Toei Oedo Line direct (~55 min) · allow 60–75 min door-to-door",
-    transitSummary: {
-      from: "Hotel Plus Hostel Asakusa 2",
-      to: "Warner Bros. Studio Tour (Toshimaen Station)",
-      time: "55–60 min",
-      fare: "≈ ¥325–330",
-      routeTitle: "Toei Oedo Line Direct from Kuramae to Toshimaen",
-    },
-    sunPlan: [
-      {
-        time: "Morning",
-        title: "Slow, Restful Morning",
-        desc: "No rush after the long Disneyland day. Sleep in, pack day bag, and take a calm coffee walk in Asakusa.",
-        icon: "☕",
-        badges: ["Rest & Recovery"],
-      },
-      {
-        time: "11:15",
-        title: "Early Lunch in Asakusa",
-        desc: "Hearty sit-down lunch near the hotel before crossing Tokyo so the tour is your first fixed event.",
-        icon: "🍜",
-        badges: ["Local Dining"],
-        image:
-          "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80",
-      },
-      {
-        time: "13:00",
-        title: "Warner Bros. Studio Tour Tokyo",
-        desc: "The Making of Harry Potter: Great Hall, Diagon Alley, Hogwarts Express, Butterbeer, and Ministry of Magic.",
-        icon: "🪄",
-        badges: ["Booked & paid", "100% Indoor"],
-        image:
-          "/images/destinations/day3-harrypotter.jpg",
-        transit: {
-          routeId: "hotel-studio-tour",
-          title: "Toei Oedo Line to Toshimaen",
-          travelTime: "55–60 min (Direct)",
-          fare: "¥325–330",
-          stepSummary: "Board Toei Oedo Line at Kuramae bound for Hikarigaoka. 0 transfers. 2-min walk from Toshimaen Station.",
-          mapQuery: "Warner+Bros+Studio+Tour+Tokyo+Toshimaen",
-        },
-      },
-      {
-        time: "17:30",
-        title: "Optional Ikebukuro Stop / Return",
-        desc: "Only stop if the family still has energy; otherwise take the direct train straight back to Asakusa.",
-        icon: "🛍️",
-        badges: ["Optional"],
-      },
-      {
-        time: "20:00",
-        title: "Hotel Public Bath & Sauna",
-        desc: "Unwind in the hotel's on-site sento bath and sauna. Perfect recharge before DisneySea tomorrow.",
-        icon: "♨️",
-        badges: ["Included at Hotel"],
-        image:
-          "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80",
-      },
-    ],
-    rainPlan: [
-      {
-        time: "Morning",
-        title: "Calm Hotel Morning",
-        desc: "Relax in the lounge or your room. Pack umbrellas for the short 2-minute station walk at Toshimaen.",
-        icon: "☕",
-        badges: ["Rest & Dry"],
-      },
-      {
-        time: "11:15",
-        title: "Lunch near Asakusa Station",
-        desc: "Warm ramen or tonkatsu near the station entrance.",
-        icon: "🍜",
-        badges: ["Covered dining"],
-      },
-      {
-        time: "13:00",
-        title: "Warner Bros. Studio Tour",
-        desc: "Completely weatherproof indoor attraction. Allow 3.5 to 4.5 hours of self-paced exploration.",
-        icon: "🪄",
-        badges: ["Booked & paid", "Fully Indoor"],
-      },
-      {
-        time: "18:00",
-        title: "Direct Return to Asakusa",
-        desc: "Skip optional walking detours and ride direct Oedo Line back to Kuramae/Asakusa.",
-        icon: "🚆",
-        badges: ["Direct Transit"],
-      },
-      {
-        time: "20:00",
-        title: "Hotel Sento & Sauna",
-        desc: "Soak in the warm hotel bath to end the day relaxed.",
-        icon: "♨️",
-        badges: ["Included at Hotel"],
-      },
-    ],
-    foodQuest:
-      "Butterbeer & themed British pub fare at the Studio Tour cafe; traditional tempura at Daikokuya back in Asakusa.",
-    weatherAdvice: {
-      sun: "The Studio Tour is fully air-conditioned indoors. Toshimaen station exit is just a 2-minute tree-lined walk.",
-      rain: "An ideal wet-day itinerary—nearly 100% covered from station to studio to hotel bath.",
-    },
-  },
-  {
-    dayNumber: "04",
-    date: "FRI · SEP 4",
-    shortDate: "Sep 4",
-    fullDateString: "2026-09-04",
     title: "Tokyo DisneySea & Fantasy Springs",
     area: "Disney Resort (Maihama)",
     icon: "🌊",
@@ -764,6 +548,222 @@ export const itineraryDays: ItineraryDay[] = [
     weatherAdvice: {
       sun: "Mediterranean Harbor has limited shade at noon. Use Mermaid Lagoon or indoor restaurants for cooling breaks.",
       rain: "Mermaid Lagoon is Tokyo Disney's best all-indoor area. Bring ponchos for walking between themed ports.",
+    },
+  },
+  {
+    dayNumber: "03",
+    date: "THU · SEP 3",
+    shortDate: "Sep 3",
+    fullDateString: "2026-09-03",
+    title: "Warner Bros. Harry Potter Studio Tour",
+    area: "Asakusa → Toshimaen",
+    icon: "🪄",
+    image:
+      "https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=1200&q=80",
+    transitNote:
+      "Eat lunch before leaving · Asakusa/Kuramae to Toshimaen on Toei Oedo Line direct (~55 min) · allow 60–75 min door-to-door",
+    transitSummary: {
+      from: "Hotel Plus Hostel Asakusa 2",
+      to: "Warner Bros. Studio Tour (Toshimaen Station)",
+      time: "55–60 min",
+      fare: "≈ ¥325–330",
+      routeTitle: "Toei Oedo Line Direct from Kuramae to Toshimaen",
+    },
+    sunPlan: [
+      {
+        time: "Morning",
+        title: "Slow, Restful Morning",
+        desc: "No rush after the long DisneySea day. Sleep in, pack day bag, and take a calm coffee walk in Asakusa.",
+        icon: "☕",
+        badges: ["Rest & Recovery"],
+      },
+      {
+        time: "11:15",
+        title: "Early Lunch in Asakusa",
+        desc: "Hearty sit-down lunch near the hotel before crossing Tokyo so the tour is your first fixed event.",
+        icon: "🍜",
+        badges: ["Local Dining"],
+        image:
+          "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80",
+      },
+      {
+        time: "13:00",
+        title: "Warner Bros. Studio Tour Tokyo",
+        desc: "The Making of Harry Potter: Great Hall, Diagon Alley, Hogwarts Express, Butterbeer, and Ministry of Magic.",
+        icon: "🪄",
+        badges: ["Booked & paid", "100% Indoor"],
+        image:
+          "/images/destinations/day3-harrypotter.jpg",
+        transit: {
+          routeId: "hotel-studio-tour",
+          title: "Toei Oedo Line to Toshimaen",
+          travelTime: "55–60 min (Direct)",
+          fare: "¥325–330",
+          stepSummary: "Board Toei Oedo Line at Kuramae bound for Hikarigaoka. 0 transfers. 2-min walk from Toshimaen Station.",
+          mapQuery: "Warner+Bros+Studio+Tour+Tokyo+Toshimaen",
+        },
+      },
+      {
+        time: "17:30",
+        title: "Optional Ikebukuro Stop / Return",
+        desc: "Only stop if the family still has energy; otherwise take the direct train straight back to Asakusa.",
+        icon: "🛍️",
+        badges: ["Optional"],
+      },
+      {
+        time: "20:00",
+        title: "Hotel Public Bath & Sauna",
+        desc: "Unwind in the hotel's on-site sento bath and sauna. Perfect recharge before Disneyland tomorrow.",
+        icon: "♨️",
+        badges: ["Included at Hotel"],
+        image:
+          "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80",
+      },
+    ],
+    rainPlan: [
+      {
+        time: "Morning",
+        title: "Calm Hotel Morning",
+        desc: "Relax in the lounge or your room. Pack umbrellas for the short 2-minute station walk at Toshimaen.",
+        icon: "☕",
+        badges: ["Rest & Dry"],
+      },
+      {
+        time: "11:15",
+        title: "Lunch near Asakusa Station",
+        desc: "Warm ramen or tonkatsu near the station entrance.",
+        icon: "🍜",
+        badges: ["Covered dining"],
+      },
+      {
+        time: "13:00",
+        title: "Warner Bros. Studio Tour",
+        desc: "Completely weatherproof indoor attraction. Allow 3.5 to 4.5 hours of self-paced exploration.",
+        icon: "🪄",
+        badges: ["Booked & paid", "Fully Indoor"],
+      },
+      {
+        time: "18:00",
+        title: "Direct Return to Asakusa",
+        desc: "Skip optional walking detours and ride direct Oedo Line back to Kuramae/Asakusa.",
+        icon: "🚆",
+        badges: ["Direct Transit"],
+      },
+      {
+        time: "20:00",
+        title: "Hotel Sento & Sauna",
+        desc: "Soak in the warm hotel bath to end the day relaxed.",
+        icon: "♨️",
+        badges: ["Included at Hotel"],
+      },
+    ],
+    foodQuest:
+      "Butterbeer & themed British pub fare at the Studio Tour cafe; traditional tempura at Daikokuya back in Asakusa.",
+    weatherAdvice: {
+      sun: "The Studio Tour is fully air-conditioned indoors. Toshimaen station exit is just a 2-minute tree-lined walk.",
+      rain: "An ideal wet-day itinerary—nearly 100% covered from station to studio to hotel bath.",
+    },
+  },
+  {
+    dayNumber: "04",
+    date: "FRI · SEP 4",
+    shortDate: "Sep 4",
+    fullDateString: "2026-09-04",
+    title: "Tokyo Disneyland Full Day",
+    area: "Disney Resort (Maihama)",
+    icon: "🏰",
+    image:
+      "/images/destinations/day2-disneyland.jpg",
+    transitNote:
+      "Asakusa → Maihama: Ginza Line to Kanda → JR to Tokyo → JR Keiyo Line (~50–55 min total, allow 10 min inside Tokyo Station)",
+    transitSummary: {
+      from: "Hotel Plus Hostel Asakusa 2",
+      to: "Tokyo Disneyland (Maihama Station)",
+      time: "50–55 min",
+      fare: "≈ ¥410–470",
+      routeTitle: "Ginza Line → JR Line → JR Keiyo Line to Maihama",
+    },
+    sunPlan: [
+      {
+        time: "08:00",
+        title: "Rope Drop — Beauty and the Beast",
+        desc: "Head straight to Fantasyland for Enchanted Tale of Beauty and the Beast, followed by Pooh's Hunny Hunt.",
+        icon: "🎡",
+        badges: ["Booked & paid", "Tier 1"],
+        image:
+          "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
+        transit: {
+          routeId: "hotel-disney",
+          title: "Asakusa to Maihama (Disneyland)",
+          travelTime: "50–55 min",
+          fare: "¥410–470",
+          stepSummary: "Ginza Line (Asakusa → Kanda) → JR Yamanote (Kanda → Tokyo) → JR Keiyo Line (Tokyo → Maihama).",
+          mapQuery: "Asakusa+to+Maihama+Station",
+        },
+      },
+      {
+        time: "09:40",
+        title: "Tomorrowland & Westernland Thrills",
+        desc: "Monsters, Inc. Ride & Go Seek! followed by Big Thunder Mountain and Splash Mountain.",
+        icon: "🚀",
+        badges: ["Tier 1 Must-Ride"],
+        image:
+          "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80",
+      },
+      {
+        time: "13:00",
+        title: "Midday Heat & A/C Recovery",
+        desc: "Indoor rides (Haunted Mansion, Pirates of the Caribbean) or seated lunch at Hungry Bear / Plaza Pavilion.",
+        icon: "🧊",
+        badges: ["Indoor Break"],
+        image:
+          "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80",
+      },
+      {
+        time: "17:00",
+        title: "Parade & Evening Spectaculars",
+        desc: "Catch Disney Harmony in Color parade, followed by Reach for the Stars castle show & Dreamlights electrical parade.",
+        icon: "🎆",
+        badges: ["Parade / Shows"],
+        image:
+          "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
+      },
+    ],
+    rainPlan: [
+      {
+        time: "08:00",
+        title: "Disneyland Rain-Ready Rope Drop",
+        desc: "Wear light ponchos. Disneyland operates rain or shine; outdoor wait times drop substantially in light rain.",
+        icon: "🎡",
+        badges: ["Booked & paid", "Ponchos on"],
+      },
+      {
+        time: "10:30",
+        title: "Indoor Dark Ride Marathon",
+        desc: "Beauty and the Beast, Pooh's Hunny Hunt, Monsters Inc., Haunted Mansion, and Star Tours are all 100% indoors.",
+        icon: "🏰",
+        badges: ["100% Indoor"],
+      },
+      {
+        time: "14:00",
+        title: "Ikspiari Mall (Severe Weather Backup)",
+        desc: "If heavy downpours hit, step across to Ikspiari next to Maihama Station for covered food court & shops.",
+        icon: "🛍️",
+        badges: ["Backup Option"],
+      },
+      {
+        time: "18:00",
+        title: "Covered Night Entertainment",
+        desc: "World Bazaar and covered arcades keep shopping and character moments completely dry.",
+        icon: "✨",
+        badges: ["Dry Route"],
+      },
+    ],
+    foodQuest:
+      "Character popcorn buckets, Mickey churros, Hungry Bear pork cutlet curry, or sit-down meals at Ikspiari (~¥900+).",
+    weatherAdvice: {
+      sun: "Midday sun is intense in Westernland. Take seated breaks inside Country Bear Theater or Western River Railroad.",
+      rain: "Most headliners are indoors. Keep your poncho accessible and confirm show modifications on the Tokyo Disney app.",
     },
   },
   {
@@ -1121,7 +1121,7 @@ export const placeGuides: PlaceGuide[] = [
       fare: "Free (Walking)",
       exit: "Hanakawado / Kaminarimon Exit",
     },
-    nextDestinationHint: "Tokyo Disneyland on Day 2 or Tokyo Skytree via short walk.",
+    nextDestinationHint: "Tokyo DisneySea on Day 2 or Tokyo Skytree via short walk.",
   },
   {
     id: "tokyo-disneyland",
@@ -1172,7 +1172,7 @@ export const placeGuides: PlaceGuide[] = [
       fare: "≈ ¥410–470",
       exit: "Maihama Station South Exit (5-min walk to gate)",
     },
-    nextDestinationHint: "Rest Day / Harry Potter Warner Bros Studio Tour on Day 3.",
+    nextDestinationHint: "Shibuya & Harajuku on Day 5.",
   },
   {
     id: "warner-bros-studio",
@@ -1223,7 +1223,7 @@ export const placeGuides: PlaceGuide[] = [
       fare: "≈ ¥325–330 (IC Card)",
       exit: "Toshimaen Station Main Exit (2-min walk)",
     },
-    nextDestinationHint: "Hotel Plus Hostel Sento Bath tonight; DisneySea full day tomorrow.",
+    nextDestinationHint: "Hotel Plus Hostel Sento Bath tonight; Disneyland full day tomorrow.",
   },
   {
     id: "tokyo-disneysea",
@@ -1276,7 +1276,7 @@ export const placeGuides: PlaceGuide[] = [
       fare: "≈ ¥470 rail + ¥260 monorail",
       exit: "Tokyo DisneySea Station (Monorail)",
     },
-    nextDestinationHint: "Shibuya & Harajuku on Day 5.",
+    nextDestinationHint: "Rest Day / Harry Potter Warner Bros Studio Tour on Day 3.",
   },
   {
     id: "shibuya-harajuku",
@@ -1387,7 +1387,7 @@ export const disneyGuides: DisneyParkGuide[] = [
     parkId: "disneyland",
     parkName: "Tokyo Disneyland",
     icon: "🏰",
-    dateStr: "Wed, Sep 2, 2026",
+    dateStr: "Fri, Sep 4, 2026",
     image:
       "/images/destinations/day2-disneyland.jpg",
     ropeDropStrategy:
@@ -1582,7 +1582,7 @@ export const disneyGuides: DisneyParkGuide[] = [
     parkId: "disneysea",
     parkName: "Tokyo DisneySea",
     icon: "🌊",
-    dateStr: "Fri, Sep 4, 2026",
+    dateStr: "Wed, Sep 2, 2026",
     image:
       "/images/destinations/day4-disneysea.jpg",
     ropeDropStrategy:
@@ -2115,7 +2115,7 @@ export const packingPresets: PackingItemPreset[] = [
     id: "doc-disney",
     title: "Tokyo Disney park tickets in Tokyo Disney Resort app",
     category: "documents",
-    note: "Sept 2 (Disneyland) & Sept 4 (DisneySea)",
+    note: "Sept 2 (DisneySea) & Sept 4 (Disneyland)",
     isRequired: true,
   },
   {
@@ -2139,9 +2139,9 @@ export const packingPresets: PackingItemPreset[] = [
   },
   {
     id: "doc-suica",
-    title: "Digital Suica / PASMO added to Apple Wallet or Google Wallet",
+    title: "Buy physical Suica / PASMO IC cards for all 5 travelers",
     category: "documents",
-    note: "Top up with Visa/Mastercard before landing to skip airport ticket machines",
+    note: "Get them at a Narita Airport IC card machine or JR East Travel Service Center right after arrival, before the Keisei Access Express to Asakusa",
   },
   // Clothing
   {

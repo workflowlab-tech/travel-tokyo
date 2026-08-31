@@ -31,16 +31,16 @@ import {
 // day it belongs to, so Home can link out to the one real copy instead.
 const placeIdToDay: Record<string, string> = {
   "asakusa-sensoji": "01",
-  "tokyo-disneyland": "02",
+  "tokyo-disneysea": "02",
   "warner-bros-studio": "03",
-  "tokyo-disneysea": "04",
+  "tokyo-disneyland": "04",
   "shibuya-harajuku": "05",
   "akihabara-electric-town": "06",
 };
 
 const parkDayNumber: Record<"disneyland" | "disneysea", string> = {
-  disneyland: "02",
-  disneysea: "04",
+  disneyland: "04",
+  disneysea: "02",
 };
 
 export const PlacesAndGuides: React.FC = () => {
@@ -209,7 +209,7 @@ export const PlacesAndGuides: React.FC = () => {
                   : "text-stone-700 hover:text-stone-900"
               }`}
             >
-              🏰 Tokyo Disneyland (Sep 2)
+              🏰 Tokyo Disneyland (Sep 4)
             </button>
             <button
               onClick={() => setSelectedPark("disneysea")}
@@ -219,7 +219,7 @@ export const PlacesAndGuides: React.FC = () => {
                   : "text-stone-700 hover:text-stone-900"
               }`}
             >
-              🌊 Tokyo DisneySea (Sep 4)
+              🌊 Tokyo DisneySea (Sep 2)
             </button>
           </div>
 

@@ -135,24 +135,24 @@ export default function DetailedItineraryPage() {
             const events = isRain ? day.rainPlan : day.sunPlan;
             const placeGuide = placeGuides.find((p) => {
               if (day.dayNumber === "01") return p.id === "asakusa-sensoji";
-              if (day.dayNumber === "02") return p.id === "tokyo-disneyland";
+              if (day.dayNumber === "02") return p.id === "tokyo-disneysea";
               if (day.dayNumber === "03") return p.id === "warner-bros-studio";
-              if (day.dayNumber === "04") return p.id === "tokyo-disneysea";
+              if (day.dayNumber === "04") return p.id === "tokyo-disneyland";
               if (day.dayNumber === "05") return p.id === "shibuya-harajuku";
               if (day.dayNumber === "06") return p.id === "akihabara-electric-town";
               return false;
             });
             const disneyGuide =
               day.dayNumber === "02"
-                ? disneyGuides.find((g) => g.parkId === "disneyland")
-                : day.dayNumber === "04"
                 ? disneyGuides.find((g) => g.parkId === "disneysea")
+                : day.dayNumber === "04"
+                ? disneyGuides.find((g) => g.parkId === "disneyland")
                 : null;
             const relatedRestaurants =
               day.dayNumber === "02"
-                ? disneyRestaurants.filter((r) => r.land.includes("Disneyland"))
-                : day.dayNumber === "04"
                 ? disneyRestaurants.filter((r) => r.land.includes("DisneySea"))
+                : day.dayNumber === "04"
+                ? disneyRestaurants.filter((r) => r.land.includes("Disneyland"))
                 : [];
 
             return (

@@ -147,7 +147,7 @@ export const TripTools: React.FC = () => {
       id: "booking-disney-parks",
       title: "Tokyo Disney Resort Park Tickets (Disneyland & DisneySea)",
       type: "ticket",
-      notes: "Not booked yet. Plan: Disneyland (Sep 2) & DisneySea (Sep 4) · Buy via Official Disney App.",
+      notes: "Not booked yet. Plan: DisneySea (Sep 2) & Disneyland (Sep 4) · Buy via Official Disney App.",
       amount: "Not Booked Yet · Planned",
       dateAdded: "2026-09-02",
     },
@@ -220,6 +220,35 @@ export const TripTools: React.FC = () => {
     return changed ? patched : docs;
   };
 
+  // One-time correction: the two Disney park days were swapped (DisneySea is
+  // now Day 2, Disneyland is now Day 4). Patches an already-seeded copy of
+  // the Disney tickets booking note to match, once, without touching
+  // anything the user has since edited themselves.
+  const correctStaleDisneyDayNotes = async (docs: BookingDocument[]): Promise<BookingDocument[]> => {
+    const alreadyCorrected =
+      typeof window !== "undefined" &&
+      window.localStorage.getItem("travel_tokyo_disney_days_corrected_v1") === "true";
+    if (alreadyCorrected) return docs;
+
+    let changed = false;
+    const patched = await Promise.all(
+      docs.map(async (doc) => {
+        if (doc.id === "booking-disney-parks" && doc.notes?.includes("Disneyland (Sep 2)")) {
+          const fresh = defaultBookings.find((d) => d.id === doc.id)!;
+          const correctedDoc: BookingDocument = { ...doc, notes: fresh.notes };
+          await saveDocToIDB(correctedDoc);
+          changed = true;
+          return correctedDoc;
+        }
+        return doc;
+      })
+    );
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("travel_tokyo_disney_days_corrected_v1", "true");
+    }
+    return changed ? patched : docs;
+  };
+
   useEffect(() => {
     async function loadDocs() {
       try {
@@ -237,7 +266,8 @@ export const TripTools: React.FC = () => {
           setDocuments(defaultBookings);
         } else {
           const statusCorrected = await correctStaleBookingStatus(stored);
-          setDocuments(await correctStaleFlightInfo(statusCorrected));
+          const flightCorrected = await correctStaleFlightInfo(statusCorrected);
+          setDocuments(await correctStaleDisneyDayNotes(flightCorrected));
         }
       } catch (err) {
         console.warn("Failed to load documents from IndexedDB:", err);
