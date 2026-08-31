@@ -50,8 +50,12 @@ export const TripTools: React.FC = () => {
   );
   const fxRate = liveFxRate || 2.70;
 
-  // Load summary stats for Budget banner
-  const [paidExpenses] = useLocalStorage<ExpenseRecord[]>("travel_tokyo_paid_expenses_v3", []);
+  // Load summary stats for Budget banner. Also keep the setters: adding or
+  // deleting a booking with a cost attached needs to append/remove from the
+  // exact same localStorage-backed arrays the Budget page reads, so a
+  // booking's amount shows up there without the user re-entering it.
+  const [paidExpenses, setPaidExpenses] = useLocalStorage<ExpenseRecord[]>("travel_tokyo_paid_expenses_v3", []);
+  const [, setPlannedExpenses] = useLocalStorage<ExpenseRecord[]>("travel_tokyo_planned_expenses_v2", []);
   const [plannedBudgetPHP] = useLocalStorage<number>(
     "travel_tokyo_budget_php",
     tripMeta.defaultCurrencies.plannedBudgetPHP || 150000
@@ -65,6 +69,49 @@ export const TripTools: React.FC = () => {
   // =========================================================================
   const [documents, setDocuments] = useState<BookingDocument[]>([]);
   const [isDocsLoading, setIsDocsLoading] = useState(true);
+
+  // Fixed id for the single Family Travel Insurance policy attachment, shown
+  // in its own card in the Documents tab (not the generic Bookings grid).
+  const INSURANCE_DOC_ID = "doc-family-travel-insurance";
+  const insuranceDoc = documents.find((d) => d.id === INSURANCE_DOC_ID);
+  const [isInsuranceUploading, setIsInsuranceUploading] = useState(false);
+  const [insuranceError, setInsuranceError] = useState<string | null>(null);
+
+  const handleInsuranceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setInsuranceError(null);
+    setIsInsuranceUploading(true);
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const fileData = event.target?.result as string;
+      const doc: BookingDocument = {
+        id: INSURANCE_DOC_ID,
+        title: "Family Travel Insurance Policy",
+        type: "other",
+        fileData,
+        fileName: file.name,
+        fileType: file.type,
+        notes: "Coverage for 5 travelers for trip duration (Sep 1–7, 2026).",
+        dateAdded: new Date().toISOString().split("T")[0],
+      };
+      try {
+        await saveDocToIDB(doc);
+        setDocuments((prev) => [doc, ...prev.filter((d) => d.id !== INSURANCE_DOC_ID)]);
+      } catch (err) {
+        console.error("Error saving insurance document:", err);
+        setInsuranceError("Couldn't save the policy file — please try again.");
+      } finally {
+        setIsInsuranceUploading(false);
+      }
+    };
+    reader.onerror = () => {
+      setIsInsuranceUploading(false);
+      setInsuranceError("Couldn't read that file — please try again.");
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Preloaded Verified Bookings
   const defaultBookings: BookingDocument[] = [
@@ -84,7 +131,7 @@ export const TripTools: React.FC = () => {
       title: "Flights: Manila (MNL) ⇄ Tokyo Narita (NRT)",
       type: "flight",
       confirmationCode: "WETQNY / WC2HXE / MH1ZRC / NLNDWD",
-      notes: "Outbound Sep 1 (06:10–11:35) · Inbound Sep 7 (13:45–17:40) · 5 Passengers",
+      notes: "Outbound Sep 1 · 5J 5054 (6:50 AM–12:25 PM) · Inbound Sep 7 · 5J 5055 (1:45 PM–5:40 PM) · 5 Passengers",
       amount: "Booked & Paid",
       dateAdded: "2026-09-01",
     },
@@ -142,6 +189,37 @@ export const TripTools: React.FC = () => {
     return changed ? patched : docs;
   };
 
+  // One-time correction: the flight booking's notes originally held placeholder
+  // times (06:10-11:35 / 13:45-17:40) before the real Cebu Pacific confirmation
+  // (5J 5054 / 5J 5055, actual departure 6:50 AM / arrival 12:25 PM outbound)
+  // came in. This patches any already-seeded copy of that one record to the
+  // real flight numbers and times, once, without touching anything the user
+  // has since edited themselves — same idiom as correctStaleBookingStatus above.
+  const correctStaleFlightInfo = async (docs: BookingDocument[]): Promise<BookingDocument[]> => {
+    const alreadyCorrected =
+      typeof window !== "undefined" &&
+      window.localStorage.getItem("travel_tokyo_flight_info_corrected_v1") === "true";
+    if (alreadyCorrected) return docs;
+
+    let changed = false;
+    const patched = await Promise.all(
+      docs.map(async (doc) => {
+        if (doc.id === "booking-flight-mnl-nrt" && doc.notes?.includes("06:10")) {
+          const fresh = defaultBookings.find((d) => d.id === doc.id)!;
+          const correctedDoc: BookingDocument = { ...doc, notes: fresh.notes };
+          await saveDocToIDB(correctedDoc);
+          changed = true;
+          return correctedDoc;
+        }
+        return doc;
+      })
+    );
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("travel_tokyo_flight_info_corrected_v1", "true");
+    }
+    return changed ? patched : docs;
+  };
+
   useEffect(() => {
     async function loadDocs() {
       try {
@@ -158,7 +236,8 @@ export const TripTools: React.FC = () => {
           window.localStorage.setItem("travel_tokyo_bookings_seeded", "true");
           setDocuments(defaultBookings);
         } else {
-          setDocuments(await correctStaleBookingStatus(stored));
+          const statusCorrected = await correctStaleBookingStatus(stored);
+          setDocuments(await correctStaleFlightInfo(statusCorrected));
         }
       } catch (err) {
         console.warn("Failed to load documents from IndexedDB:", err);
@@ -175,24 +254,58 @@ export const TripTools: React.FC = () => {
   const [docCode, setDocCode] = useState("");
   const [docNotes, setDocNotes] = useState("");
   const [docAmount, setDocAmount] = useState("");
+  const [docStatus, setDocStatus] = useState<"paid" | "planned">("planned");
   const [docFileData, setDocFileData] = useState<string | undefined>();
   const [docFileName, setDocFileName] = useState<string | undefined>();
+  // FileReader.readAsDataURL is async; on the previous version the Save
+  // button had no guard for it, so tapping Save right after picking a file
+  // (very easy to do with a large scanned PDF) could submit before the file
+  // finished reading — the booking would save with no attachment at all,
+  // which is exactly the "I attached a PDF but it won't load" symptom.
+  const [isDocFileReading, setIsDocFileReading] = useState(false);
+  const [docSaveError, setDocSaveError] = useState<string | null>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setDocSaveError(null);
+    setIsDocFileReading(true);
     setDocFileName(file.name);
     const reader = new FileReader();
     reader.onload = (event) => {
       setDocFileData(event.target?.result as string);
+      setIsDocFileReading(false);
+    };
+    reader.onerror = () => {
+      setIsDocFileReading(false);
+      setDocFileName(undefined);
+      setDocFileData(undefined);
+      setDocSaveError("Couldn't read that file — please attach it again.");
     };
     reader.readAsDataURL(file);
+  };
+
+  const BOOKING_CATEGORY_MAP: Record<BookingDocument["type"], ExpenseRecord["category"]> = {
+    ticket: "tickets",
+    hotel: "hotel",
+    flight: "flights",
+    qr: "tickets",
+    other: "other",
   };
 
   const handleAddDocument = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!docTitle.trim()) return;
+    if (isDocFileReading) {
+      setDocSaveError("Still attaching your file — wait a second, then press Save again.");
+      return;
+    }
+
+    const amountJPY = Math.max(0, Math.round(Number(docAmount) || 0));
+    const hasAmount = amountJPY > 0;
+    const amountPHP = hasAmount ? Math.round(amountJPY / fxRate) : 0;
+    const linkedExpenseId = hasAmount ? `booking-expense-${Date.now()}` : undefined;
 
     const newDoc: BookingDocument = {
       id: "doc-" + Date.now(),
@@ -200,7 +313,15 @@ export const TripTools: React.FC = () => {
       type: docType,
       confirmationCode: docCode.trim() || undefined,
       notes: docNotes.trim() || undefined,
-      amount: docAmount.trim() || undefined,
+      amount: hasAmount
+        ? `¥${amountJPY.toLocaleString()} JPY (≈ ₱${amountPHP.toLocaleString()} PHP) · ${
+            docStatus === "paid" ? "Paid" : "Planned"
+          }`
+        : undefined,
+      amountJPY: hasAmount ? amountJPY : undefined,
+      amountPHP: hasAmount ? amountPHP : undefined,
+      expenseStatus: hasAmount ? docStatus : undefined,
+      linkedExpenseId,
       fileData: docFileData,
       fileName: docFileName,
       dateAdded: new Date().toISOString().split("T")[0],
@@ -208,25 +329,63 @@ export const TripTools: React.FC = () => {
 
     try {
       await saveDocToIDB(newDoc);
-      setDocuments((prev) => [newDoc, ...prev]);
     } catch (err) {
       console.error("Error saving document to IndexedDB:", err);
+      // Keep everything the user typed/attached so they can just hit Save
+      // again — silently clearing the form here would look like it saved
+      // and then discard the attachment for good.
+      setDocSaveError("Couldn't save this booking — please try Save again.");
+      return;
+    }
+
+    setDocuments((prev) => [newDoc, ...prev]);
+
+    if (hasAmount && linkedExpenseId) {
+      const newExpense: ExpenseRecord = {
+        id: linkedExpenseId,
+        title: docTitle.trim(),
+        amount: amountJPY,
+        currency: "JPY",
+        category: BOOKING_CATEGORY_MAP[docType],
+        paymentMethod: "Primary Visa / Mastercard",
+        date: newDoc.dateAdded,
+        status: docStatus,
+        notes: `Auto-linked from Bookings & Tickets: ${docTitle.trim()}`,
+        convertedAmountPHP: amountPHP,
+      };
+      if (docStatus === "paid") {
+        setPaidExpenses((prev) => [newExpense, ...prev]);
+      } else {
+        setPlannedExpenses((prev) => [newExpense, ...prev]);
+      }
     }
 
     setDocTitle("");
     setDocCode("");
     setDocNotes("");
     setDocAmount("");
+    setDocStatus("planned");
     setDocFileData(undefined);
     setDocFileName(undefined);
+    setDocSaveError(null);
   };
 
   const handleDeleteDocument = async (id: string) => {
+    const target = documents.find((d) => d.id === id);
     try {
       await deleteDocFromIDB(id);
       setDocuments((prev) => prev.filter((d) => d.id !== id));
     } catch (err) {
       console.error("Error deleting document from IndexedDB:", err);
+      return;
+    }
+
+    // Remove the linked expense this booking created, if any — but only
+    // that one record, never anything the user entered manually in Budget.
+    if (target?.linkedExpenseId) {
+      const expenseId = target.linkedExpenseId;
+      setPaidExpenses((prev) => prev.filter((e) => e.id !== expenseId));
+      setPlannedExpenses((prev) => prev.filter((e) => e.id !== expenseId));
     }
   };
 
@@ -637,16 +796,33 @@ export const TripTools: React.FC = () => {
               />
 
               <input
-                type="text"
+                type="number"
+                inputMode="numeric"
+                min="0"
                 value={docAmount}
                 onChange={(e) => setDocAmount(e.target.value)}
-                placeholder="Amount / Cost (e.g. ¥89,525 JPY)"
-                className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] sm:col-span-3"
+                placeholder="Amount ¥ JPY (optional)"
+                className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] sm:col-span-2"
               />
 
-              <div className="sm:col-span-5 flex items-center gap-2">
+              <select
+                value={docStatus}
+                onChange={(e) => setDocStatus(e.target.value as "paid" | "planned")}
+                className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm font-medium outline-none focus:border-[#1F3A5F] sm:col-span-2"
+              >
+                <option value="planned">🗓️ Planned</option>
+                <option value="paid">✅ Paid</option>
+              </select>
+
+              <div className="sm:col-span-4 flex items-center gap-2">
                 <label className="flex-1 cursor-pointer rounded-xl border border-dashed border-stone-300 bg-stone-50 p-3 text-center text-xs font-semibold text-stone-700 hover:bg-stone-100 transition">
-                  <span>{docFileName ? docFileName : "📎 Attach Voucher PDF / Image"}</span>
+                  <span>
+                    {isDocFileReading
+                      ? "Reading file…"
+                      : docFileName
+                      ? docFileName
+                      : "📎 Attach Voucher PDF / Image"}
+                  </span>
                   <input
                     type="file"
                     accept="image/*,application/pdf"
@@ -657,17 +833,30 @@ export const TripTools: React.FC = () => {
               </div>
             </div>
 
+            {docAmount && Number(docAmount) > 0 && (
+              <p className="text-[11px] text-stone-500 -mt-1">
+                Automatically added to your Budget page as {docStatus === "paid" ? "Paid" : "Planned"} spend — no need to add it there too.
+              </p>
+            )}
+
+            {docSaveError && (
+              <p className="text-xs font-semibold text-red-600">{docSaveError}</p>
+            )}
+
             <button
               type="submit"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#1F3A5F] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#132540] transition"
+              disabled={isDocFileReading}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#1F3A5F] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#132540] disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              <Plus className="h-4 w-4" /> Save Booking
+              <Plus className="h-4 w-4" /> {isDocFileReading ? "Reading File…" : "Save Booking"}
             </button>
           </form>
 
-          {/* Bookings & Tickets Cards Grid */}
+          {/* Bookings & Tickets Cards Grid — the Family Travel Insurance policy
+              lives in its own dedicated card in the Documents tab instead,
+              so it isn't filtered out here to avoid showing it twice. */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {documents.map((doc) => (
+            {documents.filter((doc) => doc.id !== INSURANCE_DOC_ID).map((doc) => (
               <div
                 key={doc.id}
                 className="rounded-3xl border border-stone-200 bg-white p-5 shadow-md flex flex-col justify-between space-y-3"
@@ -924,6 +1113,48 @@ export const TripTools: React.FC = () => {
                 <span className="font-bold text-stone-900 text-sm">Travel Insurance Policy</span>
                 <p className="text-stone-600">Coverage for 5 travelers for trip duration (Sep 1–7, 2026). Emergency evacuation & medical included.</p>
                 <span className="inline-block mt-1 font-semibold text-sky-700">24/7 International Assistance</span>
+
+                {insuranceDoc?.fileData ? (
+                  <div className="mt-2 flex items-center justify-between gap-2 rounded-lg border border-stone-200 bg-white px-2.5 py-1.5">
+                    <span className="truncate text-[11px] text-stone-500">
+                      {insuranceDoc.fileName || "Policy file"}
+                    </span>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <a
+                        href={insuranceDoc.fileData}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-[#1F3A5F] hover:underline"
+                      >
+                        <Eye className="h-3 w-3" /> View
+                      </a>
+                      <label className="cursor-pointer text-[11px] font-bold text-stone-500 hover:text-stone-700">
+                        {isInsuranceUploading ? "Uploading…" : "Replace"}
+                        <input
+                          type="file"
+                          accept="image/*,application/pdf"
+                          onChange={handleInsuranceUpload}
+                          className="hidden"
+                          disabled={isInsuranceUploading}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="mt-2 flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-dashed border-stone-300 bg-white px-2.5 py-2 text-[11px] font-semibold text-stone-600 hover:bg-stone-100 transition">
+                    {isInsuranceUploading ? "Uploading…" : "📎 Attach Policy PDF / Photo"}
+                    <input
+                      type="file"
+                      accept="image/*,application/pdf"
+                      onChange={handleInsuranceUpload}
+                      className="hidden"
+                      disabled={isInsuranceUploading}
+                    />
+                  </label>
+                )}
+                {insuranceError && (
+                  <p className="text-[11px] font-semibold text-red-600">{insuranceError}</p>
+                )}
               </div>
             </div>
           </div>

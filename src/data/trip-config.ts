@@ -63,10 +63,10 @@ export const tripMeta: TripMeta = {
   },
   flights: {
     outbound: {
-      code: "Flight MNL → NRT",
-      route: "Manila (MNL) to Tokyo Narita (NRT)",
-      departureTime: "06:10 AM",
-      arrivalTime: "11:35 AM",
+      code: "5J 5054",
+      route: "Manila (MNL) Terminal 3 to Tokyo Narita (NRT) Terminal 2",
+      departureTime: "6:50 AM",
+      arrivalTime: "12:25 PM",
       airfareEstimate: "Booked & Confirmed",
       passengerPNRs: [
         { name: "Mary Joyce Ablanque", pnr: "WETQNY" },
@@ -86,10 +86,10 @@ export const tripMeta: TripMeta = {
       notes: "Arrive at NAIA T3 by 03:00 AM · Have Visit Japan Web QR ready",
     },
     inbound: {
-      code: "Flight NRT → MNL",
-      route: "Tokyo Narita (NRT) to Manila (MNL)",
-      departureTime: "13:45 PM",
-      arrivalTime: "17:40 PM",
+      code: "5J 5055",
+      route: "Tokyo Narita (NRT) Terminal 2 to Manila (MNL) Terminal 3",
+      departureTime: "1:45 PM",
+      arrivalTime: "5:40 PM",
       airfareEstimate: "Booked & Confirmed",
       passengerPNRs: [
         { name: "Mary Joyce Ablanque", pnr: "WETQNY" },
@@ -326,7 +326,7 @@ export const itineraryDays: ItineraryDay[] = [
     image:
       "/images/destinations/day1-asakusa.jpg",
     transitNote:
-      "Airport Lounge → Flight to Narita (arr 11:35 AM) → Keisei Access Express to Asakusa Station (~60–80 min direct, ¥1,300–1,350) → Hotel Plus Hostel Asakusa 2",
+      "Airport Lounge → Flight 5J 5054 to Narita (arr 12:25 PM) → Keisei Access Express to Asakusa Station (~60–80 min direct, ¥1,300–1,350) → Hotel Plus Hostel Asakusa 2",
     transitSummary: {
       from: "Narita Airport T2·3",
       to: "Hotel Plus Hostel Asakusa 2 (Hanakawado)",
@@ -345,8 +345,8 @@ export const itineraryDays: ItineraryDay[] = [
           "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=800&q=80",
       },
       {
-        time: "06:10",
-        title: "Flight MNL → NRT (06:10–11:35)",
+        time: "06:50",
+        title: "Flight 5J 5054 · MNL → NRT (6:50 AM–12:25 PM)",
         desc: "Morning flight to Tokyo Narita. PNRs: Mary Joyce (WETQNY), Anita (WC2HXE), Marlon (MH1ZRC), Jane & Bella (NLNDWD).",
         icon: "✈️",
         badges: ["Flight", "Booked & Confirmed"],
@@ -404,9 +404,9 @@ export const itineraryDays: ItineraryDay[] = [
         badges: ["Lounge", "UnionBank"],
       },
       {
-        time: "06:10",
-        title: "Flight MNL → NRT",
-        desc: "Monitor flight arrival at Narita (11:35 AM).",
+        time: "06:50",
+        title: "Flight 5J 5054 · MNL → NRT",
+        desc: "Monitor flight arrival at Narita (12:25 PM).",
         icon: "✈️",
         badges: ["Booked & Paid", "Transit"],
       },
@@ -1027,7 +1027,7 @@ export const itineraryDays: ItineraryDay[] = [
       },
       {
         time: "13:45",
-        title: "Flight NRT → MNL Departure (13:45–17:40)",
+        title: "Flight 5J 5055 · NRT → MNL Departure (1:45 PM–5:40 PM)",
         desc: "Flight back home to Manila. PNRs: Mary Joyce (WETQNY), Anita (WC2HXE), Marlon (MH1ZRC), Jane & Bella (NLNDWD). Safe travels!",
         icon: "✈️",
         badges: ["Flight", "Booked & Confirmed"],
@@ -1057,7 +1057,7 @@ export const itineraryDays: ItineraryDay[] = [
       },
       {
         time: "13:45",
-        title: "Flight NRT → MNL Departure",
+        title: "Flight 5J 5055 · NRT → MNL Departure",
         desc: "Safe flight back home to Manila!",
         icon: "✈️",
         badges: ["Booked & Paid"],
@@ -1908,7 +1908,7 @@ export const transportRoutes: TransportRoute[] = [
   {
     id: "narita-arrival",
     title: "Narita Airport → Hotel Plus Hostel Asakusa 2",
-    dateOrFrequency: "Tue, Sep 1 — Arrival (Flight arr 11:35 AM)",
+    dateOrFrequency: "Tue, Sep 1 — Arrival (Flight 5J 5054 arr 12:25 PM)",
     estimatedTime: "55–80 min",
     totalFare: "≈ ¥1,300–1,350",
     transfers: 0,
@@ -2065,7 +2065,7 @@ export const transportRoutes: TransportRoute[] = [
   {
     id: "hotel-departure",
     title: "Hotel Asakusa → Narita Airport T2 Departure",
-    dateOrFrequency: "Mon, Sep 7 — 13:45 PM Flight",
+    dateOrFrequency: "Mon, Sep 7 — 1:45 PM Flight 5J 5055",
     estimatedTime: "55–80 min",
     totalFare: "≈ ¥1,300–1,350",
     transfers: 0,

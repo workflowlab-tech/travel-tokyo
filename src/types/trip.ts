@@ -344,6 +344,13 @@ export interface BookingDocument {
   notes?: string;
   amount?: string;
   dateAdded: string;
+  // Structured cost, set only when the amount was entered via the numeric
+  // Amount field (new bookings). Lets a booking auto-create/clean up a
+  // linked ExpenseRecord in the Budget page instead of double entry.
+  amountJPY?: number;
+  amountPHP?: number;
+  expenseStatus?: "paid" | "planned";
+  linkedExpenseId?: string;
 }
 
 export interface MemoryPhoto {
