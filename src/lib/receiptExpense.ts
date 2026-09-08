@@ -85,8 +85,12 @@ export function extractJsonFromGeminiResponse(raw: unknown): ParsedReceipt {
     text?: string;
   };
 
-  if (res?.candidates?.[0]?.content?.parts?.[0]?.text) {
-    rawText = res.candidates[0].content.parts[0].text as string;
+  const joinedParts = res?.candidates?.[0]?.content?.parts
+    ?.map((part) => part?.text || "")
+    .join("");
+
+  if (joinedParts) {
+    rawText = joinedParts;
   } else if (typeof res?.text === "string") {
     rawText = res.text;
   }

@@ -76,7 +76,14 @@ export async function POST(request: Request) {
     );
   }
 
-  const geminiJson = await geminiRes.json();
+  let geminiJson: unknown;
+  try {
+    geminiJson = await geminiRes.json();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to parse Gemini response";
+    return NextResponse.json({ success: false, error: `Gemini returned invalid JSON: ${message}` }, { status: 502 });
+  }
+
   const parsed = extractJsonFromGeminiResponse(geminiJson);
   const action = classifyParsedReceipt(parsed);
 

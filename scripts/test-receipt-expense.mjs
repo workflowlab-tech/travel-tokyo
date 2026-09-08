@@ -40,6 +40,27 @@ console.log("🧪 Starting Receipt Expense Logic Tests...\n");
   console.log("✅ 3. extractJsonFromGeminiResponse falls back safely on malformed output");
 }
 
+// 3b. extractJsonFromGeminiResponse - JSON answer split across multiple response parts
+{
+  const fakeResponse = {
+    candidates: [
+      {
+        content: {
+          parts: [
+            { text: "```json\n{\"is_expense\":true,\"amount\":2400," },
+            { text: "\"currency\":\"JPY\"}\n```" },
+          ],
+        },
+      },
+    ],
+  };
+  const parsed = extractJsonFromGeminiResponse(fakeResponse);
+  assert.strictEqual(parsed.is_expense, true);
+  assert.strictEqual(parsed.amount, 2400);
+  assert.strictEqual(parsed.currency, "JPY");
+  console.log("✅ 3b. extractJsonFromGeminiResponse joins multiple response parts before parsing");
+}
+
 // 4. classifyParsedReceipt
 {
   assert.strictEqual(classifyParsedReceipt({ is_expense: true, amount: 1800 }), "add");
