@@ -55,7 +55,7 @@ TASK 2: If it is an expense, extract all transaction details.
 Output strictly valid JSON matching this schema:
 {
   "is_expense": boolean,
-  "non_expense_reason": string (e.g. 'Scenery photo', 'Selfie', 'No price shown'),
+  "non_expense_reason": string (e.g. 'Scenery photo', 'Selfie', 'General chat'),
   "title": string (Merchant name / item description),
   "amount": number (Total amount exactly as shown, in its ORIGINAL currency — do not convert it yourself),
   "currency": string (The currency actually shown: 'JPY' if ¥ or unspecified, 'PHP' if ₱ or 'Peso'/'PHP' is shown),
@@ -75,7 +75,7 @@ Payment Methods:
 - UnionBank -> 'UnionBank Visa'
 - Default to 'Cash' if unstated.
 
-Never fabricate unreadable totals. A PHP-denominated transaction is a valid expense; extract it normally with currency='PHP' — never set is_expense=false just because the currency is PHP instead of JPY. Only set is_expense=false for things that truly aren't a paid transaction (scenery, selfies, casual chat, documents with no price).`;
+Never fabricate unreadable totals. A PHP-denominated transaction is a valid expense; extract it normally with currency='PHP' — never set is_expense=false just because the currency is PHP instead of JPY. If this IS a real attempted purchase or transaction but the total amount is missing, cut off, or illegible, still set is_expense=true and set amount to 0 — do NOT set is_expense=false just because the amount is unclear. Only set is_expense=false for things that are not an attempted transaction at all (scenery, selfies, casual chat, travel documents with nothing purchased).`;
 }
 
 export function extractJsonFromGeminiResponse(raw: unknown): ParsedReceipt {
