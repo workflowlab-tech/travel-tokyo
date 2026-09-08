@@ -6,7 +6,12 @@ import {
 } from "../../../lib/receiptExpense";
 
 const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent";
+  // Flash-Lite: Google's own docs describe it as optimized for high-throughput,
+  // low-cost "simple data extraction" (exactly this task), and it carries a far
+  // higher free-tier quota than the regular Flash tier (15 RPM / 500 RPD vs.
+  // 5 RPM / 20 RPD, confirmed on this project's actual usage dashboard) — the
+  // real constraint tonight was the account's daily quota, not model choice.
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent";
 
 interface ParseReceiptRequestBody {
   imageBase64?: string;
