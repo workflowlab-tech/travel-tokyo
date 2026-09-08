@@ -70,6 +70,13 @@ export default function BudgetPage() {
     "travel_tokyo_initial_cash_jpy",
     tripMeta.defaultCurrencies.initialCashJPY || 100000
   );
+  // Real PHP amount your card/bank actually charged for the initial cash
+  // exchange, once known — same "actual overrides the live estimate" pattern
+  // as expenses and ATM withdrawals. undefined until set.
+  const [initialCashActualPHP, setInitialCashActualPHP] = useLocalStorage<number | undefined>(
+    "travel_tokyo_initial_cash_actual_php_v1",
+    undefined
+  );
 
   // ATM Cash Withdrawals Log
   const [cashWithdrawals, setCashWithdrawals] = useLocalStorage<CashWithdrawalRecord[]>(
@@ -80,6 +87,9 @@ export default function BudgetPage() {
   const [isEditingBudget, setIsEditingBudget] = useState(false);
   const [tempBudgetInputPHP, setTempBudgetInputPHP] = useState(String(plannedBudgetPHP));
   const [tempCashInputJPY, setTempCashInputJPY] = useState(String(initialCashJPY));
+  const [tempInitialCashActualPHP, setTempInitialCashActualPHP] = useState(
+    initialCashActualPHP !== undefined ? String(initialCashActualPHP) : ""
+  );
 
   const plannedBudgetJPY = Math.round(plannedBudgetPHP * fxRate);
 
@@ -390,7 +400,9 @@ export default function BudgetPage() {
     (sum, w) => sum + (w.actualPHPCharged !== undefined ? w.actualPHPCharged : Math.round(w.amountJPY / fxRate)),
     0
   );
-  const totalCashWithdrawnPHP = Math.round(initialCashJPY / fxRate) + additionalWithdrawalsPHP;
+  const initialCashPHP =
+    initialCashActualPHP !== undefined ? initialCashActualPHP : Math.round(initialCashJPY / fxRate);
+  const totalCashWithdrawnPHP = initialCashPHP + additionalWithdrawalsPHP;
 
   const cashPaidExpenses = paidExpenses.filter((e) => e.paymentMethod === "Cash");
   const actualSpentCashJPY = cashPaidExpenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
@@ -453,8 +465,12 @@ export default function BudgetPage() {
   const handleSaveBudgetConfig = () => {
     const pPHP = parseFloat(tempBudgetInputPHP.replace(/[^0-9.]/g, "")) || 150000;
     const cJPY = parseFloat(tempCashInputJPY.replace(/[^0-9.]/g, "")) || 100000;
+    const actualPHP = tempInitialCashActualPHP.trim()
+      ? parseFloat(tempInitialCashActualPHP.replace(/[^0-9.]/g, "")) || undefined
+      : undefined;
     setPlannedBudgetPHP(pPHP);
     setInitialCashJPY(cJPY);
+    setInitialCashActualPHP(actualPHP);
     setIsEditingBudget(false);
   };
 
@@ -729,6 +745,9 @@ export default function BudgetPage() {
                   setIsEditingBudget(!isEditingBudget);
                   setTempBudgetInputPHP(String(plannedBudgetPHP));
                   setTempCashInputJPY(String(initialCashJPY));
+                  setTempInitialCashActualPHP(
+                    initialCashActualPHP !== undefined ? String(initialCashActualPHP) : ""
+                  );
                 }}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-[#1F3A5F] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#132540] transition"
               >
@@ -776,6 +795,23 @@ export default function BudgetPage() {
                   />
                   <p className="mt-1 text-[11px] text-stone-500">
                     Physical cash bills exchanged before departure (e.g. {destSymbol}100,000)
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-stone-700">
+                    Actual {homeSymbol} {homeCurrency} charged for that exchange (optional)
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={tempInitialCashActualPHP}
+                    onChange={(e) => setTempInitialCashActualPHP(e.target.value.replace(/[^0-9.]/g, ""))}
+                    placeholder={`Leave blank to use ≈ ${homeSymbol}${Math.round((parseFloat(tempCashInputJPY) || 0) / fxRate).toLocaleString()}`}
+                    className="mt-1 w-full rounded-xl border border-stone-300 p-3 text-sm font-bold outline-none focus:border-[#1F3A5F]"
+                  />
+                  <p className="mt-1 text-[11px] text-stone-500">
+                    Fill this in once you know the real amount your card/bank charged for exchanging this cash, to lock it in instead of today&apos;s live rate.
                   </p>
                 </div>
               </div>
