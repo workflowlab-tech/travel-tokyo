@@ -6,7 +6,7 @@ import {
 } from "../../../lib/receiptExpense";
 
 const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent";
 
 interface ParseReceiptRequestBody {
   imageBase64?: string;
