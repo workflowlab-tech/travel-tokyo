@@ -375,9 +375,13 @@ export default function BudgetPage() {
   const actualSpentJPY = paidExpenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   // Sums each item's real card-charge PHP figure where one has been entered,
   // falling back to the live FX-rate estimate for items that don't have one yet.
+  const expensePHPValue = (item: ExpenseRecord) =>
+    item.convertedAmountPHP !== undefined
+      ? item.convertedAmountPHP
+      : Math.round(item.amount / fxRate);
+
   const actualSpentPHP = paidExpenses.reduce(
-    (sum, item) =>
-      sum + (item.convertedAmountPHP !== undefined ? item.convertedAmountPHP : Math.round(item.amount / fxRate)),
+    (sum, item) => sum + expensePHPValue(item),
     0
   );
 
@@ -445,6 +449,10 @@ export default function BudgetPage() {
       item.paymentMethod === paidPaymentFilter;
     return matchesCategory && matchesPayment;
   });
+  const filteredPaidExpensesPHP = filteredPaidExpenses.reduce(
+    (sum, item) => sum + expensePHPValue(item),
+    0
+  );
 
   const paidExpenseDayGroups = [
     {
@@ -759,9 +767,7 @@ export default function BudgetPage() {
 
   const renderPaidExpenseRow = (item: ExpenseRecord) => {
     const isPHPNative = item.currency === "PHP" && item.convertedAmountPHP !== undefined;
-    const phpValue = item.convertedAmountPHP !== undefined
-      ? item.convertedAmountPHP
-      : Math.round(item.amount / fxRate);
+    const phpValue = expensePHPValue(item);
 
     return (
       <div
@@ -1252,7 +1258,7 @@ export default function BudgetPage() {
             <div>
               <h3 className="font-serif text-xl font-bold text-stone-900">Paid expenses</h3>
               <p className="text-xs font-medium text-stone-500">
-                {filteredPaidExpenses.length} of {paidExpenses.length} records shown · {homeSymbol}{actualSpentPHP.toLocaleString()} total
+                {filteredPaidExpenses.length} of {paidExpenses.length} records shown · Filtered total: {homeSymbol}{filteredPaidExpensesPHP.toLocaleString()}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2 sm:flex">
@@ -1295,7 +1301,10 @@ export default function BudgetPage() {
 
           <div className="space-y-2">
             {paidExpenseDayGroups.map((group) => {
-              const groupJPY = group.expenses.reduce((sum, item) => sum + item.amount, 0);
+              const groupPHP = group.expenses.reduce(
+                (sum, item) => sum + expensePHPValue(item),
+                0
+              );
               return (
                 <details key={group.key} className="group overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 hover:bg-stone-50">
@@ -1305,7 +1314,7 @@ export default function BudgetPage() {
                     </div>
                     <div className="flex shrink-0 items-center gap-3 text-right">
                       <div>
-                        <div className="text-xs font-black text-[#1F3A5F]">{destSymbol}{groupJPY.toLocaleString()}</div>
+                        <div className="text-xs font-black text-[#1F3A5F]">{homeSymbol}{groupPHP.toLocaleString()}</div>
                         <div className="text-[10px] text-stone-500">{group.expenses.length} expense{group.expenses.length === 1 ? "" : "s"}</div>
                       </div>
                       <span className="text-stone-400 transition group-open:rotate-180">⌄</span>
