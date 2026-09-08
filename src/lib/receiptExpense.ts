@@ -40,6 +40,7 @@ export function buildReceiptPrompt(input: {
   kind: "image" | "text";
   caption?: string;
   text?: string;
+  today: string;
 }): string {
   const context =
     input.kind === "image"
@@ -47,6 +48,7 @@ export function buildReceiptPrompt(input: {
       : `Analyze this text message: '${input.text || ""}'.`;
 
   return `You are the TravelTokyo AI Expense Parser for a 7-day Tokyo trip.
+Today's date is ${input.today}.
 ${context}
 
 TASK 1: Determine if this is an actual monetary receipt / paid transaction OR a non-expense item (scenery photo, selfie, general chat, travel document without price).
@@ -61,7 +63,7 @@ Output strictly valid JSON matching this schema:
   "currency": string (The currency actually shown: 'JPY' if ¥ or unspecified, 'PHP' if ₱ or 'Peso'/'PHP' is shown),
   "category": string (Must be ONE of: 'food', 'transport', 'shopping', 'tickets', 'hotel', 'flights', 'documents', 'other'),
   "paymentMethod": string (Must be ONE of: 'Cash', 'BDO JCB', 'BDO Mastercard', 'RCBC Visa', 'GCash', 'MariBank', 'UnionBank Visa', 'Other Card / Wallet'),
-  "date": string or null (YYYY-MM-DD format if a date is actually shown/stated; if no date is visible or mentioned, use null — never guess, estimate, or fabricate a date),
+  "date": string or null (YYYY-MM-DD format. If a date/timestamp IS visible or stated — even partial, like '09/07', 'Sep 7', or '09/07 7:44PM' with no year — reformat it to full YYYY-MM-DD by inferring the missing year from today's date above; this is normalizing a real date you can see, not fabricating one. Only use null when there is truly no date information anywhere in the input — never invent a date that isn't shown at all),
   "notes": string
 }
 

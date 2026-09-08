@@ -45,8 +45,11 @@ export async function POST(request: Request) {
     );
   }
 
+  const today = new Date().toISOString().split("T")[0];
   const prompt = buildReceiptPrompt(
-    hasImage ? { kind: "image", caption: body.caption } : { kind: "text", text: body.text }
+    hasImage
+      ? { kind: "image", caption: body.caption, today }
+      : { kind: "text", text: body.text, today }
   );
 
   const parts: Record<string, unknown>[] = [{ text: prompt }];

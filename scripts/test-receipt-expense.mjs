@@ -13,11 +13,16 @@ console.log("🧪 Starting Receipt Expense Logic Tests...\n");
 
 // 1. buildReceiptPrompt
 {
-  const prompt = buildReceiptPrompt({ kind: "image", caption: "ramen" });
+  const prompt = buildReceiptPrompt({ kind: "image", caption: "ramen", today: "2026-09-08" });
   assert.ok(prompt.includes("'PHP' if"), "prompt must mention PHP handling");
   assert.ok(prompt.includes("ramen"), "prompt must include the caption");
   assert.ok(!prompt.includes("needs_clarification"), "prompt must not reintroduce the old clarification flow");
-  console.log("✅ 1. buildReceiptPrompt includes PHP guidance and the caption");
+  assert.ok(prompt.includes("2026-09-08"), "prompt must include today's date so the model can infer missing years");
+  assert.ok(
+    prompt.includes("inferring the missing year"),
+    "prompt must instruct the model to normalize partial dates instead of defaulting to null"
+  );
+  console.log("✅ 1. buildReceiptPrompt includes PHP guidance, the caption, and today's date for partial-date inference");
 }
 
 // 2. extractJsonFromGeminiResponse - success case (with markdown code fence, as Gemini often returns)
