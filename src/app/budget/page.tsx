@@ -16,7 +16,6 @@ import {
   Clock,
   Trash2,
   Edit2,
-  TrendingUp,
   Banknote,
   CreditCard,
   Building,
@@ -388,10 +387,23 @@ export default function BudgetPage() {
   const expectedFutureSpendJPY = plannedExpenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   const expectedFutureSpendPHP = Math.round(expectedFutureSpendJPY / fxRate);
 
-  // Keep the home-currency budget authoritative. Converting the target to JPY,
-  // subtracting, then converting back introduced visible rounding drift.
-  const projectedRemainingPHP = plannedBudgetPHP - actualSpentPHP - expectedFutureSpendPHP;
-  const projectedRemainingJPY = Math.round(projectedRemainingPHP * fxRate);
+  // Card charges incurred during the trip. Pre-travel purchases, hotel costs,
+  // and cash transactions do not belong in the credit-card balance.
+  const creditCardExpenses = paidExpenses.filter(
+    (item) =>
+      item.date >= tripMeta.startDate &&
+      item.date <= tripMeta.endDate &&
+      item.category !== "hotel" &&
+      item.paymentMethod !== "Cash"
+  );
+  const creditCardBalancePHP = creditCardExpenses.reduce(
+    (sum, item) => sum + expensePHPValue(item),
+    0
+  );
+  const creditCardBalanceJPY = creditCardExpenses.reduce(
+    (sum, item) => sum + (Number(item.amount) || 0),
+    0
+  );
 
   // =========================================================================
   // PHYSICAL CASH FORMULA: Total Amount Withdrawn − Actual Spent Cash = Balance On-Hand
@@ -1028,52 +1040,28 @@ export default function BudgetPage() {
               </p>
             </div>
 
-            {/* 4. Projected Available Balance (Planned - Paid - Committed) */}
-            <div
-              className={`rounded-3xl border p-5 shadow-md flex flex-col justify-between space-y-2 ${
-                projectedRemainingJPY >= 0
-                  ? "border-emerald-200 bg-emerald-50/80"
-                  : "border-red-200 bg-red-50/80"
-              }`}
-            >
+            {/* 4. Credit Card Balance (trip-period card charges only) */}
+            <div className="rounded-3xl border border-violet-200 bg-violet-50/80 p-5 shadow-md flex flex-col justify-between space-y-2">
               <div className="flex items-center justify-between">
-                <span
-                  className={`text-[11px] font-black uppercase tracking-wider ${
-                    projectedRemainingJPY >= 0 ? "text-emerald-800" : "text-red-800"
-                  }`}
-                >
-                  Available Balance
+                <span className="text-[11px] font-black uppercase tracking-wider text-violet-900">
+                  Credit Card Balance
                 </span>
-                <TrendingUp
-                  className={`h-4 w-4 ${projectedRemainingJPY >= 0 ? "text-emerald-600" : "text-red-600"}`}
-                />
+                <span className="rounded-full bg-violet-200 px-2.5 py-0.5 font-mono text-[10px] font-bold text-violet-900">
+                  {creditCardExpenses.length} Charges
+                </span>
               </div>
 
               <div>
-                <div
-                  className={`font-serif text-2xl sm:text-3xl font-extrabold ${
-                    projectedRemainingJPY >= 0 ? "text-emerald-950" : "text-red-950"
-                  }`}
-                >
-                  {homeSymbol} {projectedRemainingPHP.toLocaleString()}
+                <div className="font-serif text-2xl sm:text-3xl font-extrabold text-violet-950">
+                  {homeSymbol} {creditCardBalancePHP.toLocaleString()}
                 </div>
-                <div
-                  className={`mt-0.5 font-mono text-xs font-bold ${
-                    projectedRemainingJPY >= 0 ? "text-emerald-800" : "text-red-800"
-                  }`}
-                >
-                  ≈ {destSymbol} {projectedRemainingJPY.toLocaleString()} {destCurrency}
+                <div className="mt-0.5 font-mono text-xs font-bold text-violet-800">
+                  ≈ {destSymbol} {creditCardBalanceJPY.toLocaleString()} {destCurrency}
                 </div>
               </div>
 
-              <p
-                className={`text-[11px] font-medium pt-2 border-t ${
-                  projectedRemainingJPY >= 0
-                    ? "text-emerald-800 border-emerald-200"
-                    : "text-red-800 border-red-200"
-                }`}
-              >
-                Projected remainder after commitments.
+              <p className="text-[11px] font-medium pt-2 border-t border-violet-200 text-violet-800">
+                Trip card charges only. Excludes pre-travel, hotel, and cash.
               </p>
             </div>
           </div>
