@@ -8,7 +8,7 @@ export interface ParsedReceipt {
   currency?: string;
   category?: string;
   paymentMethod?: string;
-  date?: string;
+  date?: string | null;
   notes?: string;
 }
 
@@ -61,7 +61,7 @@ Output strictly valid JSON matching this schema:
   "currency": string (The currency actually shown: 'JPY' if ¥ or unspecified, 'PHP' if ₱ or 'Peso'/'PHP' is shown),
   "category": string (Must be ONE of: 'food', 'transport', 'shopping', 'tickets', 'hotel', 'flights', 'documents', 'other'),
   "paymentMethod": string (Must be ONE of: 'Cash', 'BDO JCB', 'BDO Mastercard', 'RCBC Visa', 'GCash', 'MariBank', 'UnionBank Visa', 'Other Card / Wallet'),
-  "date": string (YYYY-MM-DD format),
+  "date": string or null (YYYY-MM-DD format if a date is actually shown/stated; if no date is visible or mentioned, use null — never guess, estimate, or fabricate a date),
   "notes": string
 }
 
