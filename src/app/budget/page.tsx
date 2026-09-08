@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { tripMeta } from "../../data/trip-config";
+import { itineraryDays, tripMeta } from "../../data/trip-config";
 import { Navigation } from "../../components/Navigation";
 import { ReceiptUpload } from "../../components/ReceiptUpload";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
@@ -338,6 +338,8 @@ export default function BudgetPage() {
   const [formPaymentMethod, setFormPaymentMethod] = useState<PaymentMethod>("Cash");
   const [formDate, setFormDate] = useState(new Date().toISOString().split("T")[0]);
   const [formNotes, setFormNotes] = useState("");
+  const [paidCategoryFilter, setPaidCategoryFilter] = useState<"all" | ExpenseCategory>("all");
+  const [paidPaymentFilter, setPaidPaymentFilter] = useState("all");
 
   // ATM Withdrawal Form State
   const [withdrawalAmountJPY, setWithdrawalAmountJPY] = useState("");
@@ -379,14 +381,13 @@ export default function BudgetPage() {
     0
   );
 
-  const remainingBalanceJPY = plannedBudgetJPY - actualSpentJPY;
-  const remainingBalancePHP = Math.round(remainingBalanceJPY / fxRate);
-
   const expectedFutureSpendJPY = plannedExpenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   const expectedFutureSpendPHP = Math.round(expectedFutureSpendJPY / fxRate);
 
-  const projectedRemainingJPY = remainingBalanceJPY - expectedFutureSpendJPY;
-  const projectedRemainingPHP = Math.round(projectedRemainingJPY / fxRate);
+  // Keep the home-currency budget authoritative. Converting the target to JPY,
+  // subtracting, then converting back introduced visible rounding drift.
+  const projectedRemainingPHP = plannedBudgetPHP - actualSpentPHP - expectedFutureSpendPHP;
+  const projectedRemainingJPY = Math.round(projectedRemainingPHP * fxRate);
 
   // =========================================================================
   // PHYSICAL CASH FORMULA: Total Amount Withdrawn − Actual Spent Cash = Balance On-Hand
@@ -404,7 +405,11 @@ export default function BudgetPage() {
     initialCashActualPHP !== undefined ? initialCashActualPHP : Math.round(initialCashJPY / fxRate);
   const totalCashWithdrawnPHP = initialCashPHP + additionalWithdrawalsPHP;
 
-  const cashPaidExpenses = paidExpenses.filter((e) => e.paymentMethod === "Cash");
+  // The physical wallet tracks yen notes only. PHP cash purchases remain Cash
+  // records, but must never be converted into or deducted from the JPY wallet.
+  const cashPaidExpenses = paidExpenses.filter(
+    (e) => e.paymentMethod === "Cash" && e.currency !== "PHP"
+  );
   const actualSpentCashJPY = cashPaidExpenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   const actualSpentCashPHP = Math.round(actualSpentCashJPY / fxRate);
 
@@ -426,6 +431,45 @@ export default function BudgetPage() {
     const diff = new Date(b.date).getTime() - new Date(a.date).getTime();
     return diff !== 0 ? diff : b.id.localeCompare(a.id);
   });
+
+  const nonCashPaymentMethods = Array.from(
+    new Set(sortedPaidExpenses.filter((item) => item.paymentMethod !== "Cash").map((item) => item.paymentMethod))
+  ).sort();
+
+  const filteredPaidExpenses = sortedPaidExpenses.filter((item) => {
+    const matchesCategory = paidCategoryFilter === "all" || item.category === paidCategoryFilter;
+    const matchesPayment =
+      paidPaymentFilter === "all" ||
+      (paidPaymentFilter === "cash-jpy" && item.paymentMethod === "Cash" && item.currency !== "PHP") ||
+      (paidPaymentFilter === "cash-php" && item.paymentMethod === "Cash" && item.currency === "PHP") ||
+      item.paymentMethod === paidPaymentFilter;
+    return matchesCategory && matchesPayment;
+  });
+
+  const paidExpenseDayGroups = [
+    {
+      key: "pre-travel",
+      label: "Pre-travel expenses",
+      subtitle: `Before ${itineraryDays[0]?.shortDate || tripMeta.startDate}`,
+      expenses: filteredPaidExpenses.filter((item) => item.date < tripMeta.startDate),
+    },
+    ...itineraryDays.map((day, index) => ({
+      key: day.fullDateString,
+      label: `Day ${index + 1}`,
+      subtitle: `${day.shortDate} · ${day.title}`,
+      expenses: filteredPaidExpenses.filter((item) => item.date === day.fullDateString),
+    })),
+  ];
+
+  const postTripExpenses = filteredPaidExpenses.filter((item) => item.date > tripMeta.endDate);
+  if (postTripExpenses.length > 0) {
+    paidExpenseDayGroups.push({
+      key: "post-travel",
+      label: "Post-travel expenses",
+      subtitle: `After ${itineraryDays.at(-1)?.shortDate || tripMeta.endDate}`,
+      expenses: postTripExpenses,
+    });
+  }
 
   // Live Sync with /api/expenses (Telegram / n8n)
   const [isSyncing, setIsSyncing] = useState(false);
@@ -711,6 +755,70 @@ export default function BudgetPage() {
 
   const handleDeletePlanned = (id: string) => {
     setPlannedExpenses((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const renderPaidExpenseRow = (item: ExpenseRecord) => {
+    const isPHPNative = item.currency === "PHP" && item.convertedAmountPHP !== undefined;
+    const phpValue = item.convertedAmountPHP !== undefined
+      ? item.convertedAmountPHP
+      : Math.round(item.amount / fxRate);
+
+    return (
+      <div
+        key={item.id}
+        className="flex flex-col gap-2 border-t border-stone-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="rounded bg-stone-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-stone-600">
+              {item.category}
+            </span>
+            <span className="rounded bg-amber-50 px-1.5 py-0.5 text-[9px] font-bold text-[#8B5E14]">
+              {item.paymentMethod}{item.paymentMethod === "Cash" ? ` · ${item.currency}` : ""}
+            </span>
+          </div>
+          <h4 className="mt-1 truncate text-sm font-bold text-stone-900" title={item.title}>
+            {item.title}
+          </h4>
+          {item.notes && (
+            <p className="mt-0.5 line-clamp-1 text-[11px] text-stone-500" title={item.notes}>
+              {item.notes}
+            </p>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between gap-3 sm:justify-end">
+          <div className="text-right">
+            <div className="font-serif text-base font-bold text-stone-900">
+              {isPHPNative
+                ? `${homeSymbol} ${phpValue.toLocaleString()}`
+                : `${destSymbol} ${item.amount.toLocaleString()}`}
+            </div>
+            <div className="font-mono text-[10px] text-stone-500">
+              {isPHPNative
+                ? `≈ ${destSymbol} ${item.amount.toLocaleString()}`
+                : `${item.convertedAmountPHP !== undefined ? "=" : "≈"} ${homeSymbol} ${phpValue.toLocaleString()}`}
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => openEditModal(item)}
+              className="rounded-lg p-2 text-stone-400 transition hover:bg-stone-100 hover:text-[#1F3A5F]"
+              aria-label={`Edit ${item.title}`}
+            >
+              <Edit2 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => handleDeletePaid(item.id)}
+              className="rounded-lg p-2 text-stone-400 transition hover:bg-stone-100 hover:text-red-600"
+              aria-label={`Delete ${item.title}`}
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -1138,32 +1246,43 @@ export default function BudgetPage() {
           </div>
         </div>
 
-        {/* ========================================================================= */}
-        {/* SECTION 1 — FIXED / ACTUAL BUDGET (Confirmed & Paid Expenses) */}
-        {/* ========================================================================= */}
+        {/* SECTION 1 — PAID EXPENSES, FILTERED AND GROUPED BY TRIP DAY */}
         <section className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-stone-200 pb-3">
+          <div className="flex flex-col gap-3 border-b border-stone-200 pb-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="rounded-md bg-[#1F3A5F] px-2.5 py-1 text-xs font-black tracking-widest text-white shadow-sm">
-                  SECTION 1
-                </span>
-                <h3 className="font-serif text-xl font-bold text-stone-900 sm:text-2xl">
-                  Fixed / Actual Budget (Paid & Confirmed)
-                </h3>
-              </div>
-              <p className="mt-1 text-xs text-stone-600 leading-relaxed font-medium">
-                Confirmed transactions that are already paid (Flights, Hotel, Park Tickets, Visas, Receipts).
+              <h3 className="font-serif text-xl font-bold text-stone-900">Paid expenses</h3>
+              <p className="text-xs font-medium text-stone-500">
+                {filteredPaidExpenses.length} of {paidExpenses.length} records shown · {homeSymbol}{actualSpentPHP.toLocaleString()} total
               </p>
             </div>
+            <div className="grid grid-cols-2 gap-2 sm:flex">
+              <label className="sr-only" htmlFor="category-filter">Filter by category</label>
+              <select
+                id="category-filter"
+                value={paidCategoryFilter}
+                onChange={(event) => setPaidCategoryFilter(event.target.value as "all" | ExpenseCategory)}
+                className="rounded-xl border border-stone-300 bg-white px-3 py-2 text-xs font-bold text-stone-700 outline-none focus:border-[#1F3A5F]"
+              >
+                <option value="all">All categories</option>
+                {categories.map((category) => (
+                  <option key={category.value} value={category.value}>{category.icon} {category.label}</option>
+                ))}
+              </select>
 
-            <div className="text-left sm:text-right">
-              <div className="text-[11px] font-black uppercase text-stone-500">
-                Section Total
-              </div>
-              <div className="font-serif text-lg font-extrabold text-[#1F3A5F]">
-                {destSymbol} {actualSpentJPY.toLocaleString()} <span className="text-xs font-normal text-stone-500 font-mono">≈ {homeSymbol} {actualSpentPHP.toLocaleString()}</span>
-              </div>
+              <label className="sr-only" htmlFor="payment-filter">Filter by payment</label>
+              <select
+                id="payment-filter"
+                value={paidPaymentFilter}
+                onChange={(event) => setPaidPaymentFilter(event.target.value)}
+                className="rounded-xl border border-stone-300 bg-white px-3 py-2 text-xs font-bold text-stone-700 outline-none focus:border-[#1F3A5F]"
+              >
+                <option value="all">All payments</option>
+                <option value="cash-jpy">Cash (JPY)</option>
+                <option value="cash-php">Cash (PHP)</option>
+                {nonCashPaymentMethods.map((method) => (
+                  <option key={method} value={method}>{method}</option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -1174,126 +1293,41 @@ export default function BudgetPage() {
             openEditModal={openEditModal}
           />
 
-          {/* Paid Expenses List */}
-          <div className="divide-y divide-stone-200 rounded-3xl border border-stone-200 bg-white shadow-md overflow-hidden">
-            {sortedPaidExpenses.length === 0 ? (
-              <div className="p-8 text-center text-xs text-stone-500">
-                No paid expenses yet. Click &quot;+ Add Paid Expense&quot; above to log your first transaction.
-              </div>
-            ) : (
-              sortedPaidExpenses.map((item) => {
-                const isPHPNative = item.currency === "PHP" && item.convertedAmountPHP !== undefined;
-                // Use the locked real figure (PHP-native entry, or a JPY entry with
-                // an actual card charge filled in) whenever one exists; otherwise
-                // fall back to the live-rate estimate.
-                const phpValue = item.convertedAmountPHP !== undefined ? item.convertedAmountPHP : Math.round(item.amount / fxRate);
-                return (
-                  <div
-                    key={item.id}
-                    className="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-stone-50/80 transition"
-                  >
-                    <div className="space-y-1.5 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-900 border border-emerald-200 flex items-center gap-1">
-                          <CheckCircle2 className="h-3 w-3" /> Paid
-                        </span>
-
-                        <span className="rounded-md bg-stone-100 px-2 py-0.5 text-[10px] font-bold text-stone-700 border border-stone-200">
-                          #{item.category.toUpperCase()}
-                        </span>
-
-                        <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-[#8B5E14] border border-amber-200 flex items-center gap-1">
-                          {item.paymentMethod === "Cash" ? (
-                            <Banknote className="h-3 w-3" />
-                          ) : (
-                            <CreditCard className="h-3 w-3" />
-                          )}
-                          <span>{item.paymentMethod}</span>
-                        </span>
-
-                        <span className="text-[11px] font-mono text-stone-400">
-                          {item.date}
-                        </span>
-                      </div>
-
-                      <h4 className="font-serif text-base font-bold text-stone-900 leading-snug">
-                        {item.title}
-                      </h4>
-
-                      {item.notes && (
-                        <p className="text-xs text-stone-500 leading-relaxed font-medium">
-                          {item.notes}
-                        </p>
-                      )}
+          <div className="space-y-2">
+            {paidExpenseDayGroups.map((group) => {
+              const groupJPY = group.expenses.reduce((sum, item) => sum + item.amount, 0);
+              return (
+                <details key={group.key} className="group overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 hover:bg-stone-50">
+                    <div className="min-w-0">
+                      <div className="font-serif text-base font-bold text-stone-900">{group.label}</div>
+                      <div className="truncate text-[11px] font-medium text-stone-500">{group.subtitle}</div>
                     </div>
-
-                    <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-3 sm:pt-0 border-stone-100">
-                      <div className="text-left sm:text-right">
-                        {isPHPNative ? (
-                          <>
-                            <div className="font-serif text-xl font-bold text-stone-900">
-                              {homeSymbol} {phpValue.toLocaleString()}
-                            </div>
-                            <div className="text-xs text-stone-500 font-mono">
-                              ≈ {destSymbol} {item.amount.toLocaleString()} {destCurrency}
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="font-serif text-xl font-bold text-stone-900">
-                              {destSymbol} {item.amount.toLocaleString()}
-                            </div>
-                            <div className="text-xs text-stone-500 font-mono">
-                              {item.convertedAmountPHP !== undefined ? "=" : "≈"} {homeSymbol} {phpValue.toLocaleString()} {homeCurrency}
-                              {item.convertedAmountPHP !== undefined && (
-                                <span className="ml-1 text-[9px] text-emerald-700 font-bold">ACTUAL</span>
-                              )}
-                            </div>
-                          </>
-                        )}
+                    <div className="flex shrink-0 items-center gap-3 text-right">
+                      <div>
+                        <div className="text-xs font-black text-[#1F3A5F]">{destSymbol}{groupJPY.toLocaleString()}</div>
+                        <div className="text-[10px] text-stone-500">{group.expenses.length} expense{group.expenses.length === 1 ? "" : "s"}</div>
                       </div>
-
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => openEditModal(item)}
-                          className="p-2 rounded-lg text-stone-400 hover:text-[#1F3A5F] hover:bg-stone-100 transition"
-                          aria-label="Edit item"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeletePaid(item.id)}
-                          className="p-2 rounded-lg text-stone-400 hover:text-red-600 hover:bg-stone-100 transition"
-                          aria-label="Delete item"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
+                      <span className="text-stone-400 transition group-open:rotate-180">⌄</span>
                     </div>
-                  </div>
-                );
-              })
-            )}
+                  </summary>
+                  {group.expenses.length > 0 ? (
+                    <div>{group.expenses.map(renderPaidExpenseRow)}</div>
+                  ) : (
+                    <div className="border-t border-stone-100 px-4 py-3 text-xs text-stone-400">No matching expenses.</div>
+                  )}
+                </details>
+              );
+            })}
           </div>
         </section>
 
-        {/* ========================================================================= */}
-        {/* SECTION 2 — PLANNED / EXPECTED BUDGET (Unpaid Estimates) */}
-        {/* ========================================================================= */}
-        <section className="space-y-4">
+        {/* SECTION 2 — PLANNED EXPENSES */}
+        <section className="space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-stone-200 pb-3">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="rounded-md bg-[#FF5F93] px-2.5 py-1 text-xs font-black tracking-widest text-white shadow-sm">
-                  SECTION 2
-                </span>
-                <h3 className="font-serif text-xl font-bold text-stone-900 sm:text-2xl">
-                  Planned / Expected Budget (Not Yet Paid)
-                </h3>
-              </div>
-              <p className="mt-1 text-xs text-stone-600 leading-relaxed font-medium">
-                Upcoming planned allowances (Food daily, Train fares, Donki shopping, Souvenirs, Taxi buffer).
-              </p>
+              <h3 className="font-serif text-xl font-bold text-stone-900">Planned expenses</h3>
+              <p className="text-xs font-medium text-stone-500">Items that have not been paid yet.</p>
             </div>
 
             <div className="text-left sm:text-right">
@@ -1306,11 +1340,15 @@ export default function BudgetPage() {
             </div>
           </div>
 
-          {/* Planned Expenses List */}
-          <div className="divide-y divide-stone-200 rounded-3xl border border-stone-200 bg-white shadow-md overflow-hidden">
+          <details className="group overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+            <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-xs font-bold text-stone-700 hover:bg-stone-50">
+              <span>{plannedExpenses.length === 0 ? "No planned expenses" : `Show ${plannedExpenses.length} planned expense${plannedExpenses.length === 1 ? "" : "s"}`}</span>
+              <span className="text-stone-400 transition group-open:rotate-180">⌄</span>
+            </summary>
+            <div className="divide-y divide-stone-200 border-t border-stone-100">
             {sortedPlannedExpenses.length === 0 ? (
-              <div className="p-8 text-center text-xs text-stone-500">
-                All planned expenses have been marked as paid or none entered. Click &quot;+ Add Planned Expense&quot; above.
+              <div className="p-4 text-xs text-stone-500">
+                Everything is paid. Add a planned expense only if a new cost is expected.
               </div>
             ) : (
               sortedPlannedExpenses.map((item) => {
@@ -1410,7 +1448,8 @@ export default function BudgetPage() {
                 );
               })
             )}
-          </div>
+            </div>
+          </details>
         </section>
       </main>
 
