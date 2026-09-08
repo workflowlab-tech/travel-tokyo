@@ -387,23 +387,25 @@ export default function BudgetPage() {
   const expectedFutureSpendJPY = plannedExpenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   const expectedFutureSpendPHP = Math.round(expectedFutureSpendJPY / fxRate);
 
-  // Card charges incurred during the trip. Pre-travel purchases, hotel costs,
-  // and cash transactions do not belong in the credit-card balance.
-  const creditCardExpenses = paidExpenses.filter(
-    (item) =>
-      item.date >= tripMeta.startDate &&
-      item.date <= tripMeta.endDate &&
-      item.category !== "hotel" &&
-      item.paymentMethod !== "Cash"
-  );
-  const creditCardBalancePHP = creditCardExpenses.reduce(
+  // Credit Card Balance = Actual Spent minus these specific known costs
+  // (matched by title keyword, case-insensitive) — not trip card spending
+  // in the ongoing sense, regardless of date or category.
+  const CARD_BALANCE_EXCLUDED_KEYWORDS = ["travel tax", "esim", "sim card", "simcard", "vfs", "airfare"];
+  const excludedFromCardBalance = paidExpenses.filter((item) => {
+    const title = item.title.toLowerCase();
+    return CARD_BALANCE_EXCLUDED_KEYWORDS.some((keyword) => title.includes(keyword));
+  });
+  const excludedFromCardBalancePHP = excludedFromCardBalance.reduce(
     (sum, item) => sum + expensePHPValue(item),
     0
   );
-  const creditCardBalanceJPY = creditCardExpenses.reduce(
+  const excludedFromCardBalanceJPY = excludedFromCardBalance.reduce(
     (sum, item) => sum + (Number(item.amount) || 0),
     0
   );
+  const creditCardBalancePHP = actualSpentPHP - excludedFromCardBalancePHP;
+  const creditCardBalanceJPY = actualSpentJPY - excludedFromCardBalanceJPY;
+  const creditCardBalanceItemCount = paidExpenses.length - excludedFromCardBalance.length;
 
   // =========================================================================
   // PHYSICAL CASH FORMULA: Total Amount Withdrawn − Actual Spent Cash = Balance On-Hand
@@ -1047,7 +1049,7 @@ export default function BudgetPage() {
                   Credit Card Balance
                 </span>
                 <span className="rounded-full bg-violet-200 px-2.5 py-0.5 font-mono text-[10px] font-bold text-violet-900">
-                  {creditCardExpenses.length} Charges
+                  {creditCardBalanceItemCount} Included
                 </span>
               </div>
 
@@ -1061,7 +1063,7 @@ export default function BudgetPage() {
               </div>
 
               <p className="text-[11px] font-medium pt-2 border-t border-violet-200 text-violet-800">
-                Trip card charges only. Excludes pre-travel, hotel, and cash.
+                Actual Spent less travel tax, eSIM/SIM card, VFS, and airfare.
               </p>
             </div>
           </div>
