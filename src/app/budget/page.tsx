@@ -463,8 +463,12 @@ export default function BudgetPage() {
 
   // Handlers
   const handleSaveBudgetConfig = () => {
-    const pPHP = parseFloat(tempBudgetInputPHP.replace(/[^0-9.]/g, "")) || 150000;
-    const cJPY = parseFloat(tempCashInputJPY.replace(/[^0-9.]/g, "")) || 100000;
+    // `|| default` would silently discard a deliberate 0 (0 is falsy in JS) —
+    // only fall back to the default when the input didn't parse at all.
+    const parsedPHP = parseFloat(tempBudgetInputPHP.replace(/[^0-9.]/g, ""));
+    const pPHP = Number.isNaN(parsedPHP) ? 150000 : parsedPHP;
+    const parsedJPY = parseFloat(tempCashInputJPY.replace(/[^0-9.]/g, ""));
+    const cJPY = Number.isNaN(parsedJPY) ? 100000 : parsedJPY;
     const actualPHP = tempInitialCashActualPHP.trim()
       ? parseFloat(tempInitialCashActualPHP.replace(/[^0-9.]/g, "")) || undefined
       : undefined;
