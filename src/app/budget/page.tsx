@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { tripMeta } from "../../data/trip-config";
 import { Navigation } from "../../components/Navigation";
+import { ReceiptUpload } from "../../components/ReceiptUpload";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { useFXRate } from "../../hooks/useFXRate";
 import { ExpenseRecord, ExpenseCategory, PaymentMethod } from "../../types/trip";
@@ -1042,6 +1043,13 @@ export default function BudgetPage() {
               </div>
             </div>
           </div>
+
+          <ReceiptUpload
+            paidExpenses={paidExpenses}
+            setPaidExpenses={setPaidExpenses}
+            fxRate={fxRate}
+            openEditModal={openEditModal}
+          />
 
           {/* Paid Expenses List */}
           <div className="divide-y divide-stone-200 rounded-3xl border border-stone-200 bg-white shadow-md overflow-hidden">
