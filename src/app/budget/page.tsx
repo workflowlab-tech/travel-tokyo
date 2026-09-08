@@ -43,6 +43,10 @@ interface CashWithdrawalRecord {
   amountJPY: number;
   location: string;
   cardUsed: string;
+  // The real PHP amount your card/bank actually charged for this withdrawal
+  // (their FX rate + fees, known once the statement posts) — overrides the
+  // live-rate estimate for this record once set. Undefined until then.
+  actualPHPCharged?: number;
 }
 
 export default function BudgetPage() {
@@ -303,8 +307,9 @@ export default function BudgetPage() {
   }, [plannedExpensesLoaded]);
 
   // Form State
-  const [modalType, setModalType] = useState<"addPaid" | "addPlanned" | "edit" | "markPaid" | "addWithdrawal" | null>(null);
+  const [modalType, setModalType] = useState<"addPaid" | "addPlanned" | "edit" | "markPaid" | "addWithdrawal" | "editWithdrawal" | null>(null);
   const [activeEditingItem, setActiveEditingItem] = useState<ExpenseRecord | null>(null);
+  const [activeEditingWithdrawal, setActiveEditingWithdrawal] = useState<CashWithdrawalRecord | null>(null);
 
   const [formTitle, setFormTitle] = useState("");
   const [formAmountJPY, setFormAmountJPY] = useState("");
@@ -315,6 +320,10 @@ export default function BudgetPage() {
   // number. Whichever currency is selected here is stored as the real, locked
   // figure; the other side is still shown but is a converted estimate.
   const [formCurrency, setFormCurrency] = useState<"JPY" | "PHP">("JPY");
+  // Optional: the real PHP amount your card statement showed for this JPY
+  // expense, once you know it — locks in `convertedAmountPHP` for this record
+  // instead of the live FX-rate estimate. Blank keeps the live estimate.
+  const [formActualPHP, setFormActualPHP] = useState("");
   const [formCategory, setFormCategory] = useState<ExpenseCategory>("food");
   const [formPaymentMethod, setFormPaymentMethod] = useState<PaymentMethod>("Cash");
   const [formDate, setFormDate] = useState(new Date().toISOString().split("T")[0]);
@@ -322,6 +331,7 @@ export default function BudgetPage() {
 
   // ATM Withdrawal Form State
   const [withdrawalAmountJPY, setWithdrawalAmountJPY] = useState("");
+  const [withdrawalActualPHP, setWithdrawalActualPHP] = useState("");
   const [withdrawalLocation, setWithdrawalLocation] = useState("7-Eleven Bank ATM (Asakusa)");
   const [withdrawalCard, setWithdrawalCard] = useState("BDO Mastercard");
   const [withdrawalDate, setWithdrawalDate] = useState(new Date().toISOString().split("T")[0]);
@@ -351,7 +361,13 @@ export default function BudgetPage() {
 
   // Mathematical Calculations
   const actualSpentJPY = paidExpenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-  const actualSpentPHP = Math.round(actualSpentJPY / fxRate);
+  // Sums each item's real card-charge PHP figure where one has been entered,
+  // falling back to the live FX-rate estimate for items that don't have one yet.
+  const actualSpentPHP = paidExpenses.reduce(
+    (sum, item) =>
+      sum + (item.convertedAmountPHP !== undefined ? item.convertedAmountPHP : Math.round(item.amount / fxRate)),
+    0
+  );
 
   const remainingBalanceJPY = plannedBudgetJPY - actualSpentJPY;
   const remainingBalancePHP = Math.round(remainingBalanceJPY / fxRate);
@@ -367,7 +383,14 @@ export default function BudgetPage() {
   // =========================================================================
   const additionalWithdrawalsJPY = cashWithdrawals.reduce((sum, w) => sum + (Number(w.amountJPY) || 0), 0);
   const totalCashWithdrawnJPY = initialCashJPY + additionalWithdrawalsJPY;
-  const totalCashWithdrawnPHP = Math.round(totalCashWithdrawnJPY / fxRate);
+  // Same real-charge-first logic as actualSpentPHP: use each withdrawal's actual
+  // card-charged PHP once known, live-rate estimate otherwise. The initial cash
+  // brought (not tied to a logged withdrawal) always uses the live estimate.
+  const additionalWithdrawalsPHP = cashWithdrawals.reduce(
+    (sum, w) => sum + (w.actualPHPCharged !== undefined ? w.actualPHPCharged : Math.round(w.amountJPY / fxRate)),
+    0
+  );
+  const totalCashWithdrawnPHP = Math.round(initialCashJPY / fxRate) + additionalWithdrawalsPHP;
 
   const cashPaidExpenses = paidExpenses.filter((e) => e.paymentMethod === "Cash");
   const actualSpentCashJPY = cashPaidExpenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
@@ -440,6 +463,7 @@ export default function BudgetPage() {
     setFormTitle("");
     setFormAmountJPY("");
     setFormCurrency("JPY");
+    setFormActualPHP("");
     setFormCategory("food");
     setFormPaymentMethod(type === "addPaid" ? "Cash" : "Cash");
     setFormDate(new Date().toISOString().split("T")[0]);
@@ -451,6 +475,7 @@ export default function BudgetPage() {
     setFormTitle("");
     setFormAmountJPY("");
     setFormCurrency("JPY");
+    setFormActualPHP("");
     setFormCategory("food");
     setFormPaymentMethod("Cash");
     setFormDate(new Date().toISOString().split("T")[0]);
@@ -459,10 +484,22 @@ export default function BudgetPage() {
 
   const openAddWithdrawalModal = () => {
     setModalType("addWithdrawal");
+    setActiveEditingWithdrawal(null);
     setWithdrawalAmountJPY("20000");
+    setWithdrawalActualPHP("");
     setWithdrawalLocation("7-Eleven Bank ATM (Asakusa)");
     setWithdrawalCard("BDO Mastercard");
     setWithdrawalDate(new Date().toISOString().split("T")[0]);
+  };
+
+  const openEditWithdrawalModal = (w: CashWithdrawalRecord) => {
+    setModalType("editWithdrawal");
+    setActiveEditingWithdrawal(w);
+    setWithdrawalAmountJPY(String(w.amountJPY));
+    setWithdrawalActualPHP(w.actualPHPCharged !== undefined ? String(w.actualPHPCharged) : "");
+    setWithdrawalLocation(w.location);
+    setWithdrawalCard(w.cardUsed);
+    setWithdrawalDate(w.date);
   };
 
   const openEditModal = (item: ExpenseRecord) => {
@@ -472,9 +509,11 @@ export default function BudgetPage() {
     if (item.currency === "PHP" && item.convertedAmountPHP) {
       setFormCurrency("PHP");
       setFormAmountJPY(String(item.convertedAmountPHP));
+      setFormActualPHP("");
     } else {
       setFormCurrency("JPY");
       setFormAmountJPY(String(item.amount));
+      setFormActualPHP(item.convertedAmountPHP !== undefined ? String(item.convertedAmountPHP) : "");
     }
     setFormCategory(item.category);
     setFormPaymentMethod(item.paymentMethod);
@@ -489,9 +528,11 @@ export default function BudgetPage() {
     if (item.currency === "PHP" && item.convertedAmountPHP) {
       setFormCurrency("PHP");
       setFormAmountJPY(String(item.convertedAmountPHP));
+      setFormActualPHP("");
     } else {
       setFormCurrency("JPY");
       setFormAmountJPY(String(item.amount));
+      setFormActualPHP(item.convertedAmountPHP !== undefined ? String(item.convertedAmountPHP) : "");
     }
     setFormCategory(item.category);
     setFormPaymentMethod(item.paymentMethod);
@@ -509,10 +550,13 @@ export default function BudgetPage() {
     // also lock the real PHP figure in convertedAmountPHP so the display for
     // that record never has to re-derive PHP from a since-moved exchange rate.
     const amountNum = formCurrency === "PHP" ? Math.round(enteredNum * fxRate) : enteredNum;
+    const actualPHPNum = formActualPHP.trim()
+      ? parseFloat(formActualPHP.replace(/[^0-9.]/g, "")) || undefined
+      : undefined;
     const currencyMeta =
       formCurrency === "PHP"
         ? { currency: "PHP", convertedAmountPHP: enteredNum }
-        : { currency: "JPY", convertedAmountPHP: undefined };
+        : { currency: "JPY", convertedAmountPHP: actualPHPNum };
 
     if (modalType === "addPaid") {
       const newPaid: ExpenseRecord = {
@@ -602,17 +646,39 @@ export default function BudgetPage() {
     e.preventDefault();
     const amountNum = parseFloat(withdrawalAmountJPY.replace(/[^0-9.]/g, "")) || 0;
     if (amountNum <= 0) return;
+    const actualPHPNum = withdrawalActualPHP.trim()
+      ? parseFloat(withdrawalActualPHP.replace(/[^0-9.]/g, "")) || undefined
+      : undefined;
 
-    const newWithdrawal: CashWithdrawalRecord = {
-      id: "atm-" + Date.now(),
-      date: withdrawalDate,
-      amountJPY: amountNum,
-      location: withdrawalLocation.trim(),
-      cardUsed: withdrawalCard,
-    };
+    if (modalType === "editWithdrawal" && activeEditingWithdrawal) {
+      setCashWithdrawals((prev) =>
+        prev.map((w) =>
+          w.id === activeEditingWithdrawal.id
+            ? {
+                ...w,
+                date: withdrawalDate,
+                amountJPY: amountNum,
+                actualPHPCharged: actualPHPNum,
+                location: withdrawalLocation.trim(),
+                cardUsed: withdrawalCard,
+              }
+            : w
+        )
+      );
+    } else {
+      const newWithdrawal: CashWithdrawalRecord = {
+        id: "atm-" + Date.now(),
+        date: withdrawalDate,
+        amountJPY: amountNum,
+        actualPHPCharged: actualPHPNum,
+        location: withdrawalLocation.trim(),
+        cardUsed: withdrawalCard,
+      };
+      setCashWithdrawals((prev) => [newWithdrawal, ...prev]);
+    }
 
-    setCashWithdrawals((prev) => [newWithdrawal, ...prev]);
     setModalType(null);
+    setActiveEditingWithdrawal(null);
   };
 
   const handleDeleteWithdrawal = (id: string) => {
@@ -973,14 +1039,31 @@ export default function BudgetPage() {
                     <div>
                       <span className="font-bold text-stone-900">{destSymbol}{w.amountJPY.toLocaleString()} {destCurrency}</span>
                       <span className="text-stone-500 ml-2 font-mono">({w.date})</span>
-                      <p className="text-[11px] text-stone-600">{w.location} · {w.cardUsed}</p>
+                      <p className="text-[11px] text-stone-600">
+                        {w.location} · {w.cardUsed}
+                        {w.actualPHPCharged !== undefined && (
+                          <span className="ml-1 text-emerald-700 font-bold">
+                            · = {homeSymbol}{w.actualPHPCharged.toLocaleString()} actual
+                          </span>
+                        )}
+                      </p>
                     </div>
-                    <button
-                      onClick={() => handleDeleteWithdrawal(w.id)}
-                      className="text-stone-400 hover:text-red-600 p-1"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => openEditWithdrawalModal(w)}
+                        className="text-stone-400 hover:text-[#1F3A5F] p-1"
+                        aria-label="Edit withdrawal"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteWithdrawal(w.id)}
+                        className="text-stone-400 hover:text-red-600 p-1"
+                        aria-label="Delete withdrawal"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1060,7 +1143,10 @@ export default function BudgetPage() {
             ) : (
               sortedPaidExpenses.map((item) => {
                 const isPHPNative = item.currency === "PHP" && item.convertedAmountPHP !== undefined;
-                const phpValue = isPHPNative ? item.convertedAmountPHP! : Math.round(item.amount / fxRate);
+                // Use the locked real figure (PHP-native entry, or a JPY entry with
+                // an actual card charge filled in) whenever one exists; otherwise
+                // fall back to the live-rate estimate.
+                const phpValue = item.convertedAmountPHP !== undefined ? item.convertedAmountPHP : Math.round(item.amount / fxRate);
                 return (
                   <div
                     key={item.id}
@@ -1118,7 +1204,10 @@ export default function BudgetPage() {
                               {destSymbol} {item.amount.toLocaleString()}
                             </div>
                             <div className="text-xs text-stone-500 font-mono">
-                              ≈ {homeSymbol} {phpValue.toLocaleString()} {homeCurrency}
+                              {item.convertedAmountPHP !== undefined ? "=" : "≈"} {homeSymbol} {phpValue.toLocaleString()} {homeCurrency}
+                              {item.convertedAmountPHP !== undefined && (
+                                <span className="ml-1 text-[9px] text-emerald-700 font-bold">ACTUAL</span>
+                              )}
                             </div>
                           </>
                         )}
@@ -1186,7 +1275,10 @@ export default function BudgetPage() {
             ) : (
               sortedPlannedExpenses.map((item) => {
                 const isPHPNative = item.currency === "PHP" && item.convertedAmountPHP !== undefined;
-                const phpValue = isPHPNative ? item.convertedAmountPHP! : Math.round(item.amount / fxRate);
+                // Use the locked real figure (PHP-native entry, or a JPY entry with
+                // an actual card charge filled in) whenever one exists; otherwise
+                // fall back to the live-rate estimate.
+                const phpValue = item.convertedAmountPHP !== undefined ? item.convertedAmountPHP : Math.round(item.amount / fxRate);
                 return (
                   <div
                     key={item.id}
@@ -1240,7 +1332,10 @@ export default function BudgetPage() {
                               {destSymbol} {item.amount.toLocaleString()}
                             </div>
                             <div className="text-xs text-stone-500 font-mono">
-                              ≈ {homeSymbol} {phpValue.toLocaleString()} {homeCurrency}
+                              {item.convertedAmountPHP !== undefined ? "=" : "≈"} {homeSymbol} {phpValue.toLocaleString()} {homeCurrency}
+                              {item.convertedAmountPHP !== undefined && (
+                                <span className="ml-1 text-[9px] text-emerald-700 font-bold">ACTUAL</span>
+                              )}
                             </div>
                           </>
                         )}
@@ -1282,7 +1377,7 @@ export default function BudgetPage() {
       {/* ========================================================================= */}
       {/* MODAL: ADD / EDIT / MARK AS PAID */}
       {/* ========================================================================= */}
-      {modalType && modalType !== "addWithdrawal" && (
+      {modalType && modalType !== "addWithdrawal" && modalType !== "editWithdrawal" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-lg overflow-hidden rounded-3xl bg-white p-6 shadow-2xl border border-stone-200 space-y-5 animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
@@ -1363,6 +1458,25 @@ export default function BudgetPage() {
                     Pick whichever currency you were actually charged in — that figure is saved exactly; the other side is a converted estimate.
                   </p>
                 </div>
+
+                {formCurrency === "JPY" && modalType !== "addPlanned" && (
+                  <div>
+                    <label className="text-xs font-bold text-stone-700">
+                      Actual {homeSymbol} {homeCurrency} charged on your card (optional)
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formActualPHP}
+                      onChange={(e) => setFormActualPHP(e.target.value.replace(/[^0-9.]/g, ""))}
+                      placeholder={`Leave blank to use ≈ ${homeSymbol}${Math.round((parseFloat(formAmountJPY) || 0) / fxRate).toLocaleString()} above`}
+                      className="mt-1 w-full rounded-xl border border-stone-300 p-2.5 text-xs font-bold outline-none focus:border-[#1F3A5F]"
+                    />
+                    <p className="mt-1 text-[10px] text-stone-400">
+                      Fill this in once your card statement posts, to lock in the real amount (your bank&apos;s FX rate + fees) instead of today&apos;s live rate.
+                    </p>
+                  </div>
+                )}
 
                 <div>
                   <label className="text-xs font-bold text-stone-700">
@@ -1462,18 +1576,21 @@ export default function BudgetPage() {
       {/* ========================================================================= */}
       {/* MODAL: LOG ATM CASH WITHDRAWAL */}
       {/* ========================================================================= */}
-      {modalType === "addWithdrawal" && (
+      {(modalType === "addWithdrawal" || modalType === "editWithdrawal") && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-lg overflow-hidden rounded-3xl bg-white p-6 shadow-2xl border border-stone-200 space-y-5 animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
               <div className="flex items-center gap-2">
                 <Landmark className="h-5 w-5 text-[#1F3A5F]" />
                 <h3 className="font-serif text-lg font-bold text-stone-900">
-                  Log ATM Cash Withdrawal
+                  {modalType === "editWithdrawal" ? "Edit ATM Withdrawal" : "Log ATM Cash Withdrawal"}
                 </h3>
               </div>
               <button
-                onClick={() => setModalType(null)}
+                onClick={() => {
+                  setModalType(null);
+                  setActiveEditingWithdrawal(null);
+                }}
                 className="p-1 rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-700"
               >
                 <X className="h-5 w-5" />
@@ -1500,6 +1617,23 @@ export default function BudgetPage() {
                 />
                 <p className="mt-1 text-[10px] text-stone-500 font-mono">
                   ≈ {homeSymbol} {Math.round((parseFloat(withdrawalAmountJPY) || 0) / fxRate).toLocaleString()} {homeCurrency}
+                </p>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-stone-700">
+                  Actual {homeSymbol} {homeCurrency} charged on your card (optional)
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={withdrawalActualPHP}
+                  onChange={(e) => setWithdrawalActualPHP(e.target.value.replace(/[^0-9.]/g, ""))}
+                  placeholder={`Leave blank to use ≈ ${homeSymbol}${Math.round((parseFloat(withdrawalAmountJPY) || 0) / fxRate).toLocaleString()} above`}
+                  className="mt-1 w-full rounded-xl border border-stone-300 p-2.5 text-xs font-bold outline-none focus:border-[#1F3A5F]"
+                />
+                <p className="mt-1 text-[10px] text-stone-400">
+                  Fill this in once your card statement posts, to lock in the real amount instead of today&apos;s live rate.
                 </p>
               </div>
 
@@ -1552,7 +1686,10 @@ export default function BudgetPage() {
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100">
                 <button
                   type="button"
-                  onClick={() => setModalType(null)}
+                  onClick={() => {
+                    setModalType(null);
+                    setActiveEditingWithdrawal(null);
+                  }}
                   className="rounded-xl px-4 py-2.5 text-xs font-bold text-stone-600 hover:bg-stone-100"
                 >
                   Cancel
@@ -1561,7 +1698,7 @@ export default function BudgetPage() {
                   type="submit"
                   className="rounded-xl bg-[#1F3A5F] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#132540] transition"
                 >
-                  Confirm Withdrawal
+                  {modalType === "editWithdrawal" ? "Save Changes" : "Confirm Withdrawal"}
                 </button>
               </div>
             </form>
